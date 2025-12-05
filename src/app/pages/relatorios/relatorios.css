@@ -1,241 +1,156 @@
-/* --- LAYOUT GERAL (Reutilizado) --- */
+/* --- LAYOUT BASE --- */
 .page-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  animation: fadeIn 0.3s ease-in;
+  display: flex; flex-direction: column; gap: 24px; animation: fadeIn 0.3s ease-in;
 }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
+.page-header { display: flex; justify-content: space-between; align-items: center; }
 .page-header h1 { font-size: 28px; color: #111827; margin: 0; }
 .subtitle { color: #6b7280; margin: 4px 0 0 0; font-size: 14px; }
 
-/* Filtros de Data */
-.date-filters {
-  display: flex;
-  gap: 10px;
-}
+.btn-primary { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.btn-primary:hover { background: #1d4ed8; }
 
-.date-filters select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  color: #374151;
-  font-size: 14px;
-  cursor: pointer;
-}
+/* TOOLBAR */
+.toolbar { display: flex; gap: 16px; align-items: center; }
+.search-box { flex: 1; background: white; padding: 10px 16px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; }
+.search-box input { border: none; outline: none; width: 100%; font-size: 15px; }
 
-/* --- CARDS DE ESTATÍSTICA --- */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.stat-card.blue .stat-icon { background: #eff6ff; color: #2563eb; }
-.stat-card.green .stat-icon { background: #f0fdf4; color: #16a34a; }
-.stat-card.orange .stat-icon { background: #fff7ed; color: #ea580c; }
-
-.stat-data h3 { margin: 0; font-size: 24px; color: #111827; }
-.stat-data p { margin: 0; font-size: 13px; color: #6b7280; }
-
-/* --- TABELA --- */
-.table-container {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-}
-
-.card-header-simple {
-  padding: 15px 20px;
-  border-bottom: 1px solid #f3f4f6;
-  background-color: #f9fafb;
-}
-.card-header-simple h3 { margin: 0; font-size: 16px; color: #374151; }
-
+/* TABELA */
+.card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
 table { width: 100%; border-collapse: collapse; text-align: left; }
-th { background-color: #f9fafb; padding: 12px 20px; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; }
-td { padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px; }
+th { background: #f9fafb; padding: 16px; font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
+td { padding: 16px; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
 
-.col-group { display: flex; flex-direction: column; }
-.primary-text { font-weight: 500; color: #111827; }
-.secondary-text { font-size: 12px; color: #6b7280; }
-.price-text { font-weight: 600; color: #111827; }
+.budget-info { display: flex; flex-direction: column; }
+.detail-text { font-size: 12px; color: #6b7280; }
+.budget-id { font-weight: bold; color: #374151; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 
-.btn-action.print {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #dbeafe;
-  width: 32px; height: 32px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.btn-action.print:hover { background: #2563eb; color: white; }
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.status-badge.pending { background: #fff7ed; color: #c2410c; }
+.status-badge.approved { background: #f0fdf4; color: #15803d; }
+.status-badge.rejected { background: #fef2f2; color: #991b1b; }
 
-/* --- MODAL DE LAUDO (SIMULAÇÃO DE PAPEL A4) --- */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(2px);
-  overflow-y: auto;
-  padding: 20px;
-}
+.total-col { font-weight: bold; color: #111827; }
 
-.report-paper {
-  background: white;
-  width: 210mm; /* Largura A4 */
-  min-height: 297mm; /* Altura A4 */
-  padding: 20mm;
-  box-shadow: 0 0 20px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  color: #000;
-  font-family: 'Times New Roman', serif; /* Fonte mais formal para documentos */
-}
+.btn-action { width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.btn-action.edit { background: #eff6ff; color: #2563eb; }
+.btn-action.delete { background: #fef2f2; color: #dc2626; }
+.btn-action.print { background: #f3f4f6; color: #4b5563; }
+.btn-action.print:hover { background: #e5e7eb; color: #1f2937; }
 
-/* Header do Relatório */
-.report-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
+.actions-cell { display: flex; gap: 8px; }
 
-.company-info h1 { margin: 0; font-size: 24px; text-transform: uppercase; color: #000; }
-.company-info p { margin: 4px 0; font-size: 12px; color: #444; }
+/* --- MODAL --- */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
+.modal-content.large-modal { background: white; border-radius: 12px; width: 800px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
 
-.meta-box {
-  border: 2px solid #000;
-  padding: 5px 10px;
-  text-align: center;
-}
-.meta-box span { display: block; font-size: 10px; text-transform: uppercase; }
-.meta-box strong { font-size: 18px; }
+.modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; }
+.modal-header h2 { margin: 0; font-size: 20px; color: #111827; }
+.header-actions { display: flex; align-items: center; gap: 15px; }
+.total-display { font-size: 18px; font-weight: bold; color: #2563eb; }
+.btn-print { background: #fff; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.btn-print:hover { background: #f3f4f6; }
 
-.divider { border: 0; border-top: 2px solid #000; margin: 10px 0 20px 0; }
+form { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.form-section { padding: 20px; background: #fff; }
+.form-row { display: flex; gap: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.col-4 { flex: 2; } .col-2 { flex: 1; }
+label { font-size: 13px; font-weight: 600; color: #374151; }
+input, select, textarea { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; }
 
-/* Seções do Relatório */
-.report-section { margin-bottom: 20px; }
-.report-section h3 {
-  font-size: 14px;
-  text-transform: uppercase;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 5px;
-  margin-bottom: 10px;
-  color: #000;
-}
+/* ITEMS SECTION */
+.items-section { padding: 20px; background: #f8fafc; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+.add-row { display: flex; gap: 15px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.add-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.input-with-btn { display: flex; gap: 8px; }
+.input-with-btn select { flex: 1; }
+.qty-input { width: 70px; }
+.btn-add { background: #111827; color: white; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 15px;
-  font-family: sans-serif;
-  font-size: 12px;
-}
-.info-grid label { font-weight: bold; display: block; color: #666; }
+.items-table { width: 100%; font-size: 14px; }
+.items-table th { background: transparent; border-bottom: 2px solid #e5e7eb; padding: 10px; color: #6b7280; font-size: 12px; }
+.items-table td { padding: 10px; border-bottom: 1px solid #e5e7eb; background: white; }
+.type-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+.type-badge.service { background: #e0e7ff; color: #4338ca; }
+.type-badge.product { background: #ffedd5; color: #9a3412; }
+.subtotal { font-weight: bold; }
+.btn-remove-item { color: #ef4444; background: none; border: none; font-size: 18px; cursor: pointer; }
+.empty-items { text-align: center; color: #9ca3af; padding: 20px; font-style: italic; }
 
-.content-box p { font-size: 14px; line-height: 1.5; text-align: justify; margin-bottom: 15px; }
+.form-actions { padding: 20px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px; margin-top: auto; }
+.btn-cancel { background: white; border: 1px solid #d1d5db; color: #374151; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+.btn-save { background: #2563eb; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-/* Financeiro no Relatório */
-.simple-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.simple-table td { padding: 8px 0; border-bottom: 1px dashed #ccc; font-size: 14px; }
-.text-right { text-align: right; }
-.total-row td { font-weight: bold; font-size: 16px; border-bottom: none; border-top: 2px solid #000; padding-top: 10px; }
+/* --- IMPRESSÃO (CORRIGIDA) --- */
+.printable-invoice { display: none; }
 
-/* Rodapé do Relatório */
-.report-footer { margin-top: auto; text-align: center; }
-.report-footer p { font-size: 10px; color: #666; }
-.signature-line {
-  margin-top: 40px;
-  border-top: 1px solid #000;
-  width: 200px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: 5px;
-  font-size: 12px;
-}
-
-/* Botões do Modal (Não imprime) */
-.modal-actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  font-family: sans-serif;
-}
-
-.btn-cancel { background: #fff; border: 1px solid #ccc; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-.btn-primary { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-
-/* --- REGRAS DE IMPRESSÃO --- */
 @media print {
-  /* Esconde tudo o que não for a área de impressão */
-  body * {
+  /* ::ng-deep é usado para furar o encapsulamento e atingir elementos fora deste componente */
+  :host ::ng-deep body * {
     visibility: hidden;
   }
-  
-  /* Esconde a barra lateral e container principal do app */
-  .layout-container, .sidebar, .page-container, .no-print {
+
+  /* Esconde containers pais se necessário, embora o layout.css já trate disso */
+  :host ::ng-deep .layout-container, 
+  :host ::ng-deep app-layout, 
+  :host ::ng-deep .sidebar, 
+  .page-container, 
+  .modal-overlay {
     display: none !important;
   }
 
-  /* Mostra o Modal/Papel */
-  .modal-overlay, .report-paper, .report-paper * {
+  /* Mostra apenas a fatura */
+  .printable-invoice, .printable-invoice * {
     visibility: visible;
   }
 
-  .modal-overlay {
-    position: absolute;
-    left: 0; top: 0;
+  .printable-invoice {
+    display: block !important;
+    position: fixed; /* Fixa no topo da folha */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 20px 40px;
     background: white;
-    padding: 0;
+    z-index: 99999; /* Garante que fique acima de tudo */
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #000;
   }
 
-  .report-paper {
-    box-shadow: none;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+  /* Força cores de fundo para impressão (opcional, depende do navegador) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  /* Estilização interna da impressão */
+  .invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+  .company-details h1 { font-size: 22px; margin: 0 0 5px 0; text-transform: uppercase; }
+  .company-details p { margin: 2px 0; font-size: 12px; }
+  
+  .invoice-meta { text-align: right; }
+  .invoice-meta h2 { font-size: 18px; margin: 0 0 10px 0; color: #444; }
+  .invoice-meta p { margin: 2px 0; font-size: 12px; }
+
+  .client-details { margin-bottom: 30px; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+  .client-details h3 { font-size: 14px; margin: 0 0 5px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; }
+  .client-details p { margin: 3px 0; font-size: 12px; }
+
+  .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+  .invoice-table th { border-bottom: 2px solid #000; padding: 8px; text-align: left; text-transform: uppercase; }
+  .invoice-table td { border-bottom: 1px solid #ddd; padding: 8px; }
+  .invoice-table td:last-child { font-weight: bold; }
+
+  .invoice-footer { display: flex; justify-content: space-between; margin-top: 20px; }
+  .notes { width: 60%; font-size: 11px; color: #555; border: 1px solid #eee; padding: 10px; }
+  .grand-total { text-align: right; font-size: 16px; }
+  .grand-total span { display: block; font-size: 10px; color: #666; }
+  
+  .terms { margin-top: 50px; text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
+  .signature { margin-top: 40px; text-align: center; }
 }

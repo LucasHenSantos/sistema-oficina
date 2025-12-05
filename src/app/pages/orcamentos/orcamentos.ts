@@ -34,7 +34,7 @@ export class Orcamentos {
   searchTerm = signal('');
   showModal = signal(false);
 
-  // Dados Mockados
+  // Listas de Apoio (Mock)
   clientsList = signal(['Roberto Silva', 'Ana Júlia Costa', 'Transportadora Veloz', 'Carlos Eduardo']);
   vehiclesList = signal(['Honda Civic 2018', 'Jeep Renegade', 'Volvo FH 540', 'Fiat Strada']);
   
@@ -116,7 +116,7 @@ export class Orcamentos {
   }
 
   deleteBudget(id: number) {
-    if (confirm('Excluir este orçamento?')) {
+    if (confirm('Tem certeza que deseja excluir este orçamento?')) {
       this.budgets.update(list => list.filter(b => b.id !== id));
     }
   }
@@ -166,13 +166,13 @@ export class Orcamentos {
 
   // --- IMPRESSÃO ---
   
-  // CORREÇÃO: Agora aceita um argumento opcional
+  // CORREÇÃO: Argumento opcional para evitar o erro de TypeScript
   printBudget(budget?: Orcamento) {
     if (budget) {
       this.currentBudget.set(JSON.parse(JSON.stringify(budget)));
     }
-    // Pequeno delay para garantir que o Angular renderize os dados no template de impressão antes de abrir a janela
-    setTimeout(() => window.print(), 100);
+    // Delay para garantir que o DOM atualize
+    setTimeout(() => window.print(), 200);
   }
 
   getStatusLabel(status: string) {

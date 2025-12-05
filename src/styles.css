@@ -1,1 +1,66 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f3f4f6;
+}
+
+/* ==========================================================================
+   REGRAS DE IMPRESSÃO GLOBAIS (CRÍTICO PARA O PDF FUNCIONAR)
+   ========================================================================== */
+@media print {
+  /* 1. Esconde TUDO por padrão usando visibility
+     (display: none mataria os filhos, visibility permite reverter nos filhos) */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 2. Esconde explicitamente containers de UI para garantir que não ocupem espaço */
+  .sidebar,
+  .no-print,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  /* 3. Reseta o layout principal para não interferir */
+  body, html, app-root, app-layout, .layout-container, .content, .page-container {
+    background: white !important;
+    height: auto !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* 4. MÁGICA: Torna visível APENAS a fatura e seus conteúdos */
+  .printable-invoice, 
+  .printable-invoice * {
+    visibility: visible !important;
+  }
+
+  /* 5. Posiciona a fatura para ocupar a folha inteira */
+  .printable-invoice {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: white !important;
+    z-index: 999999 !important; /* Fica acima de tudo */
+    font-family: 'Helvetica Neue', Arial, sans-serif !important;
+    color: black !important;
+  }
+
+  /* Remove sombras e bordas extras na impressão */
+  .card, .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

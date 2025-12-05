@@ -37,7 +37,6 @@ tr:last-child td { border-bottom: none; }
 .btn-action { width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
 .btn-action.edit { background: #eff6ff; color: #2563eb; }
 .btn-action.delete { background: #fef2f2; color: #dc2626; }
-/* Estilo para o botão de imprimir na tabela */
 .btn-action.print { background: #f3f4f6; color: #4b5563; }
 .btn-action.print:hover { background: #e5e7eb; color: #1f2937; }
 
@@ -85,65 +84,32 @@ input, select, textarea { padding: 10px; border: 1px solid #d1d5db; border-radiu
 .btn-cancel { background: white; border: 1px solid #d1d5db; color: #374151; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
 .btn-save { background: #2563eb; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-/* --- IMPRESSÃO (CORREÇÃO CRÍTICA) --- */
-/* Por padrão, a fatura de impressão fica escondida */
-.printable-invoice { display: none; }
+/* --- IMPRESSÃO (ESTILOS INTERNOS DA FATURA) --- */
+/* Apenas estilos visuais, a lógica de mostrar/esconder está no styles.css global */
+.printable-invoice { display: none; } /* Escondido por padrão na tela */
 
-@media print {
-  /* 1. Esconde tudo na página */
-  body * {
-    visibility: hidden;
-  }
+/* Estilos para quando a fatura estiver visível (na impressão) */
+.invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+.company-details h1 { font-size: 22px; margin: 0 0 5px 0; text-transform: uppercase; }
+.company-details p { margin: 2px 0; font-size: 12px; }
 
-  /* 2. Esconde explicitamente os containers do layout Angular para evitar conflitos de espaço */
-  .layout-container, app-layout, .sidebar, .page-container, .modal-overlay {
-    display: none !important;
-  }
+.invoice-meta { text-align: right; }
+.invoice-meta h2 { font-size: 18px; margin: 0 0 10px 0; color: #444; }
+.invoice-meta p { margin: 2px 0; font-size: 12px; }
 
-  /* 3. Torna visível APENAS a fatura e seus descendentes */
-  .printable-invoice, .printable-invoice * {
-    visibility: visible;
-  }
+.client-details { margin-bottom: 30px; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+.client-details h3 { font-size: 14px; margin: 0 0 5px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; }
+.client-details p { margin: 3px 0; font-size: 12px; }
 
-  /* 4. Posiciona a fatura para ocupar a folha inteira, SOBREPONDO tudo */
-  .printable-invoice {
-    display: block !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: white;
-    z-index: 99999; /* Z-index altíssimo para garantir que fique por cima */
-    padding: 20px 40px;
-    margin: 0;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #000;
-  }
+.invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+.invoice-table th { border-bottom: 2px solid #000; padding: 8px; text-align: left; text-transform: uppercase; }
+.invoice-table td { border-bottom: 1px solid #ddd; padding: 8px; }
+.invoice-table td:last-child { font-weight: bold; }
 
-  /* Estilização interna da impressão (para garantir que fique bonito no papel) */
-  .invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
-  .company-details h1 { font-size: 22px; margin: 0 0 5px 0; text-transform: uppercase; }
-  .company-details p { margin: 2px 0; font-size: 12px; }
-  
-  .invoice-meta { text-align: right; }
-  .invoice-meta h2 { font-size: 18px; margin: 0 0 10px 0; color: #444; }
-  .invoice-meta p { margin: 2px 0; font-size: 12px; }
+.invoice-footer { display: flex; justify-content: space-between; margin-top: 20px; }
+.notes { width: 60%; font-size: 11px; color: #555; border: 1px solid #eee; padding: 10px; }
+.grand-total { text-align: right; font-size: 16px; }
+.grand-total span { display: block; font-size: 10px; color: #666; }
 
-  .client-details { margin-bottom: 30px; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
-  .client-details h3 { font-size: 14px; margin: 0 0 5px 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; text-transform: uppercase; }
-  .client-details p { margin: 3px 0; font-size: 12px; }
-
-  .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
-  .invoice-table th { border-bottom: 2px solid #000; padding: 8px; text-align: left; text-transform: uppercase; }
-  .invoice-table td { border-bottom: 1px solid #ddd; padding: 8px; }
-  .invoice-table td:last-child { font-weight: bold; }
-
-  .invoice-footer { display: flex; justify-content: space-between; margin-top: 20px; }
-  .notes { width: 60%; font-size: 11px; color: #555; border: 1px solid #eee; padding: 10px; }
-  .grand-total { text-align: right; font-size: 16px; }
-  .grand-total span { display: block; font-size: 10px; color: #666; }
-  
-  .terms { margin-top: 50px; text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
-  .signature { margin-top: 40px; text-align: center; }
-}
+.terms { margin-top: 50px; text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
+.signature { margin-top: 40px; text-align: center; }

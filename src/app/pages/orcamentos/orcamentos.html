@@ -1,3 +1,4 @@
+<!-- A classe no-print aqui esconde a lista na impressão -->
 <div class="page-container no-print">
   
   <header class="page-header">
@@ -54,7 +55,7 @@
             <td class="actions-cell">
               <button class="btn-action edit" (click)="editBudget(budget)">✏️</button>
               <button class="btn-action delete" (click)="deleteBudget(budget.id)">🗑️</button>
-              <!-- Botão Imprimir da Tabela -->
+              <!-- Adicionei este botão que faltava na tabela para consistência -->
               <button class="btn-action print" (click)="printBudget(budget)" title="Imprimir">🖨️</button>
             </td>
           </tr>
@@ -63,7 +64,7 @@
     </table>
   </div>
 
-  <!-- MODAL DE EDIÇÃO -->
+  <!-- MODAL DE EDIÇÃO (Também escondido na impressão via classe no-print no pai ou display:none global) -->
   @if (showModal()) {
     <div class="modal-overlay" (click)="closeModal()">
       <div class="modal-content large-modal" (click)="$event.stopPropagation()">
@@ -71,7 +72,6 @@
         <div class="modal-header">
           <h2>{{ currentBudget().id === 0 ? 'Novo Orçamento' : 'Editar Orçamento #' + currentBudget().id }}</h2>
           <div class="header-actions">
-            <!-- BOTÃO DE IMPRIMIR DO MODAL -->
             @if (currentBudget().id !== 0) {
               <button type="button" class="btn-print" (click)="printBudget()">🖨️ Imprimir</button>
             }
@@ -194,74 +194,72 @@
       </div>
     </div>
   }
+</div>
 
-  <!-- ========================================== -->
-  <!-- LAYOUT DE IMPRESSÃO (VISÍVEL APENAS NO PRINT) -->
-  <!-- ========================================== -->
-  <div class="printable-invoice" id="invoice">
-    <div class="invoice-header">
-      <div class="company-details">
-        <!-- Tenta pegar dados da empresa ou usa padrão -->
-        <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
-        <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
-        <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
-      </div>
-      <div class="invoice-meta">
-        <h2>ORÇAMENTO #{{ currentBudget().id || 'NOVO' }}</h2>
-        <p>Data: {{ currentBudget().date | date:'dd/MM/yyyy' }}</p>
-        <p>Validade: {{ currentBudget().validUntil | date:'dd/MM/yyyy' }}</p>
-      </div>
+<!-- ========================================== -->
+<!-- LAYOUT DE IMPRESSÃO (FORA DO CONTAINER PRINCIPAL) -->
+<!-- ========================================== -->
+<div class="printable-invoice" id="invoice">
+  <div class="invoice-header">
+    <div class="company-details">
+      <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
+      <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
+      <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
     </div>
-
-    <div class="client-details">
-      <h3>Dados do Cliente</h3>
-      <p><strong>Cliente:</strong> {{ currentBudget().client }}</p>
-      <p><strong>Veículo:</strong> {{ currentBudget().vehicle }}</p>
-    </div>
-
-    <table class="invoice-table">
-      <thead>
-        <tr>
-          <th>Descrição</th>
-          <th>Qtd</th>
-          <th>Valor Unit.</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of currentBudget().items; track $index) {
-          <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.qty }}</td>
-            <td>{{ item.price | currency:'BRL' }}</td>
-            <td>{{ item.total | currency:'BRL' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-
-    <div class="invoice-footer">
-      <div class="notes">
-        <strong>Observações:</strong>
-        <p>{{ currentBudget().notes || 'Sem observações adicionais.' }}</p>
-        @if (companyData()?.pixKey) {
-          <br>
-          <p><strong>Pix:</strong> {{ companyData().pixKey }}</p>
-        }
-      </div>
-      <div class="grand-total">
-        <span>TOTAL A PAGAR:</span>
-        <strong>{{ currentBudget().total | currency:'BRL' }}</strong>
-      </div>
-    </div>
-
-    <div class="terms">
-      <p>{{ companyData()?.quoteFooterText || 'Orçamento sujeito a aprovação. Valores válidos até a data de vencimento.' }}</p>
-      <div class="signature">
-        __________________________________________<br>
-        Assinatura do Responsável
-      </div>
+    <div class="invoice-meta">
+      <h2>ORÇAMENTO #{{ currentBudget().id || 'NOVO' }}</h2>
+      <p>Data: {{ currentBudget().date | date:'dd/MM/yyyy' }}</p>
+      <p>Validade: {{ currentBudget().validUntil | date:'dd/MM/yyyy' }}</p>
     </div>
   </div>
 
+  <div class="client-details">
+    <h3>Dados do Cliente</h3>
+    <p><strong>Cliente:</strong> {{ currentBudget().client }}</p>
+    <p><strong>Veículo:</strong> {{ currentBudget().vehicle }}</p>
+  </div>
+
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Valor Unit.</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of currentBudget().items; track $index) {
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.qty }}</td>
+          <td>{{ item.price | currency:'BRL' }}</td>
+          <td>{{ item.total | currency:'BRL' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="invoice-footer">
+    <div class="notes">
+      <strong>Observações:</strong>
+      <p>{{ currentBudget().notes || 'Sem observações adicionais.' }}</p>
+      @if (companyData()?.pixKey) {
+        <br>
+        <p><strong>Pix:</strong> {{ companyData().pixKey }}</p>
+      }
+    </div>
+    <div class="grand-total">
+      <span>TOTAL A PAGAR:</span>
+      <strong>{{ currentBudget().total | currency:'BRL' }}</strong>
+    </div>
+  </div>
+
+  <div class="terms">
+    <p>{{ companyData()?.quoteFooterText || 'Orçamento sujeito a aprovação. Valores válidos até a data de vencimento.' }}</p>
+    <div class="signature">
+      __________________________________________<br>
+      Assinatura do Responsável
+    </div>
+  </div>
 </div>

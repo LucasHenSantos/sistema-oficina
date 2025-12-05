@@ -9,8 +9,8 @@
 
 /* --- SIDEBAR --- */
 .sidebar {
-  width: 260px; /* Largura fixa */
-  background-color: #1f2937; /* Fundo escuro */
+  width: 260px;
+  background-color: #1f2937;
   color: white;
   display: flex;
   flex-direction: column;
@@ -26,55 +26,45 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 35px; /* Aumentei o espaço inferior */
+  margin-bottom: 35px;
   padding-bottom: 10px;
-  /* border-bottom removido para um visual mais limpo */
   position: relative;
 }
 
-/* Esconde a logo como solicitado */
-.brand-logo {
-  display: none;
-}
+.brand-logo { display: none; }
 
 .brand-name {
-  font-family: 'Montserrat', 'Helvetica Neue', 'Roboto', sans-serif; /* Nova fonte */
+  font-family: 'Montserrat', 'Helvetica Neue', 'Roboto', sans-serif;
   font-size: 22px;
-  font-weight: 700; /* Peso ajustado para a nova fonte */
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px; /* Espaçamento inicial */
+  letter-spacing: 1.2px;
   color: #ffffff;
   margin: 10px 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.4); /* Sombra de texto mais definida */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
   position: relative;
   width: 100%;
-  transition: letter-spacing 0.3s ease, text-shadow 0.3s ease; /* Transição suave */
+  transition: letter-spacing 0.3s ease, text-shadow 0.3s ease;
   cursor: default;
 }
 
-/* Efeito ao passar o mouse no título */
 .brand-name:hover {
-  letter-spacing: 2px; /* Aumenta o espaçamento */
-  text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.4); /* Adiciona um brilho sutil */
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.4);
 }
 
-/* Força o texto a ficar em uma linha só, ignorando o <br> do HTML */
-.brand-name br {
-  display: none;
-}
+.brand-name br { display: none; }
 
-/* Novo traço: Efeito de luz de neon */
 .brand-name::after {
   content: '';
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: -15px; /* Mais distante do texto */
-  width: 40px; /* Traço curto e centralizado */
-  height: 4px; /* Mais espesso */
-  background-color: #2563eb; /* Cor sólida central */
+  bottom: -15px;
+  width: 40px;
+  height: 4px;
+  background-color: #2563eb;
   border-radius: 4px;
-  /* Brilho intenso de neon */
   box-shadow: 
     0 0 10px rgba(37, 99, 235, 0.8),
     0 0 20px rgba(37, 99, 235, 0.5),
@@ -82,7 +72,6 @@
   transition: width 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* O traço se expande e brilha mais ao passar o mouse */
 .brand-name:hover::after {
   width: 80px;
   box-shadow: 
@@ -91,13 +80,8 @@
     0 0 50px rgba(37, 99, 235, 0.5);
 }
 
-
 /* --- MENU --- */
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.menu { display: flex; flex-direction: column; gap: 8px; }
 
 .menu a {
   display: flex;
@@ -113,12 +97,8 @@
   border-left: 4px solid transparent;
 }
 
-.menu a:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: white;
-}
+.menu a:hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
 
-/* Item Ativo */
 .menu a.active {
   background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
@@ -126,11 +106,7 @@
   box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 }
 
-.icon {
-  font-size: 18px;
-  width: 24px;
-  text-align: center;
-}
+.icon { font-size: 18px; width: 24px; text-align: center; }
 
 /* --- ÁREA DE CONTEÚDO --- */
 .content {
@@ -138,4 +114,27 @@
   padding: 32px;
   overflow-y: auto;
   background-color: #f3f4f6;
+}
+
+/* ==========================================================================
+   REGRA DE IMPRESSÃO GLOBAL (A MÁGICA ACONTECE AQUI)
+   ========================================================================== */
+@media print {
+  /* Esconde a barra lateral e remove o scroll do container principal */
+  .sidebar { display: none !important; }
+  
+  .layout-container {
+    display: block !important;
+    height: auto !important;
+    width: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+  }
+
+  .content {
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: white !important;
+    overflow: visible !important;
+  }
 }
