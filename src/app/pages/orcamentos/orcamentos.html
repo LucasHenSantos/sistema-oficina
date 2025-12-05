@@ -1,4 +1,3 @@
-<!-- A classe no-print aqui esconde a lista na impressão -->
 <div class="page-container no-print">
   
   <header class="page-header">
@@ -55,7 +54,6 @@
             <td class="actions-cell">
               <button class="btn-action edit" (click)="editBudget(budget)">✏️</button>
               <button class="btn-action delete" (click)="deleteBudget(budget.id)">🗑️</button>
-              <!-- Adicionei este botão que faltava na tabela para consistência -->
               <button class="btn-action print" (click)="printBudget(budget)" title="Imprimir">🖨️</button>
             </td>
           </tr>
@@ -64,7 +62,6 @@
     </table>
   </div>
 
-  <!-- MODAL DE EDIÇÃO (Também escondido na impressão via classe no-print no pai ou display:none global) -->
   @if (showModal()) {
     <div class="modal-overlay" (click)="closeModal()">
       <div class="modal-content large-modal" (click)="$event.stopPropagation()">
@@ -196,16 +193,19 @@
   }
 </div>
 
-<!-- ========================================== -->
-<!-- LAYOUT DE IMPRESSÃO (FORA DO CONTAINER PRINCIPAL) -->
-<!-- ========================================== -->
 <div class="printable-invoice" id="invoice">
   <div class="invoice-header">
-    <div class="company-details">
-      <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
-      <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
-      <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
+    
+    <div class="header-left">
+      <img src="assets/logo.png" alt="Logo" class="invoice-logo">
+      
+      <div class="company-details">
+        <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
+        <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
+        <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
+      </div>
     </div>
+
     <div class="invoice-meta">
       <h2>ORÇAMENTO #{{ currentBudget().id || 'NOVO' }}</h2>
       <p>Data: {{ currentBudget().date | date:'dd/MM/yyyy' }}</p>
