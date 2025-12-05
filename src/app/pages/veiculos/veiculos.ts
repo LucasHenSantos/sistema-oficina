@@ -1,6 +1,7 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router'; // Importação nova
 
 @Component({
   selector: 'app-veiculos',
@@ -9,10 +10,24 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './veiculos.html',
   styleUrl: './veiculos.css'
 })
-export class Veiculos {
+export class Veiculos implements OnInit {
   searchTerm = signal('');
+  showModal = signal(false);
 
-  // Dados mockados
+  ownersList = signal(['Roberto Silva', 'Ana Júlia Costa', 'Carlos Eduardo', 'Cliente Balcão']);
+
+  currentVehicle = signal({
+    id: 0,
+    plate: '',
+    model: '',
+    brand: '',
+    year: new Date().getFullYear(),
+    color: '',
+    client: '',
+    lastService: '-',
+    status: 'delivered'
+  });
+
   vehicles = signal([
     {
       id: 1,
@@ -22,46 +37,11 @@ export class Veiculos {
       year: 2019,
       color: 'Branco',
       client: 'Roberto Silva',
-      lastService: 'Troca de Óleo (12/08/2024)',
-      status: 'in-shop', // in-shop, delivered
-      image: 'assets/car-placeholder.png' // Futuro: foto do carro
-    },
-    {
-      id: 2,
-      plate: 'XYZ-9876',
-      model: 'Renegade Sport',
-      brand: 'Jeep',
-      year: 2021,
-      color: 'Verde',
-      client: 'Ana Júlia Costa',
-      lastService: 'Revisão 30k (05/12/2024)',
-      status: 'delivered'
-    },
-    {
-      id: 3,
-      plate: 'HJK-4567',
-      model: 'HB20 Sense',
-      brand: 'Hyundai',
-      year: 2020,
-      color: 'Prata',
-      client: 'Carlos Eduardo',
-      lastService: 'Freios (20/11/2024)',
-      status: 'delivered'
-    },
-    {
-      id: 4,
-      plate: 'BRA-2E19',
-      model: 'Saveiro Cross',
-      brand: 'Volkswagen',
-      year: 2018,
-      color: 'Vermelho',
-      client: 'Carlos Eduardo',
-      lastService: 'Suspensão (10/10/2024)',
+      lastService: '12/08/2024',
       status: 'in-shop'
     }
   ]);
 
-  // Filtro inteligente: Busca por Placa, Modelo ou Dono
   filteredVehicles = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.vehicles().filter(v => 
@@ -71,12 +51,61 @@ export class Veiculos {
     );
   });
 
-  // Ações
-  openHistory(plate: string) {
-    console.log(`Abrindo histórico do veículo ${plate}`);
+  // Injetamos a rota ativa para ler os parâmetros
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    // Verifica se veio do Dashboard com ordem de abrir modal
+    this.route.queryParams.subscribe(params => {
+      if (params['open'] === 'true') {
+        this.openModal();
+      }
+    });
   }
 
-  editVehicle(id: number) {
-    console.log(`Editando veículo ${id}`);
+  // --- AÇÕES ---
+
+  openModal() {
+    this.currentVehicle.set({
+      id: 0,
+      plate: '',
+      model: '',
+      brand: '',
+      year: 2020,
+      color: '',
+      client: this.ownersList()[0],
+      lastService: '-',
+      status: 'in-shop' // Padrão 'Na Oficina' ao criar novo
+    });
+    this.showModal.set(true);
+  }
+
+  editVehicle(vehicle: any) {
+    this.currentVehicle.set({ ...vehicle });
+    this.showModal.set(true);
+  }
+
+  closeModal() {
+    this.showModal.set(false);
+  }
+
+  saveVehicle() {
+    const newVehicle = this.currentVehicle();
+    newVehicle.plate = newVehicle.plate.toUpperCase();
+
+    this.vehicles.update(list => {
+      if (newVehicle.id === 0) {
+        return [...list, { ...newVehicle, id: new Date().getTime() }];
+      } else {
+        return list.map(v => v.id === newVehicle.id ? newVehicle : v);
+      }
+    });
+    this.closeModal();
+  }
+
+  deleteVehicle(id: number) {
+    if(confirm('Remover este veículo?')) {
+      this.vehicles.update(list => list.filter(v => v.id !== id));
+    }
   }
 }

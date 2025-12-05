@@ -1,4 +1,4 @@
-/* Reutilizando a base consistente */
+/* --- ESTILOS GERAIS DA PÁGINA --- */
 .page-container {
   display: flex;
   flex-direction: column;
@@ -20,7 +20,7 @@
 .page-header h1 { font-size: 28px; color: #111827; margin: 0; }
 .subtitle { color: #6b7280; margin: 4px 0 0 0; font-size: 14px; }
 
-/* Botão e Toolbar idênticos ao Clientes para consistência */
+/* Botões */
 .btn-primary {
   background-color: #2563eb;
   color: white;
@@ -36,6 +36,7 @@
 }
 .btn-primary:hover { background-color: #1d4ed8; }
 
+/* Toolbar */
 .toolbar { display: flex; gap: 16px; align-items: center; }
 
 .search-box {
@@ -51,7 +52,7 @@
 }
 .search-box input { border: none; outline: none; width: 100%; font-size: 15px; color: #374151; }
 
-/* TABELA */
+/* Tabela */
 .card {
   background: white;
   border-radius: 12px;
@@ -76,7 +77,7 @@ td { padding: 16px; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-a
 tr:last-child td { border-bottom: none; }
 tr:hover { background-color: #f8fafc; }
 
-/* ESPECÍFICO DE VEÍCULOS */
+/* --- ESPECÍFICO DE VEÍCULOS --- */
 
 /* Info do Carro */
 .vehicle-info { display: flex; align-items: center; gap: 12px; }
@@ -156,5 +157,48 @@ tr:hover { background-color: #f8fafc; }
 
 .history { background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
 .edit { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+.delete { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
 .empty-state { padding: 40px; text-align: center; color: #9ca3af; }
+
+/* --- MODAL STYLES (NOVO) --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+  display: flex; justify-content: center; align-items: center;
+  backdrop-filter: blur(2px);
+}
+.modal-content {
+  background: white; padding: 24px; border-radius: 16px;
+  width: 550px; max-width: 95%;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-content h2 {
+  margin-top: 0; padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb; margin-bottom: 20px;
+  color: #111827; font-size: 20px;
+}
+
+.form-row { display: flex; gap: 15px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+
+.col-4 { flex: 4; } .col-6 { flex: 6; } .col-8 { flex: 8; }
+
+label { font-size: 13px; font-weight: 600; color: #374151; }
+input, select {
+  padding: 10px; border: 1px solid #d1d5db;
+  border-radius: 8px; outline: none; background: white;
+}
+input:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+.btn-cancel { background: white; border: 1px solid #d1d5db; padding: 10px 20px; border-radius: 8px; cursor: pointer; color: #4b5563; font-weight: 500; }
+.btn-save { background: #2563eb; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.btn-save:disabled {
+  background-color: #9ca3af; /* Cinza */
+  cursor: not-allowed;
+  opacity: 0.7;
+}

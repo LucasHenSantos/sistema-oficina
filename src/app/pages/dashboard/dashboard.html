@@ -39,9 +39,18 @@
     <div class="card actions-card">
       <h2>🚀 Ações Rápidas</h2>
       <div class="actions-buttons">
-        <button class="btn-action">Nova Entrada de Veículo</button>
-        <button class="btn-action">Novo Orçamento</button>
-        <button class="btn-action">Consultar Peça</button>
+        <!-- AGORA: Passamos { open: true } para avisar que queremos o modal aberto -->
+        <button class="btn-action" (click)="navigateTo('/veiculos', { open: 'true' })">
+          Nova Entrada de Veículo
+        </button>
+        
+        <button class="btn-action" (click)="navigateTo('/orcamentos', { open: 'true' })">
+          Novo Orçamento
+        </button>
+        
+        <button class="btn-action" (click)="navigateTo('/produtos', { open: 'true' })">
+          Novo Produto (Peça)
+        </button>
       </div>
     </div>
   </div>

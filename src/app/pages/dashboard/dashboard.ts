@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,7 +10,6 @@ import { CommonModule } from '@angular/common';
   styleUrl: './dashboard.css'
 })
 export class Dashboard {
-  // Sinais para controlar os dados da tela (Reatividade do Angular 17+)
   stats = signal([
     { title: 'Veículos na Oficina', value: 12, icon: '🚗', color: 'blue', subtext: '4 entraram hoje' },
     { title: 'Aguardando Orçamento', value: 5, icon: '📝', color: 'orange', subtext: 'Prioridade alta' },
@@ -23,4 +23,11 @@ export class Dashboard {
     { time: '10:00', text: 'Serviço finalizado: Troca de óleo Honda Civic', type: 'info' },
     { time: '11:20', text: 'Saída: Fiat Strada', type: 'saida' }
   ]);
+
+  constructor(private router: Router) {}
+
+  // Atualizado para aceitar queryParams (opcional)
+  navigateTo(path: string, params: any = {}) {
+    this.router.navigate([path], { queryParams: params });
+  }
 }

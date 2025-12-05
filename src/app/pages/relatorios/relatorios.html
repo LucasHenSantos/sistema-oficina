@@ -1,1 +1,180 @@
-<p>relatorios works!</p>
+<div class="page-container no-print">
+  
+  <header class="page-header">
+    <div>
+      <h1>Relatórios & Laudos</h1>
+      <p class="subtitle">Consulte fechamentos financeiros e emita laudos técnicos</p>
+    </div>
+    <div class="date-filters">
+      <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set($event)">
+        <option [value]="1">Janeiro</option>
+        <option [value]="6">Junho</option>
+        <option [value]="12">Dezembro</option>
+        <!-- Adicione os outros meses -->
+      </select>
+      <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)">
+        <option [value]="2024">2024</option>
+        <option [value]="2025">2025</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- CARDS DE RESUMO -->
+  <div class="stats-row">
+    <div class="card stat-card blue">
+      <div class="stat-icon">💰</div>
+      <div class="stat-data">
+        <h3>{{ totalRevenue() | currency:'BRL' }}</h3>
+        <p>Faturamento do Mês</p>
+      </div>
+    </div>
+
+    <div class="card stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-data">
+        <h3>{{ closedOrders().length }}</h3>
+        <p>Serviços Finalizados</p>
+      </div>
+    </div>
+
+    <div class="card stat-card orange">
+      <div class="stat-icon">📈</div>
+      <div class="stat-data">
+        <h3>{{ averageTicket() | currency:'BRL' }}</h3>
+        <p>Ticket Médio</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA DE SERVIÇOS FECHADOS -->
+  <div class="card table-container">
+    <div class="card-header-simple">
+      <h3>Histórico de Ordens de Serviço</h3>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>O.S. #</th>
+          <th>Cliente / Veículo</th>
+          <th>Serviço Principal</th>
+          <th>Valor</th>
+          <th class="actions-col">Laudo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of closedOrders(); track order.id) {
+          <tr>
+            <td>{{ order.date }}</td>
+            <td><strong>#{{ order.id }}</strong></td>
+            <td>
+              <div class="col-group">
+                <span class="primary-text">{{ order.client }}</span>
+                <span class="secondary-text">{{ order.vehicle }}</span>
+              </div>
+            </td>
+            <td>{{ order.serviceType }}</td>
+            <td class="price-text">{{ order.total | currency:'BRL' }}</td>
+            <td class="actions-cell">
+              <button class="btn-action print" (click)="generateReport(order)" title="Gerar Laudo Técnico">
+                🖨️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL DE LAUDO TÉCNICO (VISUALIZAÇÃO DE IMPRESSÃO) -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <!-- A classe .print-area é a única que aparecerá na impressão -->
+    <div class="report-paper print-area" (click)="$event.stopPropagation()">
+      
+      <!-- Cabeçalho do Laudo -->
+      <header class="report-header">
+        <div class="company-info">
+          <h1>MECÂNICA BORGES</h1>
+          <p>Especialistas em Mecânica Geral e Injeção</p>
+          <p class="small">Rua Exemplo, 123 - Centro - (11) 99999-9999</p>
+        </div>
+        <div class="report-meta">
+          <div class="meta-box">
+            <span>LAUDO TÉCNICO</span>
+            <strong>#{{ currentReport()?.id }}</strong>
+          </div>
+          <p>Data: {{ currentReport()?.date }}</p>
+        </div>
+      </header>
+
+      <hr class="divider">
+
+      <!-- Dados do Cliente -->
+      <section class="report-section">
+        <h3>Dados do Veículo</h3>
+        <div class="info-grid">
+          <div>
+            <label>Cliente:</label>
+            <span>{{ currentReport()?.client }}</span>
+          </div>
+          <div>
+            <label>Veículo:</label>
+            <span>{{ currentReport()?.vehicle }}</span>
+          </div>
+          <div>
+            <label>Técnico Resp.:</label>
+            <span>{{ currentReport()?.technician }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Diagnóstico e Solução (Simulado) -->
+      <section class="report-section content-box">
+        <h3>Diagnóstico Técnico</h3>
+        <p>
+          O veículo apresentou ruídos na suspensão dianteira e instabilidade em curvas.
+          Após análise no elevador, constatou-se folga excessiva nas buchas de bandeja e 
+          vazamento no amortecedor direito.
+        </p>
+        
+        <h3>Serviços Executados</h3>
+        <p>
+          Realizada a substituição do kit de amortecedores dianteiros, par de bandejas e 
+          bieletas. Efetuado alinhamento 3D e balanceamento das rodas. 
+          Teste de rodagem realizado com sucesso.
+        </p>
+      </section>
+
+      <!-- Resumo Financeiro -->
+      <section class="report-section financial">
+        <table class="simple-table">
+          <tr>
+            <td>Serviços / Peças</td>
+            <td class="text-right">{{ currentReport()?.serviceType }}</td>
+          </tr>
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td class="text-right">{{ currentReport()?.total | currency:'BRL' }}</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- Rodapé -->
+      <footer class="report-footer">
+        <p>Garantia de 90 dias para serviços e peças.</p>
+        <div class="signature-line">
+          Assinatura do Responsável
+        </div>
+      </footer>
+
+      <!-- Botões de Ação (Não saem na impressão) -->
+      <div class="modal-actions no-print">
+        <button class="btn-cancel" (click)="closeModal()">Fechar</button>
+        <button class="btn-primary" (click)="printReport()">Imprimir PDF</button>
+      </div>
+
+    </div>
+  </div>
+}

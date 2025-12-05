@@ -1,35 +1,27 @@
 <div class="page-container">
   
-  <!-- CABEÇALHO DA PÁGINA -->
   <header class="page-header">
     <div>
       <h1>Clientes</h1>
       <p class="subtitle">Gerencie contatos e histórico de atendimentos</p>
     </div>
-    <button class="btn-primary">
+    <button class="btn-primary" (click)="openModal()">
       <span class="icon">+</span> Novo Cliente
     </button>
   </header>
 
-  <!-- BARRA DE FERRAMENTAS (BUSCA) -->
   <div class="toolbar">
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input 
         type="text" 
-        placeholder="Buscar por nome, telefone ou modelo do carro..."
+        placeholder="Buscar por nome ou telefone..."
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
       >
     </div>
-    <!-- Filtros rápidos (futuro) -->
-    <div class="filter-actions">
-      <button class="btn-icon" title="Filtrar">🌪️</button>
-      <button class="btn-icon" title="Exportar">📄</button>
-    </div>
   </div>
 
-  <!-- TABELA DE CLIENTES -->
   <div class="table-container card">
     <table>
       <thead>
@@ -38,67 +30,72 @@
           <th>Veículos</th>
           <th>Contato</th>
           <th>Status</th>
-          <th>Última Visita</th>
-          <th class="actions-col">Ações Rápidas</th>
+          <th class="actions-col">Ações</th>
         </tr>
       </thead>
       <tbody>
         @for (client of filteredClients(); track client.id) {
           <tr>
-            <!-- Coluna Nome (com Avatar fictício) -->
             <td class="client-info">
               <div class="avatar">{{ client.name.charAt(0) }}</div>
               <div class="text-data">
                 <strong>{{ client.name }}</strong>
-                <span class="id-text">#{{ client.id }}</span>
+                <span class="id-text">{{ client.email }}</span>
               </div>
             </td>
-
-            <!-- Coluna Veículos -->
             <td>
               <div class="cars-list">
                 @for (car of client.cars; track car) {
                   <span class="car-badge">{{ car }}</span>
                 }
+                @if (client.cars.length === 0) { <span class="no-car">Sem veículo</span> }
               </div>
             </td>
-
-            <!-- Coluna Contato -->
             <td>{{ client.phone }}</td>
-
-            <!-- Coluna Status -->
             <td>
-              <span class="status-badge" [class]="client.status">
-                {{ client.statusLabel }}
-              </span>
+              <span class="status-badge" [class]="client.status">{{ client.statusLabel }}</span>
             </td>
-
-            <!-- Coluna Data -->
-            <td>{{ client.lastVisit }}</td>
-
-            <!-- Coluna Ações -->
             <td class="actions-cell">
-              <button class="btn-action whatsapp" (click)="openWhatsApp(client.phone)" title="Mandar Zap">
-                📱
-              </button>
-              <button class="btn-action new-os" (click)="newOrder(client.name)" title="Abrir Nova OS">
-                🔧
-              </button>
-              <button class="btn-action edit" title="Editar Cadastro">
-                ✏️
-              </button>
+              <button class="btn-action whatsapp" (click)="openWhatsApp(client.phone)">📱</button>
+              <button class="btn-action edit" (click)="editClient(client)">✏️</button>
+              <button class="btn-action delete" (click)="deleteClient(client.id)">🗑️</button>
             </td>
           </tr>
         }
       </tbody>
     </table>
-    
-    <!-- Estado Vazio (se a busca não achar nada) -->
-    @if (filteredClients().length === 0) {
-      <div class="empty-state">
-        <p>Nenhum cliente encontrado.</p>
-      </div>
-    }
   </div>
 
+  <!-- MODAL -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>{{ currentClient().id === 0 ? 'Novo Cliente' : 'Editar Cliente' }}</h2>
+        
+        <form (ngSubmit)="saveClient()" #clientForm="ngForm">
+          
+          <div class="form-group">
+            <label>Nome Completo *</label>
+            <input type="text" [(ngModel)]="currentClient().name" name="name" required minlength="3" placeholder="Ex: João da Silva">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Telefone / WhatsApp *</label>
+              <input type="text" [(ngModel)]="currentClient().phone" name="phone" required minlength="8" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group col-6">
+              <label>E-mail (Opcional)</label>
+              <input type="email" [(ngModel)]="currentClient().email" name="email" placeholder="cliente@email.com">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-save" [disabled]="clientForm.invalid">Salvar Cliente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 </div>

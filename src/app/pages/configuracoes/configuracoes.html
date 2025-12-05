@@ -3,17 +3,113 @@
   <header class="page-header">
     <div>
       <h1>Configurações do Sistema</h1>
-      <p class="subtitle">Personalize as opções e listas da sua oficina</p>
+      <p class="subtitle">Personalize a aparência e os dados da sua oficina</p>
     </div>
   </header>
 
   <div class="settings-grid">
     
-    <!-- CARD DE CATEGORIAS DE SERVIÇO -->
-    <div class="card settings-card">
+    <!-- 1. APARÊNCIA (TEMA) -->
+    <div class="card settings-card full-width">
+      <div class="card-header">
+        <h3>🎨 Aparência do Sistema</h3>
+        <p>Escolha o tema de sua preferência para trabalhar</p>
+      </div>
+      <div class="card-body theme-selector">
+        <button 
+          class="theme-btn light" 
+          [class.active]="theme() === 'light'"
+          (click)="toggleTheme('light')">
+          ☀️ Claro
+        </button>
+        <button 
+          class="theme-btn dark" 
+          [class.active]="theme() === 'dark'"
+          (click)="toggleTheme('dark')">
+          🌙 Escuro
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. DADOS DA OFICINA (FORMULÁRIO COMPLETO) -->
+    <div class="card settings-card full-width">
+      <div class="card-header">
+        <h3>🏢 Dados da Oficina (Impressão)</h3>
+        <p>Estas informações aparecerão no cabeçalho dos orçamentos e relatórios.</p>
+      </div>
+      
+      <div class="card-body">
+        <form (ngSubmit)="saveCompanyData()" class="company-form">
+          
+          <!-- Linha 1 -->
+          <div class="form-row">
+            <div class="form-group col-2">
+              <label>Nome Fantasia da Oficina</label>
+              <input type="text" [(ngModel)]="companyData().name" name="name" placeholder="Ex: Mecânica Borges">
+            </div>
+            <div class="form-group col-1">
+              <label>CNPJ / CPF</label>
+              <input type="text" [(ngModel)]="companyData().cnpj" name="cnpj" placeholder="00.000.000/0001-00">
+            </div>
+          </div>
+
+          <!-- Linha 2 -->
+          <div class="form-row">
+            <div class="form-group col-1">
+              <label>Telefone / WhatsApp</label>
+              <input type="text" [(ngModel)]="companyData().phone" name="phone" placeholder="(00) 90000-0000">
+            </div>
+            <div class="form-group col-2">
+              <label>Email de Contato</label>
+              <input type="email" [(ngModel)]="companyData().email" name="email" placeholder="contato@oficina.com">
+            </div>
+          </div>
+
+          <!-- Linha 3 (Endereço) -->
+          <div class="form-row">
+            <div class="form-group col-2">
+              <label>Endereço (Rua, Nº, Bairro)</label>
+              <input type="text" [(ngModel)]="companyData().address" name="address" placeholder="Rua das Peças, 123 - Centro">
+            </div>
+            <div class="form-group col-1">
+              <label>Cidade / Estado</label>
+              <input type="text" [(ngModel)]="companyData().city" name="city" placeholder="São Paulo - SP">
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Linha 4 (Financeiro) -->
+          <div class="form-row">
+            <div class="form-group col-1">
+              <label>Chave Pix (Para Recebimento)</label>
+              <input type="text" [(ngModel)]="companyData().pixKey" name="pixKey" placeholder="CPF, Email ou Aleatória">
+            </div>
+            <div class="form-group col-2">
+              <label>Informações Bancárias Adicionais</label>
+              <input type="text" [(ngModel)]="companyData().bankInfo" name="bankInfo" placeholder="Banco X, Ag 0000, Cc 00000-0">
+            </div>
+          </div>
+
+          <!-- Linha 5 (Rodapé) -->
+          <div class="form-group">
+            <label>Texto de Rodapé do Orçamento</label>
+            <input type="text" [(ngModel)]="companyData().quoteFooterText" name="quoteFooterText" placeholder="Ex: Orçamento válido por 15 dias. Garantia de 3 meses.">
+          </div>
+
+          <div class="form-actions right">
+            <button type="submit" class="btn-save">💾 Salvar Dados da Empresa</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. CATEGORIAS DE SERVIÇO -->
+    <div class="card settings-card full-width">
       <div class="card-header">
         <h3>📂 Categorias de Serviço</h3>
-        <p>Defina os grupos usados no catálogo de serviços</p>
+        <p>Gerencie os grupos usados no catálogo de serviços</p>
       </div>
       
       <div class="card-body">
@@ -28,25 +124,14 @@
           <button class="btn-add" (click)="addCategory()">Adicionar</button>
         </div>
 
-        <ul class="category-list">
+        <ul class="category-list horizontal-list">
           @for (cat of categories(); track cat; let i = $index) {
-            <li>
+            <li class="category-item">
               <span>{{ cat }}</span>
-              <button class="btn-remove" (click)="removeCategory(i)" title="Remover">🗑️</button>
+              <button class="btn-remove-icon" (click)="removeCategory(i)" title="Remover">×</button>
             </li>
           }
         </ul>
-      </div>
-    </div>
-
-    <!-- Espaço para futuras configurações (Dados da Empresa, Backup, etc) -->
-    <div class="card settings-card placeholder-card">
-      <div class="card-header">
-        <h3>🏢 Dados da Oficina</h3>
-        <p>Em breve: Configure nome, endereço e logo para impressão.</p>
-      </div>
-      <div class="card-body disabled">
-        <p>Configuração disponível na versão completa.</p>
       </div>
     </div>
 

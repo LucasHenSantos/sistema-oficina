@@ -1,0 +1,134 @@
+/* --- Base Consistente --- */
+.page-container {
+  display: flex; flex-direction: column; gap: 24px;
+  animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-header { display: flex; justify-content: space-between; align-items: center; }
+.page-header h1 { font-size: 28px; color: #111827; margin: 0; }
+.subtitle { color: #6b7280; margin: 4px 0 0 0; font-size: 14px; }
+
+/* Botões */
+.btn-primary {
+  background-color: #2563eb; color: white; border: none;
+  padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: background 0.2s;
+}
+.btn-primary:hover { background-color: #1d4ed8; }
+
+/* Toolbar */
+.toolbar { display: flex; gap: 16px; align-items: center; }
+.search-box {
+  flex: 1; background: white; padding: 10px 16px;
+  border-radius: 8px; border: 1px solid #e5e7eb;
+  display: flex; align-items: center; gap: 12px;
+}
+.search-box input { border: none; outline: none; width: 100%; font-size: 15px; }
+
+.filter-chip {
+  background: #fee2e2; color: #dc2626; padding: 8px 12px;
+  border-radius: 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: 1px solid #fecaca;
+}
+
+/* Tabela */
+.card {
+  background: white; border-radius: 12px;
+  border: 1px solid #e5e7eb; overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th {
+  background-color: #f9fafb; padding: 16px;
+  font-size: 13px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; border-bottom: 1px solid #e5e7eb;
+}
+td { padding: 16px; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover { background-color: #f8fafc; }
+
+/* --- ITENS DE PRODUTO --- */
+.product-info { display: flex; align-items: center; gap: 12px; }
+.code-badge {
+  background: #f3f4f6; color: #4b5563; padding: 4px 8px;
+  border-radius: 4px; font-family: monospace; font-size: 12px; font-weight: bold;
+  border: 1px solid #e5e7eb;
+}
+.text-data { display: flex; flex-direction: column; }
+.brand-text { font-size: 12px; color: #6b7280; }
+
+.cat-text {
+  background: #e0f2fe; color: #0369a1; padding: 4px 10px;
+  border-radius: 6px; font-size: 12px; font-weight: 600;
+}
+.loc-text { font-size: 13px; color: #6b7280; font-style: italic; }
+
+/* STATUS DE ESTOQUE (IMPORTANTE) */
+.stock-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 600; border: 1px solid transparent;
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Variações de Cor */
+.stock-badge.ok { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+.stock-badge.ok .status-dot { background: #16a34a; }
+
+.stock-badge.low { background: #ffedd5; color: #ea580c; border-color: #fed7aa; }
+.stock-badge.low .status-dot { background: #ea580c; }
+
+.stock-badge.empty { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+.stock-badge.empty .status-dot { background: #dc2626; }
+
+/* Preços */
+.price-info { display: flex; flex-direction: column; }
+.sell-price { font-weight: bold; color: #111827; }
+.cost-price { font-size: 11px; color: #9ca3af; }
+
+/* Ações */
+.actions-cell { display: flex; gap: 8px; }
+.btn-action {
+  width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: transform 0.1s;
+}
+.btn-action:hover { transform: scale(1.1); }
+.edit { background: #f3f4f6; color: #4b5563; }
+.delete { background: #fee2e2; color: #dc2626; }
+
+.empty-state { padding: 40px; text-align: center; color: #9ca3af; }
+
+/* --- MODAL --- */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1000;
+  display: flex; justify-content: center; align-items: center;
+  backdrop-filter: blur(2px);
+}
+.modal-content {
+  background: white; padding: 24px; border-radius: 16px;
+  width: 600px; max-width: 95%;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modal-content h2 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb; margin-bottom: 20px;}
+
+.form-row { display: flex; gap: 15px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.col-3 { flex: 3; } .col-6 { flex: 6; } .col-9 { flex: 9; }
+
+label { font-size: 13px; font-weight: 600; color: #374151; }
+input, select {
+  padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; outline: none;
+}
+input:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+.form-actions {
+  display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb;
+}
+.btn-cancel { background: white; border: 1px solid #d1d5db; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+.btn-save { background: #2563eb; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }

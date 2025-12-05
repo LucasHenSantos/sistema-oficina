@@ -1,1 +1,199 @@
-<p>ordem-servico works!</p>
+<div class="page-container">
+  
+  <header class="page-header">
+    <div>
+      <h1>Ordens de Serviço</h1>
+      <p class="subtitle">Controle de orçamentos, aprovações e serviços realizados</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <span class="icon">+</span> Nova OS
+    </button>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Buscar por cliente, veículo ou Nº da OS..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      >
+    </div>
+  </div>
+
+  <!-- TABELA PRINCIPAL -->
+  <div class="table-container card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nº OS</th>
+          <th>Cliente / Veículo</th>
+          <th>Data</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th class="actions-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (os of filteredOrders(); track os.id) {
+          <tr>
+            <td><span class="os-id">#{{ os.id }}</span></td>
+            <td>
+              <div class="os-info">
+                <strong>{{ os.client }}</strong>
+                <span class="detail-text">{{ os.vehicle }}</span>
+              </div>
+            </td>
+            <td>{{ os.date | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="status-badge" [class]="os.status">
+                {{ getStatusLabel(os.status) }}
+              </span>
+            </td>
+            <td class="total-col">{{ os.total | currency:'BRL' }}</td>
+            <td class="actions-cell">
+              <button class="btn-action edit" (click)="editOrder(os)">✏️</button>
+              <button class="btn-action delete" (click)="deleteOrder(os.id)">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL DE OS -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header">
+          <h2>{{ currentOrder().id === 0 ? 'Nova Ordem de Serviço' : 'Editar OS #' + currentOrder().id }}</h2>
+          <div class="total-display">
+            Total: {{ currentOrder().total | currency:'BRL' }}
+          </div>
+        </div>
+        
+        <form (ngSubmit)="saveOrder()">
+          
+          <!-- DADOS GERAIS -->
+          <div class="form-section">
+            <div class="form-row">
+              <div class="form-group col-4">
+                <label>Cliente</label>
+                <select [(ngModel)]="currentOrder().client" name="client" required>
+                  <option value="" disabled selected>Selecione...</option>
+                  @for (c of clientsList(); track c) { <option [value]="c">{{ c }}</option> }
+                </select>
+              </div>
+              <div class="form-group col-4">
+                <label>Veículo</label>
+                <select [(ngModel)]="currentOrder().vehicle" name="vehicle" required>
+                  <option value="" disabled selected>Selecione...</option>
+                  @for (v of vehiclesList(); track v) { <option [value]="v">{{ v }}</option> }
+                </select>
+              </div>
+              <div class="form-group col-2">
+                <label>Data</label>
+                <input type="date" [(ngModel)]="currentOrder().date" name="date">
+              </div>
+              <div class="form-group col-2">
+                <label>Status</label>
+                <select [(ngModel)]="currentOrder().status" name="status">
+                  <option value="pending">Pendente</option>
+                  <option value="approved">Aprovado</option>
+                  <option value="in-progress">Em Andamento</option>
+                  <option value="completed">Finalizado</option>
+                  <option value="canceled">Cancelado</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADICIONAR ITENS (SERVIÇOS E PEÇAS) -->
+          <div class="items-section">
+            <div class="add-row">
+              <!-- Adicionar Serviço -->
+              <div class="add-group service-group">
+                <label>Adicionar Serviço</label>
+                <div class="input-with-btn">
+                  <select [ngModel]="selectedServiceId()" (ngModelChange)="selectedServiceId.set($event)" name="addSvc">
+                    <option [ngValue]="null">Selecione o serviço...</option>
+                    @for (s of availableServices(); track s.id) {
+                      <option [value]="s.id">{{ s.name }} ({{ s.price | currency:'BRL' }})</option>
+                    }
+                  </select>
+                  <button type="button" class="btn-add" (click)="addService()">Add</button>
+                </div>
+              </div>
+
+              <!-- Adicionar Produto -->
+              <div class="add-group product-group">
+                <label>Adicionar Peça/Produto</label>
+                <div class="input-with-btn">
+                  <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)" name="addProd">
+                    <option [ngValue]="null">Selecione a peça...</option>
+                    @for (p of availableProducts(); track p.id) {
+                      <option [value]="p.id">{{ p.name }} ({{ p.price | currency:'BRL' }})</option>
+                    }
+                  </select>
+                  <input type="number" [ngModel]="productQty()" (ngModelChange)="productQty.set($event)" name="qty" class="qty-input" min="1" value="1">
+                  <button type="button" class="btn-add" (click)="addProduct()">Add</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- LISTA DE ITENS DA OS -->
+            <div class="items-list-container">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Qtd</th>
+                    <th>Unitário</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of currentOrder().items; track $index) {
+                    <tr>
+                      <td>
+                        <span class="type-badge" [class]="item.type">
+                          {{ item.type === 'service' ? 'Serviço' : 'Peça' }}
+                        </span>
+                      </td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.qty }}</td>
+                      <td>{{ item.price | currency:'BRL' }}</td>
+                      <td class="subtotal">{{ item.total | currency:'BRL' }}</td>
+                      <td>
+                        <button type="button" class="btn-remove-item" (click)="removeItem($index)">×</button>
+                      </td>
+                    </tr>
+                  }
+                  @if (currentOrder().items.length === 0) {
+                    <tr>
+                      <td colspan="6" class="empty-items">Nenhum item adicionado à OS.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Observações / Diagnóstico</label>
+            <textarea [(ngModel)]="currentOrder().notes" name="notes" rows="2" placeholder="Descreva o problema ou observações importantes..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-save">Salvar OS</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

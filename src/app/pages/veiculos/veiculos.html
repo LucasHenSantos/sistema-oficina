@@ -5,12 +5,11 @@
       <h1>Veículos</h1>
       <p class="subtitle">Frota cadastrada e histórico de manutenções</p>
     </div>
-    <button class="btn-primary">
+    <button class="btn-primary" (click)="openModal()">
       <span class="icon">+</span> Novo Veículo
     </button>
   </header>
 
-  <!-- BARRA DE BUSCA -->
   <div class="toolbar">
     <div class="search-box">
       <span class="search-icon">🔍</span>
@@ -23,15 +22,13 @@
     </div>
   </div>
 
-  <!-- LISTA DE VEÍCULOS -->
   <div class="table-container card">
     <table>
       <thead>
         <tr>
-          <th>Veículo / Detalhes</th>
+          <th>Veículo</th>
           <th>Placa</th>
           <th>Proprietário</th>
-          <th>Último Serviço</th>
           <th>Status</th>
           <th class="actions-col">Ações</th>
         </tr>
@@ -39,7 +36,6 @@
       <tbody>
         @for (vehicle of filteredVehicles(); track vehicle.id) {
           <tr>
-            <!-- Coluna Modelo/Marca -->
             <td>
               <div class="vehicle-info">
                 <div class="brand-logo">{{ vehicle.brand.charAt(0) }}</div>
@@ -49,26 +45,15 @@
                 </div>
               </div>
             </td>
-
-            <!-- Coluna Placa (Estilo Mercosul/Padrão) -->
             <td>
               <div class="plate-badge">
                 <div class="plate-header">BRASIL</div>
                 <div class="plate-number">{{ vehicle.plate }}</div>
               </div>
             </td>
-
-            <!-- Coluna Dono -->
             <td>
-              <div class="owner-link">
-                👤 {{ vehicle.client }}
-              </div>
+              <div class="owner-link">👤 {{ vehicle.client }}</div>
             </td>
-
-            <!-- Coluna Serviço -->
-            <td class="service-text">{{ vehicle.lastService }}</td>
-
-            <!-- Coluna Status -->
             <td>
               @if (vehicle.status === 'in-shop') {
                 <span class="status-tag in-shop">Na Oficina</span>
@@ -76,25 +61,79 @@
                 <span class="status-tag delivered">Entregue</span>
               }
             </td>
-
-            <!-- Ações -->
             <td class="actions-cell">
-              <button class="btn-action history" (click)="openHistory(vehicle.plate)" title="Ver Histórico Completo">
-                📜
-              </button>
-              <button class="btn-action edit" (click)="editVehicle(vehicle.id)" title="Editar">
-                ✏️
-              </button>
+              <button class="btn-action edit" (click)="editVehicle(vehicle)">✏️</button>
+              <button class="btn-action delete" (click)="deleteVehicle(vehicle.id)">🗑️</button>
             </td>
           </tr>
         }
       </tbody>
     </table>
-
-    @if (filteredVehicles().length === 0) {
-      <div class="empty-state">
-        <p>Nenhum veículo encontrado com esse termo.</p>
-      </div>
-    }
   </div>
+
+  <!-- MODAL -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>{{ currentVehicle().id === 0 ? 'Cadastrar Veículo' : 'Editar Veículo' }}</h2>
+        
+        <!-- #vehicleForm="ngForm" permite que o Angular monitore a validade deste formulário -->
+        <form (ngSubmit)="saveVehicle()" #vehicleForm="ngForm">
+          
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label>Placa *</label>
+              <!-- required e minlength forçam validação -->
+              <input type="text" [(ngModel)]="currentVehicle().plate" name="plate" required minlength="7" placeholder="ABC-1234" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group col-8">
+              <label>Proprietário *</label>
+              <select [(ngModel)]="currentVehicle().client" name="client" required>
+                <option value="" disabled selected>Selecione...</option>
+                @for (owner of ownersList(); track owner) {
+                  <option [value]="owner">{{ owner }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Marca</label>
+              <input type="text" [(ngModel)]="currentVehicle().brand" name="brand" placeholder="Ex: Chevrolet">
+            </div>
+            <div class="form-group col-6">
+              <label>Modelo *</label>
+              <input type="text" [(ngModel)]="currentVehicle().model" name="model" required placeholder="Ex: Onix 1.0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label>Ano</label>
+              <input type="number" [(ngModel)]="currentVehicle().year" name="year">
+            </div>
+            <div class="form-group col-4">
+              <label>Cor</label>
+              <input type="text" [(ngModel)]="currentVehicle().color" name="color" placeholder="Ex: Prata">
+            </div>
+            
+            <div class="form-group col-4">
+              <label>Situação</label>
+              <select [(ngModel)]="currentVehicle().status" name="status">
+                <option value="in-shop">Na Oficina</option>
+                <option value="delivered">Entregue</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+            <!-- O botão ficará cinza e não clicável se o formulário for inválido -->
+            <button type="submit" class="btn-save" [disabled]="vehicleForm.invalid">Salvar Veículo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 </div>
