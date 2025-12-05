@@ -1,1 +1,48 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <header class="header">
+    <h1>Visão Geral</h1>
+    <p class="date">Hoje, {{ 0 | date:'dd/MM/yyyy' }}</p>
+  </header>
+
+  <!-- CARDS DE ESTATÍSTICAS -->
+  <div class="stats-grid">
+    @for (stat of stats(); track stat.title) {
+      <div class="card stat-card" [class]="stat.color">
+        <div class="icon-box">
+          {{ stat.icon }}
+        </div>
+        <div class="stat-info">
+          <h3>{{ stat.value }}</h3>
+          <p>{{ stat.title }}</p>
+          <span class="subtext">{{ stat.subtext }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- SEÇÃO INFERIOR -->
+  <div class="content-grid">
+    <!-- Atividades Recentes -->
+    <div class="card activity-card">
+      <h2>🔔 Atividades Recentes</h2>
+      <ul class="activity-list">
+        @for (item of recentActivity(); track item.time) {
+          <li [class]="item.type">
+            <span class="time">{{ item.time }}</span>
+            <span class="text">{{ item.text }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Acesso Rápido -->
+    <div class="card actions-card">
+      <h2>🚀 Ações Rápidas</h2>
+      <div class="actions-buttons">
+        <button class="btn-action">Nova Entrada de Veículo</button>
+        <button class="btn-action">Novo Orçamento</button>
+        <button class="btn-action">Consultar Peça</button>
+      </div>
+    </div>
+  </div>
+</div>

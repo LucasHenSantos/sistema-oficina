@@ -1,1 +1,127 @@
-<p>servicos works!</p>
+<div class="page-container">
+  
+  <header class="page-header">
+    <div>
+      <h1>Catálogo de Serviços</h1>
+      <p class="subtitle">Gerencie sua tabela de preços e tempos de execução</p>
+    </div>
+    <button class="btn-primary" (click)="openNewServiceModal()">
+      <span class="icon">+</span> Novo Serviço
+    </button>
+  </header>
+
+  <!-- BARRA DE BUSCA -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Busque por nome do serviço ou categoria..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      >
+    </div>
+  </div>
+
+  <!-- TABELA DE SERVIÇOS -->
+  <div class="table-container card">
+    <table>
+      <thead>
+        <tr>
+          <th>Serviço / Descrição</th>
+          <th>Categoria</th>
+          <th>Tempo Estimado</th>
+          <th>Valor Base (Mão de Obra)</th>
+          <th class="actions-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (service of filteredServices(); track service.id) {
+          <tr>
+            <td>
+              <div class="service-info">
+                <div class="icon-box">🔧</div>
+                <div class="text-data">
+                  <strong>{{ service.name }}</strong>
+                  <span class="detail-text">{{ service.description }}</span>
+                </div>
+              </div>
+            </td>
+            <td><span class="category-badge">{{ service.category }}</span></td>
+            <td>
+              <div class="time-badge">🕐 {{ service.time }}</div>
+            </td>
+            <td>
+              <span class="price-tag">
+                {{ service.price | currency:'BRL':'symbol':'1.2-2' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-action edit" (click)="editService(service)" title="Editar Preço">
+                ✏️
+              </button>
+              <button class="btn-action delete" (click)="deleteService(service.id)" title="Remover">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (filteredServices().length === 0) {
+      <div class="empty-state">
+        <p>Nenhum serviço encontrado.</p>
+      </div>
+    }
+  </div>
+
+  <!-- MODAL DE CADASTRO / EDIÇÃO -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h2>{{ currentService().id === 0 ? 'Novo Serviço' : 'Editar Serviço' }}</h2>
+        
+        <form (ngSubmit)="saveService()">
+          <div class="form-group">
+            <label>Nome do Serviço</label>
+            <input type="text" [(ngModel)]="currentService().name" name="name" placeholder="Ex: Troca de Óleo" required>
+          </div>
+
+          <div class="form-group">
+            <label>Descrição Detalhada</label>
+            <textarea [(ngModel)]="currentService().description" name="desc" rows="2" placeholder="O que está incluso neste serviço?"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Categoria</label>
+              <!-- AQUI ESTÁ A MÁGICA: O select agora é dinâmico! -->
+              <select [(ngModel)]="currentService().category" name="category">
+                @for (cat of categories(); track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Tempo Estimado</label>
+              <input type="text" [(ngModel)]="currentService().time" name="time" placeholder="Ex: 45 min">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Preço Base (R$)</label>
+            <input type="number" [(ngModel)]="currentService().price" name="price" placeholder="0,00" step="0.01">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-save">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+</div>

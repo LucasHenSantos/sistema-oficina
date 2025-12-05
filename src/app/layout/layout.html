@@ -1,1 +1,50 @@
-<p>layout works!</p>
+<div class="layout-container">
+
+  <!-- BARRA LATERAL (SIDEBAR) -->
+  <aside class="sidebar">
+    
+    <!-- ÁREA DA MARCA / LOGO -->
+    <div class="brand-header">
+      <!-- O caminho assets/logo.png refere-se ao arquivo em src/assets/logo.png -->
+      <!-- O 'onerror' esconde a imagem se ela não carregar -->
+      <img src="assets/logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+      <h1 class="brand-name">Mecânica Borges</h1>
+    </div>
+
+    <nav class="menu">
+      <a routerLink="/dashboard" routerLinkActive="active">
+        <span class="icon">🏠</span> Dashboard
+      </a>
+      <a routerLink="/clientes" routerLinkActive="active">
+        <span class="icon">👥</span> Clientes
+      </a>
+      <a routerLink="/veiculos" routerLinkActive="active">
+        <span class="icon">🚗</span> Veículos
+      </a>
+      <a routerLink="/servicos" routerLinkActive="active">
+        <span class="icon">🔧</span> Serviços
+      </a>
+      <a routerLink="/ordem-servico" routerLinkActive="active">
+        <span class="icon">📝</span> Ordens de Serviço
+      </a>
+      <a routerLink="/orcamentos" routerLinkActive="active">
+        <span class="icon">💰</span> Orçamentos
+      </a>
+      <a routerLink="/produtos" routerLinkActive="active">
+        <span class="icon">📦</span> Produtos
+      </a>
+      <a routerLink="/relatorios" routerLinkActive="active">
+        <span class="icon">📊</span> Relatórios
+      </a>
+      <a routerLink="/configuracoes" routerLinkActive="active">
+        <span class="icon">⚙️</span> Configurações
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL -->
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

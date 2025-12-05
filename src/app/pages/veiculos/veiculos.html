@@ -1,1 +1,100 @@
-<p>veiculos works!</p>
+<div class="page-container">
+  
+  <header class="page-header">
+    <div>
+      <h1>Veículos</h1>
+      <p class="subtitle">Frota cadastrada e histórico de manutenções</p>
+    </div>
+    <button class="btn-primary">
+      <span class="icon">+</span> Novo Veículo
+    </button>
+  </header>
+
+  <!-- BARRA DE BUSCA -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Digite a placa, modelo ou nome do cliente..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      >
+    </div>
+  </div>
+
+  <!-- LISTA DE VEÍCULOS -->
+  <div class="table-container card">
+    <table>
+      <thead>
+        <tr>
+          <th>Veículo / Detalhes</th>
+          <th>Placa</th>
+          <th>Proprietário</th>
+          <th>Último Serviço</th>
+          <th>Status</th>
+          <th class="actions-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (vehicle of filteredVehicles(); track vehicle.id) {
+          <tr>
+            <!-- Coluna Modelo/Marca -->
+            <td>
+              <div class="vehicle-info">
+                <div class="brand-logo">{{ vehicle.brand.charAt(0) }}</div>
+                <div class="text-data">
+                  <strong>{{ vehicle.model }}</strong>
+                  <span class="detail-text">{{ vehicle.brand }} • {{ vehicle.year }} • {{ vehicle.color }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Coluna Placa (Estilo Mercosul/Padrão) -->
+            <td>
+              <div class="plate-badge">
+                <div class="plate-header">BRASIL</div>
+                <div class="plate-number">{{ vehicle.plate }}</div>
+              </div>
+            </td>
+
+            <!-- Coluna Dono -->
+            <td>
+              <div class="owner-link">
+                👤 {{ vehicle.client }}
+              </div>
+            </td>
+
+            <!-- Coluna Serviço -->
+            <td class="service-text">{{ vehicle.lastService }}</td>
+
+            <!-- Coluna Status -->
+            <td>
+              @if (vehicle.status === 'in-shop') {
+                <span class="status-tag in-shop">Na Oficina</span>
+              } @else {
+                <span class="status-tag delivered">Entregue</span>
+              }
+            </td>
+
+            <!-- Ações -->
+            <td class="actions-cell">
+              <button class="btn-action history" (click)="openHistory(vehicle.plate)" title="Ver Histórico Completo">
+                📜
+              </button>
+              <button class="btn-action edit" (click)="editVehicle(vehicle.id)" title="Editar">
+                ✏️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (filteredVehicles().length === 0) {
+      <div class="empty-state">
+        <p>Nenhum veículo encontrado com esse termo.</p>
+      </div>
+    }
+  </div>
+</div>

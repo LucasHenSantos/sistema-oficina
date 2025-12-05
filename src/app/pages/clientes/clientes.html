@@ -1,1 +1,104 @@
-<p>clientes works!</p>
+<div class="page-container">
+  
+  <!-- CABEÇALHO DA PÁGINA -->
+  <header class="page-header">
+    <div>
+      <h1>Clientes</h1>
+      <p class="subtitle">Gerencie contatos e histórico de atendimentos</p>
+    </div>
+    <button class="btn-primary">
+      <span class="icon">+</span> Novo Cliente
+    </button>
+  </header>
+
+  <!-- BARRA DE FERRAMENTAS (BUSCA) -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Buscar por nome, telefone ou modelo do carro..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      >
+    </div>
+    <!-- Filtros rápidos (futuro) -->
+    <div class="filter-actions">
+      <button class="btn-icon" title="Filtrar">🌪️</button>
+      <button class="btn-icon" title="Exportar">📄</button>
+    </div>
+  </div>
+
+  <!-- TABELA DE CLIENTES -->
+  <div class="table-container card">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Veículos</th>
+          <th>Contato</th>
+          <th>Status</th>
+          <th>Última Visita</th>
+          <th class="actions-col">Ações Rápidas</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (client of filteredClients(); track client.id) {
+          <tr>
+            <!-- Coluna Nome (com Avatar fictício) -->
+            <td class="client-info">
+              <div class="avatar">{{ client.name.charAt(0) }}</div>
+              <div class="text-data">
+                <strong>{{ client.name }}</strong>
+                <span class="id-text">#{{ client.id }}</span>
+              </div>
+            </td>
+
+            <!-- Coluna Veículos -->
+            <td>
+              <div class="cars-list">
+                @for (car of client.cars; track car) {
+                  <span class="car-badge">{{ car }}</span>
+                }
+              </div>
+            </td>
+
+            <!-- Coluna Contato -->
+            <td>{{ client.phone }}</td>
+
+            <!-- Coluna Status -->
+            <td>
+              <span class="status-badge" [class]="client.status">
+                {{ client.statusLabel }}
+              </span>
+            </td>
+
+            <!-- Coluna Data -->
+            <td>{{ client.lastVisit }}</td>
+
+            <!-- Coluna Ações -->
+            <td class="actions-cell">
+              <button class="btn-action whatsapp" (click)="openWhatsApp(client.phone)" title="Mandar Zap">
+                📱
+              </button>
+              <button class="btn-action new-os" (click)="newOrder(client.name)" title="Abrir Nova OS">
+                🔧
+              </button>
+              <button class="btn-action edit" title="Editar Cadastro">
+                ✏️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    
+    <!-- Estado Vazio (se a busca não achar nada) -->
+    @if (filteredClients().length === 0) {
+      <div class="empty-state">
+        <p>Nenhum cliente encontrado.</p>
+      </div>
+    }
+  </div>
+
+</div>

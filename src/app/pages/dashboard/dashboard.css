@@ -1,0 +1,134 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header h1 {
+  font-size: 28px;
+  color: #1f2937;
+  margin: 0;
+}
+
+.header .date {
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* GRID DOS CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+/* Estilo dos Cards de Estatística */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: #f3f4f6;
+}
+
+.stat-info h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: #111827;
+}
+
+.stat-info p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.stat-info .subtext {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Cores específicas */
+.stat-card.blue .icon-box { background: #dbeafe; color: #2563eb; }
+.stat-card.orange .icon-box { background: #ffedd5; color: #ea580c; }
+.stat-card.green .icon-box { background: #dcfce7; color: #16a34a; }
+.stat-card.red .icon-box { background: #fee2e2; color: #dc2626; }
+
+/* ÁREA INFERIOR */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* 2 partes para atividade, 1 para botões */
+  gap: 20px;
+}
+
+/* Lista de Atividades */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.activity-list li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.activity-list .time {
+  font-weight: bold;
+  color: #4b5563;
+  min-width: 50px;
+}
+
+/* Cores das atividades */
+.entrada .text { color: #2563eb; }
+.saida .text { color: #dc2626; }
+.sucesso .text { color: #16a34a; }
+
+/* Botões de Ação */
+.actions-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-action {
+  background: #1f2937;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.btn-action:hover {
+  background: #374151;
+}

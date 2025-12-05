@@ -1,1 +1,54 @@
-<p>configuracoes works!</p>
+<div class="page-container">
+  
+  <header class="page-header">
+    <div>
+      <h1>Configurações do Sistema</h1>
+      <p class="subtitle">Personalize as opções e listas da sua oficina</p>
+    </div>
+  </header>
+
+  <div class="settings-grid">
+    
+    <!-- CARD DE CATEGORIAS DE SERVIÇO -->
+    <div class="card settings-card">
+      <div class="card-header">
+        <h3>📂 Categorias de Serviço</h3>
+        <p>Defina os grupos usados no catálogo de serviços</p>
+      </div>
+      
+      <div class="card-body">
+        <div class="input-group">
+          <input 
+            type="text" 
+            placeholder="Nova categoria (ex: Funilaria)"
+            [ngModel]="newCategoryName()" 
+            (ngModelChange)="newCategoryName.set($event)"
+            (keyup.enter)="addCategory()"
+          >
+          <button class="btn-add" (click)="addCategory()">Adicionar</button>
+        </div>
+
+        <ul class="category-list">
+          @for (cat of categories(); track cat; let i = $index) {
+            <li>
+              <span>{{ cat }}</span>
+              <button class="btn-remove" (click)="removeCategory(i)" title="Remover">🗑️</button>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <!-- Espaço para futuras configurações (Dados da Empresa, Backup, etc) -->
+    <div class="card settings-card placeholder-card">
+      <div class="card-header">
+        <h3>🏢 Dados da Oficina</h3>
+        <p>Em breve: Configure nome, endereço e logo para impressão.</p>
+      </div>
+      <div class="card-body disabled">
+        <p>Configuração disponível na versão completa.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
