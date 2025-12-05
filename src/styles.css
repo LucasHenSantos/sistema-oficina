@@ -2,11 +2,114 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
+/* ==========================================================================
+   VARIÁVEIS DE TEMA (CLARO / ESCURO)
+   ========================================================================== */
+:root {
+  /* Tema Claro (Padrão) - Cores originais do seu projeto */
+  --bg-body: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-sidebar: #1f2937;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --input-bg: #ffffff;
+  --hover-bg: #f9fafb;
+}
+
+/* Tema Escuro (Sobrescreve as variáveis quando ativado) */
+[data-theme="dark"] {
+  --bg-body: #111827;        /* Fundo bem escuro */
+  --bg-card: #1f2937;        /* Cards cinza escuro */
+  --bg-sidebar: #0f172a;     /* Sidebar quase preta */
+  --text-primary: #f9fafb;   /* Texto branco */
+  --text-secondary: #9ca3af; /* Texto cinza claro */
+  --border-color: #374151;   /* Bordas escuras */
+  --input-bg: #374151;       /* Inputs escuros */
+  --hover-bg: #374151;       /* Hover mais claro */
+}
+
+/* ==========================================================================
+   ESTILOS GLOBAIS
+   ========================================================================== */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Roboto', sans-serif;
-  background-color: #f3f4f6;
+  /* Usa as variáveis para permitir a troca de tema */
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- REGRAS ESPECÍFICAS PARA O MODO ESCURO --- */
+/* Força a aplicação das variáveis em componentes que têm cor fixa no CSS original */
+
+[data-theme="dark"] .layout-container,
+[data-theme="dark"] .content {
+  background-color: var(--bg-body) !important;
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .modal-content, 
+[data-theme="dark"] .search-box {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .sidebar {
+  background-color: var(--bg-sidebar) !important;
+}
+
+/* Textos e Títulos */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] strong,
+[data-theme="dark"] .sell-price,
+[data-theme="dark"] .total-col {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] p, 
+[data-theme="dark"] span, 
+[data-theme="dark"] label,
+[data-theme="dark"] .subtitle,
+[data-theme="dark"] td,
+[data-theme="dark"] .detail-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Inputs e Formulários */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Tabelas */
+[data-theme="dark"] th {
+  background-color: #374151 !important;
+  color: #fff !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] td {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] tr:hover td {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Ícones */
+[data-theme="dark"] .icon-box,
+[data-theme="dark"] .stat-icon {
+  background-color: #374151 !important;
+  color: #fff !important;
 }
 
 /* ==========================================================================
@@ -35,6 +138,8 @@ body {
     padding: 0 !important;
     overflow: visible !important;
     position: static !important;
+    /* Força texto preto na impressão para economizar tinta e garantir leitura */
+    color: black !important; 
   }
 
   /* 4. MÁGICA: Torna visível APENAS a fatura e seus conteúdos */
