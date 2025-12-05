@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,78 +9,53 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './servicos.html',
   styleUrl: './servicos.css'
 })
-export class Servicos {
+export class Servicos implements OnInit { 
   // Sinais de Controle
   searchTerm = signal('');
   showModal = signal(false);
 
-  // --- CONFIGURAÇÃO DE CATEGORIAS ---
-  // Lista centralizada de categorias para o dropdown
-  categories = signal([
-    'Manutenção',
-    'Suspensão',
-    'Elétrica',
-    'Freios',
-    'Estética',
-    'Motor',
-    'Ar Condicionado',
-    'Pneus',
-    'Outros'
-  ]);
+  // Lista de categorias (Carregada do Banco de Configurações)
+  categories = signal<string[]>([]); 
 
   // Objeto para o Formulário (Edição/Criação)
   currentService = signal({
     id: 0,
     name: '',
     description: '',
-    category: 'Manutenção', // Valor inicial
+    category: '', // Inicialmente vazio, será preenchido com a primeira categoria carregada
     time: '',
     price: 0
   });
 
-  // Dados Iniciais (Catálogo Fictício)
-  services = signal([
-    {
-      id: 1,
-      name: 'Troca de Óleo e Filtro',
-      description: 'Mão de obra para drenagem e substituição',
-      category: 'Manutenção',
-      time: '45 min',
-      price: 80.00
-    },
-    {
-      id: 2,
-      name: 'Alinhamento 3D + Balanceamento',
-      description: 'Ajuste de geometria e peso de rodas (4 pneus)',
-      category: 'Suspensão',
-      time: '1h 30m',
-      price: 150.00
-    },
-    {
-      id: 3,
-      name: 'Diagnóstico Eletrônico (Scanner)',
-      description: 'Varredura completa de módulos e sensores',
-      category: 'Elétrica',
-      time: '30 min',
-      price: 120.00
-    },
-    {
-      id: 4,
-      name: 'Troca de Pastilhas (Dianteira)',
-      description: 'Substituição do par dianteiro',
-      category: 'Freios',
-      time: '1h',
-      price: 100.00
-    },
-    {
-      id: 5,
-      name: 'Lavagem Completa + Cera',
-      description: 'Externa, interna e aplicação de cera protetora',
-      category: 'Estética',
-      time: '2h',
-      price: 90.00
+  // Lista de Serviços (agora vinda do banco)
+  services = signal<any[]>([]);
+
+  // --- Ciclo de Vida: Carrega os dados ao iniciar ---
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  async loadData() {
+    if (!window.electronAPI) return;
+
+    try {
+      // 1. Carrega Serviços do Banco
+      const servicesData = await window.electronAPI.getServicos();
+      this.services.set(servicesData);
+      
+      // 2. Carrega as Categorias salvas em Configurações
+      const savedCategories = await window.electronAPI.getConfig('categorias');
+      if (savedCategories && savedCategories.length > 0) {
+         this.categories.set(savedCategories);
+         // Define a primeira categoria carregada como padrão do formulário
+         this.currentService.update(s => ({...s, category: savedCategories[0]}));
+      }
+
+    } catch (error) {
+      console.error('Erro ao carregar serviços ou categorias:', error);
     }
-  ]);
+  }
+
 
   // Filtro de Busca (Computed Signal)
   filteredServices = computed(() => {
@@ -94,12 +69,11 @@ export class Servicos {
   // --- Funções do Modal e Ações ---
 
   openNewServiceModal() {
-    // Reseta o formulário e define a categoria padrão como a primeira da lista
     this.currentService.set({
       id: 0,
       name: '',
       description: '',
-      category: this.categories()[0], 
+      category: this.categories()[0] || '', 
       time: '',
       price: 0
     });
@@ -107,7 +81,6 @@ export class Servicos {
   }
 
   editService(service: any) {
-    // Cria uma cópia para não alterar a tabela em tempo real antes de salvar
     this.currentService.set({ ...service });
     this.showModal.set(true);
   }
@@ -116,26 +89,44 @@ export class Servicos {
     this.showModal.set(false);
   }
 
-  saveService() {
+  async saveService() {
     const newSvc = this.currentService();
 
-    this.services.update(list => {
-      if (newSvc.id === 0) {
-        // Adicionar Novo (Gera ID baseado no timestamp para simular BD)
-        const newId = new Date().getTime();
-        return [...list, { ...newSvc, id: newId }];
-      } else {
-        // Atualizar Existente
-        return list.map(s => s.id === newSvc.id ? newSvc : s);
+    if (window.electronAPI) {
+      try {
+        if (newSvc.id === 0) {
+          // Adicionar Novo 
+          const saved = await window.electronAPI.addServico(newSvc);
+          this.services.update(list => [...list, saved]);
+        } else {
+          // Atualizar Existente
+          await window.electronAPI.updateServico(newSvc);
+          this.services.update(list => list.map(s => s.id === newSvc.id ? newSvc : s));
+        }
+        this.closeModal();
+      } catch (error) {
+        console.error('Erro ao salvar serviço:', error);
+        alert('Erro ao salvar no banco de dados.');
       }
-    });
-
-    this.closeModal();
+    } else {
+       this.closeModal();
+       console.warn('Modo navegador: Ação não persistida.');
+    }
   }
 
-  deleteService(id: number) {
+  async deleteService(id: number) {
     if(confirm('Tem certeza que deseja remover este serviço do catálogo?')) {
-      this.services.update(list => list.filter(s => s.id !== id));
+       if (window.electronAPI) {
+        try {
+          await window.electronAPI.deleteServico(id);
+          this.services.update(list => list.filter(s => s.id !== id));
+        } catch (error) {
+          console.error('Erro ao excluir:', error);
+          alert('Erro ao excluir do banco.');
+        }
+      } else {
+        this.services.update(list => list.filter(s => s.id !== id));
+      }
     }
   }
 }

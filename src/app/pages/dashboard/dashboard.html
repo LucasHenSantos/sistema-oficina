@@ -20,6 +20,27 @@
     }
   </div>
 
+  <div class="recent-activities">
+    <h2>Atividades Recentes</h2>
+    @if (loading()) {
+        <p>Carregando dados...</p>
+    } @else {
+        @for (activity of recentActivities(); track activity.id) {
+            <div class="activity-item">
+                <div class="info">
+                    <strong>OS #{{ activity.id }}</strong> - {{ activity.client }} ({{ activity.vehicle }})
+                </div>
+                <div class="status-badge status-{{ activity.status }}">
+                    {{ formatStatus(activity.status) }}
+                </div>
+                <div class="date-value">
+                    {{ formatDate(activity.date) }}
+                </div>
+            </div>
+        }
+    }
+</div>
+
   <!-- SEÇÃO INFERIOR -->
   <div class="content-grid">
     <!-- Atividades Recentes -->
@@ -33,6 +54,19 @@
           </li>
         }
       </ul>
+    </div>
+
+    <div class="kpi-cards">
+    <div class="card">
+        <h3>Veículos na Oficina</h3>
+        <p class="data-value">{{ vehiclesInProgress() }}</p>
+    </div>
+    
+    <div class="card">
+        <h3>Faturamento Mês</h3>
+        <p class="data-value">{{ monthlyRevenue() | currency:'BRL' }}</p>
+    </div>
+    
     </div>
 
     <!-- Acesso Rápido -->

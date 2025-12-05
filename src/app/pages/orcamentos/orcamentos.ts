@@ -1,7 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// Interfaces simplificadas (Baseadas nas suas originais)
 interface OrcamentoItem {
   type: 'service' | 'product';
   id: number;
@@ -30,44 +31,19 @@ interface Orcamento {
   templateUrl: './orcamentos.html',
   styleUrl: './orcamentos.css'
 })
-export class Orcamentos {
+export class Orcamentos implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
 
-  // Listas de Apoio (Mock)
-  clientsList = signal(['Roberto Silva', 'Ana Júlia Costa', 'Transportadora Veloz', 'Carlos Eduardo']);
-  vehiclesList = signal(['Honda Civic 2018', 'Jeep Renegade', 'Volvo FH 540', 'Fiat Strada']);
+  // Listas de Apoio (Dados reais do banco)
+  clientsList = signal<string[]>([]);
+  vehiclesList = signal<string[]>([]);
   
-  availableServices = signal([
-    { id: 1, name: 'Troca de Óleo', price: 80 },
-    { id: 2, name: 'Alinhamento 3D', price: 120 },
-    { id: 3, name: 'Mão de Obra (Hora)', price: 150 }
-  ]);
+  availableServices = signal<any[]>([]);
+  availableProducts = signal<any[]>([]);
 
-  availableProducts = signal([
-    { id: 101, name: 'Óleo Sintético 5W30', price: 45 },
-    { id: 102, name: 'Filtro de Óleo', price: 30 },
-    { id: 103, name: 'Pastilha de Freio', price: 180 }
-  ]);
-
-  budgets = signal<Orcamento[]>([
-    {
-      id: 1050,
-      client: 'Roberto Silva',
-      vehicle: 'Honda Civic 2018',
-      date: '2024-12-05',
-      validUntil: '2024-12-20',
-      status: 'pending',
-      total: 355.00,
-      items: [
-        { type: 'service', id: 1, name: 'Troca de Óleo', qty: 1, price: 80, total: 80 },
-        { type: 'product', id: 101, name: 'Óleo Sintético 5W30', qty: 4, price: 45, total: 180 },
-        { type: 'product', id: 102, name: 'Filtro de Óleo', qty: 1, price: 30, total: 30 },
-        { type: 'service', id: 3, name: 'Mão de Obra (Hora)', qty: 0.5, price: 130, total: 65 }
-      ],
-      notes: 'Cliente pediu para verificar pastilhas também.'
-    }
-  ]);
+  // Lista Principal (Dados reais do banco)
+  budgets = signal<Orcamento[]>([]);
 
   currentBudget = signal<Orcamento>(this.getEmptyBudget());
 
@@ -76,17 +52,50 @@ export class Orcamentos {
   selectedProductId = signal<number | null>(null);
   productQty = signal(1);
 
-  // Dados da Empresa (Carregados do Config)
+  // Dados da Empresa (para o rodapé da impressão)
   companyData = signal<any>(null);
 
-  constructor() {
-    this.loadCompanyData();
+  // --- CICLO DE VIDA ---
+  ngOnInit(): void {
+    this.loadData();
   }
 
-  private loadCompanyData() {
-    const saved = localStorage.getItem('oficina_dados_empresa');
-    if (saved) {
-      this.companyData.set(JSON.parse(saved));
+  async loadData() {
+    if (!window.electronAPI) return;
+
+    try {
+      // 1. Carrega a Lista Principal
+      const budgetsData = await window.electronAPI.getOrcamentos();
+      this.budgets.set(budgetsData);
+      
+      // 2. Carrega Listas de Apoio (Para Selects)
+      const clientsData = await window.electronAPI.getClientes();
+      const vehiclesData = await window.electronAPI.getVeiculos();
+      const servicesData = await window.electronAPI.getServicos();
+      const productsData = await window.electronAPI.getProdutos();
+      const companyConfig = await window.electronAPI.getConfig('dados_empresa');
+
+      // Mapeia para o formato de string simples
+      this.clientsList.set(clientsData.map((c: any) => c.name));
+      this.vehiclesList.set(vehiclesData.map((v: any) => `${v.model} (${v.plate})`));
+      
+      this.availableServices.set(servicesData);
+      this.availableProducts.set(productsData);
+
+      // Carrega dados da empresa para impressão
+      if (companyConfig) {
+        this.companyData.set(companyConfig);
+      }
+
+      // Define cliente/veículo padrão se houver
+      this.currentBudget.update(b => ({
+          ...b,
+          client: clientsData[0]?.name || '',
+          vehicle: vehiclesData[0] ? `${vehiclesData[0].model} (${vehiclesData[0].plate})` : ''
+      }));
+
+    } catch (error) {
+      console.error('Erro ao carregar dados de orçamento:', error);
     }
   }
 
@@ -115,28 +124,48 @@ export class Orcamentos {
     this.showModal.set(false);
   }
 
-  deleteBudget(id: number) {
+  async deleteBudget(id: number) {
     if (confirm('Tem certeza que deseja excluir este orçamento?')) {
-      this.budgets.update(list => list.filter(b => b.id !== id));
+      if (window.electronAPI) {
+        try {
+          await window.electronAPI.deleteOrcamento(id);
+          this.budgets.update(list => list.filter(b => b.id !== id));
+        } catch (error) {
+          console.error('Erro ao excluir orçamento:', error);
+        }
+      } else {
+        this.budgets.update(list => list.filter(b => b.id !== id));
+      }
     }
   }
 
-  saveBudget() {
+  async saveBudget() {
     const budget = this.currentBudget();
+    // Recalcula o total final antes de salvar (garantia)
     budget.total = budget.items.reduce((acc, i) => acc + i.total, 0);
 
-    this.budgets.update(list => {
-      if (budget.id === 0) {
-        budget.id = Math.max(...list.map(b => b.id), 1000) + 1;
-        return [budget, ...list];
-      } else {
-        return list.map(b => b.id === budget.id ? budget : b);
+    if (window.electronAPI) {
+      try {
+        if (budget.id === 0) {
+          // --- ADICIONAR NOVO ---
+          const saved = await window.electronAPI.addOrcamento(budget);
+          this.budgets.update(list => [saved, ...list]);
+        } else {
+          // --- ATUALIZAR EXISTENTE ---
+          await window.electronAPI.updateOrcamento(budget);
+          this.budgets.update(list => list.map(b => b.id === budget.id ? budget : b));
+        }
+        this.closeModal();
+      } catch (error) {
+        console.error('Erro ao salvar orçamento:', error);
+        alert('Erro ao salvar no banco de dados.');
       }
-    });
-    this.closeModal();
+    } else {
+      this.closeModal();
+    }
   }
 
-  // --- ITENS ---
+  // --- ITENS (Cálculo no Frontend) ---
 
   addService() {
     const svc = this.availableServices().find(s => s.id === this.selectedServiceId());
@@ -150,28 +179,35 @@ export class Orcamentos {
     const prod = this.availableProducts().find(p => p.id === this.selectedProductId());
     const qty = this.productQty();
     if (prod && qty > 0) {
-      this.addItem({ type: 'product', id: prod.id, name: prod.name, qty: qty, price: prod.price, total: prod.price * qty });
+      this.addItem({ type: 'product', id: prod.id, name: prod.name, qty: qty, price: prod.sellPrice, total: prod.sellPrice * qty });
       this.selectedProductId.set(null);
       this.productQty.set(1);
     }
   }
 
   private addItem(item: OrcamentoItem) {
-    this.currentBudget.update(b => ({ ...b, items: [...b.items, item] }));
+    this.currentBudget.update(b => {
+      const newItems = [...b.items, item];
+      // Recalcula o total do orçamento a cada item adicionado/removido
+      const newTotal = newItems.reduce((acc, i) => acc + i.total, 0); 
+      return { ...b, items: newItems, total: newTotal };
+    });
   }
 
   removeItem(index: number) {
-    this.currentBudget.update(b => ({ ...b, items: b.items.filter((_, i) => i !== index) }));
+    this.currentBudget.update(b => {
+      const newItems = b.items.filter((_, i) => i !== index);
+      const newTotal = newItems.reduce((acc, i) => acc + i.total, 0);
+      return { ...b, items: newItems, total: newTotal };
+    });
   }
 
   // --- IMPRESSÃO ---
   
-  // CORREÇÃO: Argumento opcional para evitar o erro de TypeScript
   printBudget(budget?: Orcamento) {
     if (budget) {
       this.currentBudget.set(JSON.parse(JSON.stringify(budget)));
     }
-    // Delay para garantir que o DOM atualize
     setTimeout(() => window.print(), 200);
   }
 
@@ -181,8 +217,12 @@ export class Orcamentos {
   }
 
   private getEmptyBudget(): Orcamento {
+    // Busca os valores padrões atuais
+    const defaultClient = this.clientsList()[0] || '';
+    const defaultVehicle = this.vehiclesList()[0] || '';
+    
     return {
-      id: 0, client: '', vehicle: '', date: new Date().toISOString().split('T')[0],
+      id: 0, client: defaultClient, vehicle: defaultVehicle, date: new Date().toISOString().split('T')[0],
       validUntil: '', status: 'pending', total: 0, items: [], notes: ''
     };
   }
