@@ -169,3 +169,29 @@ input, select, textarea { padding: 10px; border: 1px solid #d1d5db; border-radiu
   .terms { margin-top: 50px; text-align: center; font-size: 9px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
   .signature { margin-top: 40px; text-align: center; }
 }
+.actions-cell .convert-to-os {
+    background-color: #16a34a; /* Verde que contrasta com o azul do edit */
+    color: white;
+    font-weight: bold;
+    /* Copia o estilo base do btn-action para manter o padrão */
+    width: 32px; 
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.actions-cell .convert-to-os:hover {
+    background-color: #107c34;
+    transform: scale(1.1);
+}
+
+/* Garante que o espaçamento na célula de ações continue bom */
+.actions-cell { 
+    display: flex; 
+    gap: 8px; 
+}

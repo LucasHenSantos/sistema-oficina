@@ -1,91 +1,86 @@
 <div class="dashboard-container">
-  <header class="header">
-    <h1>Visão Geral</h1>
-    <p class="date">Hoje, {{ 0 | date:'dd/MM/yyyy' }}</p>
-  </header>
+    <header class="header">
+        <h1>Visão Geral</h1>
+        <p class="date">Hoje, {{ 'now' | date:'dd/MM/yyyy' }}</p>
+    </header>
 
-  <!-- CARDS DE ESTATÍSTICAS -->
-  <div class="stats-grid">
-    @for (stat of stats(); track stat.title) {
-      <div class="card stat-card" [class]="stat.color">
-        <div class="icon-box">
-          {{ stat.icon }}
-        </div>
-        <div class="stat-info">
-          <h3>{{ stat.value }}</h3>
-          <p>{{ stat.title }}</p>
-          <span class="subtext">{{ stat.subtext }}</span>
-        </div>
-      </div>
-    }
-  </div>
-
-  <div class="recent-activities">
-    <h2>Atividades Recentes</h2>
-    @if (loading()) {
-        <p>Carregando dados...</p>
-    } @else {
-        @for (activity of recentActivities(); track activity.id) {
-            <div class="activity-item">
-                <div class="info">
-                    <strong>OS #{{ activity.id }}</strong> - {{ activity.client }} ({{ activity.vehicle }})
-                </div>
-                <div class="status-badge status-{{ activity.status }}">
-                    {{ formatStatus(activity.status) }}
-                </div>
-                <div class="date-value">
-                    {{ formatDate(activity.date) }}
-                </div>
+    <div class="stats-grid">
+        
+        <div class="card stat-card blue">
+            <div class="icon-box">🚗</div>
+            <div class="stat-info">
+                @if (loading()) {
+                    <h3>...</h3>
+                } @else {
+                    <h3>{{ vehiclesInProgress() }}</h3>
+                }
+                <p>Veículos na Oficina</p>
+                <span class="subtext">OS em Andamento/Pendente</span>
             </div>
-        }
-    }
-</div>
-
-  <!-- SEÇÃO INFERIOR -->
-  <div class="content-grid">
-    <!-- Atividades Recentes -->
-    <div class="card activity-card">
-      <h2>🔔 Atividades Recentes</h2>
-      <ul class="activity-list">
-        @for (item of recentActivity(); track item.time) {
-          <li [class]="item.type">
-            <span class="time">{{ item.time }}</span>
-            <span class="text">{{ item.text }}</span>
-          </li>
-        }
-      </ul>
-    </div>
-
-    <div class="kpi-cards">
-    <div class="card">
-        <h3>Veículos na Oficina</h3>
-        <p class="data-value">{{ vehiclesInProgress() }}</p>
-    </div>
-    
-    <div class="card">
-        <h3>Faturamento Mês</h3>
-        <p class="data-value">{{ monthlyRevenue() | currency:'BRL' }}</p>
-    </div>
-    
-    </div>
-
-    <!-- Acesso Rápido -->
-    <div class="card actions-card">
-      <h2>🚀 Ações Rápidas</h2>
-      <div class="actions-buttons">
-        <!-- AGORA: Passamos { open: true } para avisar que queremos o modal aberto -->
-        <button class="btn-action" (click)="navigateTo('/veiculos', { open: 'true' })">
-          Nova Entrada de Veículo
-        </button>
+        </div>
         
-        <button class="btn-action" (click)="navigateTo('/orcamentos', { open: 'true' })">
-          Novo Orçamento
-        </button>
+        <div class="card stat-card green">
+            <div class="icon-box">💰</div>
+            <div class="stat-info">
+                @if (loading()) {
+                    <h3>...</h3>
+                } @else {
+                    <h3>{{ monthlyRevenue() | currency:'BRL':'symbol':'1.2-2' }}</h3>
+                }
+                <p>Faturamento do Mês</p>
+                <span class="subtext">OS Finalizadas ({{ completedOrdersThisMonth().length }})</span>
+            </div>
+        </div>
         
-        <button class="btn-action" (click)="navigateTo('/produtos', { open: 'true' })">
-          Novo Produto (Peça)
-        </button>
-      </div>
+        <div class="card stat-card red">
+            <div class="icon-box">📦</div>
+            <div class="stat-info">
+                <h3>2</h3> 
+                <p>Estoque Baixo</p>
+                <span class="subtext">Itens Críticos</span>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <div class="content-grid">
+        <div class="card activity-card">
+            <h2>🔔 Atividades Recentes</h2>
+            
+            @if (loading()) {
+                <ul class="activity-list"><li><span class="time">...</span><span class="text">Carregando dados...</span></li></ul>
+            } @else if (recentActivities().length === 0) {
+                 <div class="empty-state">
+                    <p>Nenhuma Ordem de Serviço recente encontrada. 📝</p>
+                 </div>
+            } @else {
+                <ul class="activity-list">
+                    @for (activity of recentActivities(); track activity.id) {
+                        <li [class]="activity.status | lowercase">
+                            <span class="time">{{ formatDate(activity.date) }}</span>
+                            <span class="text">
+                                OS #{{ activity.id }} - {{ activity.client }} ({{ activity.vehicle }})
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="card actions-card">
+            <h2>🚀 Ações Rápidas</h2>
+            <div class="actions-buttons">
+                <a class="btn-action" routerLink="/veiculos" [queryParams]="{ open: 'true' }">
+                    Nova Entrada de Veículo
+                </a>
+                
+                <a class="btn-action" routerLink="/orcamentos" [queryParams]="{ open: 'true' }">
+                    Novo Orçamento
+                </a>
+                
+                <a class="btn-action" routerLink="/produtos" [queryParams]="{ open: 'true' }">
+                    Novo Produto (Peça)
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

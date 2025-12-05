@@ -1,7 +1,7 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router'; 
 
 @Component({
   selector: 'app-veiculos',
@@ -14,10 +14,8 @@ export class Veiculos implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
 
-  // Lista de proprietários (Carregada do Banco de Clientes)
-  ownersList = signal<string[]>([]); 
+  ownersList = signal<string[]>([]); // Lista de Nomes de Clientes
 
-  // Objeto do Veículo
   currentVehicle = signal({
     id: 0,
     plate: '',
@@ -25,12 +23,11 @@ export class Veiculos implements OnInit {
     brand: '',
     year: new Date().getFullYear(),
     color: '',
-    client: '',
+    client: '', // Campo que associa ao nome do cliente
     lastService: '-',
-    status: 'delivered' // ou 'in-shop'
+    status: 'delivered'
   });
 
-  // Lista de Veículos (Carregada do Banco)
   vehicles = signal<any[]>([]);
 
   filteredVehicles = computed(() => {
@@ -56,27 +53,26 @@ export class Veiculos implements OnInit {
   }
 
   async loadData() {
-    if (window.electronAPI) {
-      try {
-        // 1. Busca Veículos do Banco
-        const dataVehicles = await window.electronAPI.getVeiculos();
-        this.vehicles.set(dataVehicles);
+    if (!window.electronAPI) return;
 
-        // 2. Busca Clientes para preencher o Select de Proprietários
-        const dataClients = await window.electronAPI.getClientes();
-        // Mapeamos apenas os nomes para facilitar o select simples
-        this.ownersList.set(dataClients.map((c: any) => c.name));
-        
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-      }
+    try {
+      // 1. Busca Veículos do Banco
+      const dataVehicles = await window.electronAPI.getVeiculos();
+      this.vehicles.set(dataVehicles);
+
+      // 2. Busca Clientes para preencher o Select de Proprietários
+      const dataClients = await window.electronAPI.getClientes();
+      this.ownersList.set(dataClients.map((c: any) => c.name));
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
     }
   }
 
   // --- AÇÕES ---
 
   openModal() {
-    // Se tiver clientes, seleciona o primeiro por padrão
+    // Define o cliente padrão
     const defaultClient = this.ownersList().length > 0 ? this.ownersList()[0] : '';
     
     this.currentVehicle.set({
@@ -84,9 +80,9 @@ export class Veiculos implements OnInit {
       plate: '',
       model: '',
       brand: '',
-      year: 2024,
+      year: new Date().getFullYear(), // Define o ano atual
       color: '',
-      client: defaultClient,
+      client: defaultClient, // Seta o cliente padrão no formulário
       lastService: '-',
       status: 'in-shop'
     });
@@ -111,6 +107,7 @@ export class Veiculos implements OnInit {
         if (newVehicle.id === 0) {
           // --- CRIAR ---
           const saved = await window.electronAPI.addVeiculo(newVehicle);
+          // O Veículo salvo já tem o campo 'client' preenchido corretamente
           this.vehicles.update(list => [...list, saved]);
         } else {
           // --- ATUALIZAR ---
@@ -118,19 +115,13 @@ export class Veiculos implements OnInit {
           this.vehicles.update(list => list.map(v => v.id === newVehicle.id ? newVehicle : v));
         }
         this.closeModal();
+        // Dispara o alerta para a tela de clientes que os dados podem ter mudado (Idealmente, um mecanismo de atualização mais inteligente seria usado)
+        this.loadData();
       } catch (error) {
         console.error('Erro ao salvar veículo:', error);
         alert('Erro ao salvar no banco de dados.');
       }
     } else {
-      // Fallback para navegador (sem banco)
-      this.vehicles.update(list => {
-        if (newVehicle.id === 0) {
-          return [...list, { ...newVehicle, id: new Date().getTime() }];
-        } else {
-          return list.map(v => v.id === newVehicle.id ? newVehicle : v);
-        }
-      });
       this.closeModal();
     }
   }
@@ -141,6 +132,7 @@ export class Veiculos implements OnInit {
         try {
           await window.electronAPI.deleteVeiculo(id);
           this.vehicles.update(list => list.filter(v => v.id !== id));
+          this.loadData(); // Recarrega clientes para remover a associação
         } catch (error) {
           console.error('Erro ao excluir:', error);
         }

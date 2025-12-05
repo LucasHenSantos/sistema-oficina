@@ -45,10 +45,12 @@
             </td>
             <td>
               <div class="cars-list">
-                @for (car of client.cars; track car) {
+                @for (car of client.associatedVehicles; track car) {
                   <span class="car-badge">{{ car }}</span>
                 }
-                @if (client.cars.length === 0) { <span class="no-car">Sem veículo</span> }
+                @if (!client.associatedVehicles || client.associatedVehicles.length === 0) { 
+                  <span class="no-car">Sem veículo</span> 
+                }
               </div>
             </td>
             <td>{{ client.phone }}</td>
@@ -66,7 +68,6 @@
     </table>
   </div>
 
-  <!-- MODAL -->
   @if (showModal()) {
     <div class="modal-overlay" (click)="closeModal()">
       <div class="modal-content" (click)="$event.stopPropagation()">

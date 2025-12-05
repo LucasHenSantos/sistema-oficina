@@ -11,7 +11,7 @@ interface OrderItem {
   total: number;
 }
 
-// 2. Interface para o objeto de Ordem de Serviço (RENOMEADA para evitar conflito com a Classe)
+// 2. Interface para o objeto de Ordem de Serviço (Model)
 interface OrdemServicoModel {
     id: number;
     client: string;
@@ -30,7 +30,7 @@ interface OrdemServicoModel {
   templateUrl: './ordem-servico.html',
   styleUrl: './ordem-servico.css'
 })
-export class OrdemServico implements OnInit { // Adicionado OnInit
+export class OrdemServico implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
 
@@ -40,7 +40,7 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
   availableServices = signal<any[]>([]);
   availableProducts = signal<any[]>([]);
   
-  // --- OBJETO DA OS ATUAL (usa o novo nome) ---
+  // --- OBJETO DA OS ATUAL ---
   currentOrder = signal<OrdemServicoModel>(this.getEmptyOrder());
 
   // Temporários para os selects de adição
@@ -48,7 +48,7 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
   selectedProductId = signal<number | null>(null);
   productQty = signal(1);
 
-  // --- LISTA DE OS (TABELA) (usa o novo nome) ---
+  // --- LISTA DE OS (TABELA) ---
   orders = signal<OrdemServicoModel[]>([]);
   
   // --- CICLO DE VIDA: Carrega todos os dados ---
@@ -74,7 +74,7 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
       this.clientsList.set(clientsData.map((c: any) => c.name));
       this.vehiclesList.set(vehiclesData.map((v: any) => `${v.model} (${v.plate})`));
       
-      // Nota: Produtos usam 'sellPrice'
+      // Produtos usam 'sellPrice'
       this.availableServices.set(servicesData);
       this.availableProducts.set(productsData.map((p: any) => ({
         id: p.id,
@@ -83,8 +83,8 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
       })));
 
       // Define cliente/veículo padrão para o formulário se houver dados
-      const defaultClient = clientsData[0]?.name || '';
-      const defaultVehicle = vehiclesData[0] ? `${vehiclesData[0].model} (${vehiclesData[0].plate})` : '';
+      const defaultClient = this.clientsList()[0] || '';
+      const defaultVehicle = this.vehiclesList()[0] || '';
 
       this.currentOrder.set(this.getEmptyOrder(defaultClient, defaultVehicle));
 
@@ -126,7 +126,6 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
   }
 
   editOrder(order: any) {
-    // Clona profundo para não editar a referência da tabela
     this.currentOrder.set(JSON.parse(JSON.stringify(order)));
     this.showModal.set(true);
   }
@@ -138,7 +137,10 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
   // Adicionar Serviço na Lista da OS
   addService() {
     const svcId = this.selectedServiceId();
-    const service = this.availableServices().find(s => s.id === svcId);
+    if (svcId === null) return;
+    
+    // FIX: Usa == (Loose Equality) para comparar string (input) com number (dados)
+    const service = this.availableServices().find(s => s.id == svcId); 
 
     if (service) {
       const newItem: OrderItem = { type: 'service', name: service.name, price: service.price, qty: 1, total: service.price };
@@ -151,9 +153,12 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
   addProduct() {
     const prodId = this.selectedProductId();
     const qty = this.productQty();
-    const product = this.availableProducts().find(p => p.id === prodId);
+    if (prodId === null || qty <= 0) return;
 
-    if (product && qty > 0) {
+    // FIX: Usa == (Loose Equality)
+    const product = this.availableProducts().find(p => p.id == prodId);
+
+    if (product) {
       const totalItem = product.price * qty;
       const newItem: OrderItem = { type: 'product', name: product.name, price: product.price, qty: qty, total: totalItem };
       this.addItem(newItem);
@@ -187,11 +192,9 @@ export class OrdemServico implements OnInit { // Adicionado OnInit
     if (window.electronAPI) {
       try {
         if (newOrder.id === 0) {
-          // --- ADICIONAR NOVO ---
           const saved = await window.electronAPI.addOS(newOrder);
           this.orders.update(list => [saved, ...list]);
         } else {
-          // --- ATUALIZAR EXISTENTE ---
           await window.electronAPI.updateOS(newOrder);
           this.orders.update(list => list.map(o => o.id === newOrder.id ? newOrder : o));
         }

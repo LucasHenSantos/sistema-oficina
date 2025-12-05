@@ -52,6 +52,10 @@
             </td>
             <td class="total-col">{{ budget.total | currency:'BRL' }}</td>
             <td class="actions-cell">
+              @if (budget.status === 'approved') {
+                  <button class="btn-action convert-to-os" (click)="convertToOS(budget)" title="Converter para Ordem de Serviço">⚙️</button>
+              }
+              
               <button class="btn-action edit" (click)="editBudget(budget)">✏️</button>
               <button class="btn-action delete" (click)="deleteBudget(budget.id)">🗑️</button>
               <button class="btn-action print" (click)="printBudget(budget)" title="Imprimir">🖨️</button>
@@ -132,7 +136,7 @@
                   <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)" name="addProd">
                     <option [ngValue]="null">Selecione...</option>
                     @for (p of availableProducts(); track p.id) {
-                      <option [value]="p.id">{{ p.name }} ({{ p.price | currency:'BRL' }})</option>
+                      <option [value]="p.id">{{ p.name }} ({{ p.sellPrice | currency:'BRL' }})</option>
                     }
                   </select>
                   <input type="number" [ngModel]="productQty()" (ngModelChange)="productQty.set($event)" name="qty" class="qty-input" min="1" value="1">
@@ -195,17 +199,11 @@
 
 <div class="printable-invoice" id="invoice">
   <div class="invoice-header">
-    
-    <div class="header-left">
-      <img src="assets/logo.png" alt="Logo" class="invoice-logo">
-      
-      <div class="company-details">
-        <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
-        <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
-        <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
-      </div>
+    <div class="company-details">
+      <h1>{{ companyData()?.name || 'MECÂNICA BORGES' }}</h1>
+      <p>{{ companyData()?.address || 'Rua das Oficinas, 123 - Centro' }}</p>
+      <p>CNPJ: {{ companyData()?.cnpj || '00.000.000/0000-00' }} | Tel: {{ companyData()?.phone || '(11) 9999-9999' }}</p>
     </div>
-
     <div class="invoice-meta">
       <h2>ORÇAMENTO #{{ currentBudget().id || 'NOVO' }}</h2>
       <p>Data: {{ currentBudget().date | date:'dd/MM/yyyy' }}</p>

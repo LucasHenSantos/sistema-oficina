@@ -2,6 +2,20 @@ import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// Interfaces simplificadas (Baseadas nas suas originais)
+interface Cliente {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  cars: string[]; // Mock data original (não usaremos, mas o backend pode esperar)
+  lastVisit: string;
+  status: string;
+  statusLabel: string;
+  // Propriedade para a exibição de veículos vinculados
+  associatedVehicles?: string[]; 
+}
+
 @Component({
   selector: 'app-clientes',
   standalone: true,
@@ -14,19 +28,47 @@ export class Clientes implements OnInit {
   showModal = signal(false);
 
   // Objeto para o Formulário
-  currentClient = signal({
-    id: 0,
-    name: '',
-    phone: '',
-    email: '',
-    cars: [] as string[],
-    lastVisit: new Date().toLocaleDateString('pt-BR'),
-    status: 'active',
-    statusLabel: 'Novo'
-  });
+  currentClient = signal<Cliente>(this.getEmptyClient());
 
-  // Lista de Clientes (Inicia vazia, será preenchida pelo banco)
-  clients = signal<any[]>([]);
+  // Lista de Clientes (agora com tipagem)
+  clients = signal<Cliente[]>([]);
+
+  // --- CICLO DE VIDA ---
+  ngOnInit() {
+    this.loadData();
+  }
+
+  async loadData() {
+    if (!window.electronAPI) return;
+
+    try {
+      // 1. Carrega Clientes (Clientes Data)
+      const clientsData: Cliente[] = await window.electronAPI.getClientes();
+      
+      // 2. Carrega Veículos (Veiculos Data)
+      const vehiclesData: any[] = await window.electronAPI.getVeiculos();
+      
+      // 3. Mapeamento e Associação
+      const clientsWithVehicles = clientsData.map(client => {
+        // Encontra todos os veículos cujo campo 'client' (string) bate com o nome do cliente
+        const vehicles = vehiclesData
+          .filter(v => v.client === client.name)
+          // Mapeia para um formato amigável para o badge: 'Modelo (Placa)'
+          .map(v => `${v.model} (${v.plate})`); 
+        
+        return {
+          ...client,
+          // Adiciona a propriedade que o HTML vai usar para os badges
+          associatedVehicles: vehicles 
+        } as Cliente;
+      });
+
+      this.clients.set(clientsWithVehicles);
+
+    } catch (error) {
+      console.error('Erro ao carregar dados de Clientes e Veículos:', error);
+    }
+  }
 
   filteredClients = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -36,44 +78,18 @@ export class Clientes implements OnInit {
     );
   });
 
-  // --- CICLO DE VIDA ---
-  ngOnInit() {
-    this.loadClients();
-  }
-
-  // Busca dados do Electron (SQLite)
-  async loadClients() {
-    if (window.electronAPI) {
-      try {
-        const data = await window.electronAPI.getClientes();
-        this.clients.set(data);
-      } catch (error) {
-        console.error('Erro ao carregar clientes do banco:', error);
-      }
-    } else {
-      console.warn('Electron API não detectada. Rodando em modo navegador?');
-    }
-  }
-
   // --- AÇÕES ---
   
   openModal() {
-    this.currentClient.set({
-      id: 0,
-      name: '',
-      phone: '',
-      email: '',
-      cars: [],
-      lastVisit: '-',
-      status: 'active',
-      statusLabel: 'Novo'
-    });
+    this.currentClient.set(this.getEmptyClient());
     this.showModal.set(true);
   }
 
   editClient(client: any) {
-    // Clona o objeto para não editar a lista diretamente antes de salvar
-    this.currentClient.set({ ...client });
+    // Clona o objeto e remove a propriedade temporária antes de editar, se existir
+    const clientToEdit = { ...client };
+    delete clientToEdit.associatedVehicles; 
+    this.currentClient.set(clientToEdit);
     this.showModal.set(true);
   }
 
@@ -85,44 +101,39 @@ export class Clientes implements OnInit {
     const newClient = this.currentClient();
 
     if (window.electronAPI) {
-      // Lógica para Electron + Banco de Dados
-      if (newClient.id === 0) {
-        // --- CRIAR NOVO ---
-        try {
-          const savedClient = await window.electronAPI.addCliente(newClient);
-          // Atualiza a lista local com o cliente retornado (que agora tem ID real do banco)
-          this.clients.update(list => [...list, savedClient]);
-          this.closeModal();
-        } catch (error) {
-          console.error('Erro ao salvar cliente:', error);
-          alert('Erro ao salvar no banco de dados.');
-        }
-      } else {
-        // --- EDITAR EXISTENTE ---
-        // (Nota: Ainda precisamos criar o handler 'update-cliente' no main.js para isso persistir)
-        // Por enquanto, atualiza apenas visualmente:
-        this.clients.update(list => list.map(c => c.id === newClient.id ? newClient : c));
-        this.closeModal();
-        console.warn('A edição ainda não está persistindo no banco (falta implementar no backend).');
-      }
-
-    } else {
-      // Lógica de Fallback (Apenas memória/navegador)
-      this.clients.update(list => {
+      try {
         if (newClient.id === 0) {
-          return [...list, { ...newClient, id: new Date().getTime() }];
+          // --- CRIAR NOVO ---
+          const savedClient = await window.electronAPI.addCliente(newClient);
+          // Recarrega todos os dados para atualizar a lista
+          await this.loadData(); 
         } else {
-          return list.map(c => c.id === newClient.id ? newClient : c);
+          // --- EDITAR EXISTENTE ---
+          await window.electronAPI.updateCliente(newClient);
+          // Recarrega todos os dados para atualizar a lista (incluindo o link de veículos)
+          await this.loadData();
         }
-      });
+        this.closeModal();
+      } catch (error) {
+        console.error('Erro ao salvar cliente:', error);
+        alert('Erro ao salvar no banco de dados.');
+      }
+    } else {
       this.closeModal();
     }
   }
 
-  deleteClient(id: number) {
+  async deleteClient(id: number) {
     if(confirm('Excluir este cliente?')) {
-      // (Nota: Também precisará do handler 'delete-cliente' no main.js futuramente)
-      this.clients.update(list => list.filter(c => c.id !== id));
+      if (window.electronAPI) {
+        try {
+          await window.electronAPI.deleteCliente(id);
+          await this.loadData(); // Recarrega para refletir a exclusão
+        } catch (error) {
+          console.error('Erro ao excluir cliente:', error);
+          alert('Erro ao excluir do banco.');
+        }
+      }
     }
   }
 
@@ -132,5 +143,19 @@ export class Clientes implements OnInit {
 
   newOrder(name: string) {
     console.log(`Nova OS para: ${name}`);
+  }
+
+  private getEmptyClient(): Cliente {
+    return {
+      id: 0,
+      name: '',
+      phone: '',
+      email: '',
+      cars: [],
+      lastVisit: new Date().toLocaleDateString('pt-BR'),
+      status: 'active',
+      statusLabel: 'Novo',
+      associatedVehicles: [] // Limpa ao iniciar
+    };
   }
 }

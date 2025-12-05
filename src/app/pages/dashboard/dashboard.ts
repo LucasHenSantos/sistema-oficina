@@ -1,14 +1,15 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router'; // Importado para navigationTo
 
-// Interface de OS simplificada para o Dashboard
+// Interfaces/Tipagem
 interface OrdemServicoDashboard {
   id: number;
   client: string;
   vehicle: string;
   total: number;
-  status: string; // 'in_progress', 'completed', 'pending' etc.
+  status: string; // 'in-progress', 'completed', 'pending' etc.
   date: string; // YYYY-MM-DD
 }
 
@@ -23,6 +24,8 @@ export class Dashboard implements OnInit {
   // Lista bruta de todas as OSs
   allOrders = signal<OrdemServicoDashboard[]>([]);
   loading = signal(true);
+  
+  constructor(private router: Router) {}
 
   // --- CICLO DE VIDA ---
   ngOnInit(): void {
@@ -49,10 +52,10 @@ export class Dashboard implements OnInit {
 
   // --- KPIS (COMPUTED SIGNALS) ---
 
-  // 1. Veículos na Oficina (Status 'in_progress')
+  // 1. Veículos na Oficina (Status 'in-progress' ou 'pending')
   vehiclesInProgress = computed(() => {
     return this.allOrders().filter(order => 
-      order.status === 'in_progress' || order.status === 'pending'
+      order.status === 'in-progress' || order.status === 'pending'
     ).length;
   });
 
@@ -86,29 +89,31 @@ export class Dashboard implements OnInit {
       .slice(0, 5);
   });
 
-  // Helper para formatar o status
+  // --- HELPERS ---
+
+  // Helper para formatar o status (para a lista de atividades)
   formatStatus(status: string): string {
-    switch (status) {
-      case 'in_progress':
-        return 'Em Andamento';
-      case 'completed':
-        return 'Finalizada';
-      case 'pending':
-        return 'Pendente';
-      case 'cancelled':
-        return 'Cancelada';
-      default:
-        return 'Desconhecido';
-    }
+    const map: any = {
+      'pending': 'Pendente',
+      'approved': 'Aprovado',
+      'in-progress': 'Em Andamento',
+      'completed': 'Finalizado',
+      'canceled': 'Cancelado'
+    };
+    return map[status] || status;
   }
 
   // Helper para formatar a data (apenas dia/mês)
   formatDate(dateString: string): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    // Extrai o dia e o mês, formatando com zero à esquerda
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     return `${day}/${month}`;
+  }
+  
+  // Atualizado para aceitar queryParams (opcional)
+  navigateTo(path: string, params: any = {}) {
+    this.router.navigate([path], { queryParams: params });
   }
 }
