@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,11 +9,11 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './produtos.html',
   styleUrl: './produtos.css'
 })
-export class Produtos {
+export class Produtos implements OnInit { // Implementa OnInit
   searchTerm = signal('');
   showModal = signal(false);
 
-  // Categorias de Peças (Poderia vir das configurações futuramente)
+  // Categorias de Peças (Mantidas localmente, podem vir do banco de Configurações no futuro)
   categories = signal([
     'Óleos e Fluidos',
     'Filtros',
@@ -39,57 +39,24 @@ export class Produtos {
     location: '' // Ex: Prateleira A1
   });
 
-  // Dados Mockados (Simulação do Banco)
-  products = signal([
-    {
-      id: 1,
-      code: 'OLE-5W30',
-      name: 'Óleo Sintético 5W30',
-      brand: 'Castrol',
-      category: 'Óleos e Fluidos',
-      quantity: 12,
-      minQuantity: 10,
-      costPrice: 25.00,
-      sellPrice: 45.00,
-      location: 'Prateleira A1'
-    },
-    {
-      id: 2,
-      code: 'FIL-AR-ONIX',
-      name: 'Filtro de Ar (Onix/Prisma)',
-      brand: 'TecFil',
-      category: 'Filtros',
-      quantity: 3, // ESTOQUE BAIXO
-      minQuantity: 5,
-      costPrice: 15.00,
-      sellPrice: 35.00,
-      location: 'Prateleira B3'
-    },
-    {
-      id: 3,
-      code: 'PAS-DIANT-KA',
-      name: 'Pastilha de Freio Dianteira (Ford Ka)',
-      brand: 'Cobreq',
-      category: 'Freios',
-      quantity: 8,
-      minQuantity: 4,
-      costPrice: 60.00,
-      sellPrice: 120.00,
-      location: 'Gaveta F2'
-    },
-    {
-      id: 4,
-      code: 'PNEU-175-70-14',
-      name: 'Pneu 175/70 R14',
-      brand: 'Pirelli',
-      category: 'Pneus',
-      quantity: 0, // ZERADO
-      minQuantity: 4,
-      costPrice: 280.00,
-      sellPrice: 450.00,
-      location: 'Depósito'
+  // Lista de Produtos (agora inicializada vazia)
+  products = signal<any[]>([]);
+
+  // --- Ciclo de Vida: Carrega os dados ao iniciar ---
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+  
+  async loadProducts() {
+    if (window.electronAPI) {
+      try {
+        const data = await window.electronAPI.getProdutos();
+        this.products.set(data);
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+      }
     }
-  ]);
+  }
 
   // Filtro de Busca
   filteredProducts = computed(() => {
@@ -101,7 +68,7 @@ export class Produtos {
     );
   });
 
-  // --- Helpers Visuais ---
+  // --- Helpers Visuais (Mantidos do código original) ---
   getStockStatus(qty: number, min: number): 'ok' | 'low' | 'empty' {
     if (qty === 0) return 'empty';
     if (qty <= min) return 'low';
@@ -121,7 +88,7 @@ export class Produtos {
       code: '',
       name: '',
       brand: '',
-      category: 'Óleos e Fluidos',
+      category: this.categories()[0], // Define a primeira categoria como padrão
       quantity: 0,
       minQuantity: 5,
       costPrice: 0,
@@ -140,21 +107,51 @@ export class Produtos {
     this.showModal.set(false);
   }
 
-  saveProduct() {
+  async saveProduct() {
     const newProd = this.currentProduct();
-    this.products.update(list => {
-      if (newProd.id === 0) {
-        return [...list, { ...newProd, id: new Date().getTime() }];
-      } else {
-        return list.map(p => p.id === newProd.id ? newProd : p);
+
+    if (window.electronAPI) {
+      try {
+        if (newProd.id === 0) {
+          // --- CRIAR NOVO ---
+          const saved = await window.electronAPI.addProduto(newProd);
+          this.products.update(list => [...list, saved]);
+        } else {
+          // --- ATUALIZAR EXISTENTE ---
+          await window.electronAPI.updateProduto(newProd);
+          this.products.update(list => list.map(p => p.id === newProd.id ? newProd : p));
+        }
+        this.closeModal();
+      } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        alert('Erro ao salvar no banco de dados.');
       }
-    });
-    this.closeModal();
+    } else {
+      // Fallback para modo navegador (manteremos por enquanto, mas não salva)
+      this.products.update(list => {
+        if (newProd.id === 0) {
+          return [...list, { ...newProd, id: new Date().getTime() }];
+        } else {
+          return list.map(p => p.id === newProd.id ? newProd : p);
+        }
+      });
+      this.closeModal();
+    }
   }
 
-  deleteProduct(id: number) {
+  async deleteProduct(id: number) {
     if(confirm('Remover este produto do estoque?')) {
-      this.products.update(list => list.filter(p => p.id !== id));
+      if (window.electronAPI) {
+        try {
+          await window.electronAPI.deleteProduto(id);
+          this.products.update(list => list.filter(p => p.id !== id));
+        } catch (error) {
+          console.error('Erro ao excluir:', error);
+          alert('Erro ao excluir do banco.');
+        }
+      } else {
+        this.products.update(list => list.filter(p => p.id !== id));
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router'; // Importação nova
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-veiculos',
@@ -14,8 +14,10 @@ export class Veiculos implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
 
-  ownersList = signal(['Roberto Silva', 'Ana Júlia Costa', 'Carlos Eduardo', 'Cliente Balcão']);
+  // Lista de proprietários (Carregada do Banco de Clientes)
+  ownersList = signal<string[]>([]); 
 
+  // Objeto do Veículo
   currentVehicle = signal({
     id: 0,
     plate: '',
@@ -25,22 +27,11 @@ export class Veiculos implements OnInit {
     color: '',
     client: '',
     lastService: '-',
-    status: 'delivered'
+    status: 'delivered' // ou 'in-shop'
   });
 
-  vehicles = signal([
-    {
-      id: 1,
-      plate: 'ABC-1234',
-      model: 'Onix LTZ 1.4',
-      brand: 'Chevrolet',
-      year: 2019,
-      color: 'Branco',
-      client: 'Roberto Silva',
-      lastService: '12/08/2024',
-      status: 'in-shop'
-    }
-  ]);
+  // Lista de Veículos (Carregada do Banco)
+  vehicles = signal<any[]>([]);
 
   filteredVehicles = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -51,10 +42,11 @@ export class Veiculos implements OnInit {
     );
   });
 
-  // Injetamos a rota ativa para ler os parâmetros
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
+    this.loadData();
+
     // Verifica se veio do Dashboard com ordem de abrir modal
     this.route.queryParams.subscribe(params => {
       if (params['open'] === 'true') {
@@ -63,19 +55,40 @@ export class Veiculos implements OnInit {
     });
   }
 
+  async loadData() {
+    if (window.electronAPI) {
+      try {
+        // 1. Busca Veículos do Banco
+        const dataVehicles = await window.electronAPI.getVeiculos();
+        this.vehicles.set(dataVehicles);
+
+        // 2. Busca Clientes para preencher o Select de Proprietários
+        const dataClients = await window.electronAPI.getClientes();
+        // Mapeamos apenas os nomes para facilitar o select simples
+        this.ownersList.set(dataClients.map((c: any) => c.name));
+        
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      }
+    }
+  }
+
   // --- AÇÕES ---
 
   openModal() {
+    // Se tiver clientes, seleciona o primeiro por padrão
+    const defaultClient = this.ownersList().length > 0 ? this.ownersList()[0] : '';
+    
     this.currentVehicle.set({
       id: 0,
       plate: '',
       model: '',
       brand: '',
-      year: 2020,
+      year: 2024,
       color: '',
-      client: this.ownersList()[0],
+      client: defaultClient,
       lastService: '-',
-      status: 'in-shop' // Padrão 'Na Oficina' ao criar novo
+      status: 'in-shop'
     });
     this.showModal.set(true);
   }
@@ -89,23 +102,51 @@ export class Veiculos implements OnInit {
     this.showModal.set(false);
   }
 
-  saveVehicle() {
+  async saveVehicle() {
     const newVehicle = this.currentVehicle();
     newVehicle.plate = newVehicle.plate.toUpperCase();
 
-    this.vehicles.update(list => {
-      if (newVehicle.id === 0) {
-        return [...list, { ...newVehicle, id: new Date().getTime() }];
-      } else {
-        return list.map(v => v.id === newVehicle.id ? newVehicle : v);
+    if (window.electronAPI) {
+      try {
+        if (newVehicle.id === 0) {
+          // --- CRIAR ---
+          const saved = await window.electronAPI.addVeiculo(newVehicle);
+          this.vehicles.update(list => [...list, saved]);
+        } else {
+          // --- ATUALIZAR ---
+          await window.electronAPI.updateVeiculo(newVehicle);
+          this.vehicles.update(list => list.map(v => v.id === newVehicle.id ? newVehicle : v));
+        }
+        this.closeModal();
+      } catch (error) {
+        console.error('Erro ao salvar veículo:', error);
+        alert('Erro ao salvar no banco de dados.');
       }
-    });
-    this.closeModal();
+    } else {
+      // Fallback para navegador (sem banco)
+      this.vehicles.update(list => {
+        if (newVehicle.id === 0) {
+          return [...list, { ...newVehicle, id: new Date().getTime() }];
+        } else {
+          return list.map(v => v.id === newVehicle.id ? newVehicle : v);
+        }
+      });
+      this.closeModal();
+    }
   }
 
-  deleteVehicle(id: number) {
+  async deleteVehicle(id: number) {
     if(confirm('Remover este veículo?')) {
-      this.vehicles.update(list => list.filter(v => v.id !== id));
+      if (window.electronAPI) {
+        try {
+          await window.electronAPI.deleteVeiculo(id);
+          this.vehicles.update(list => list.filter(v => v.id !== id));
+        } catch (error) {
+          console.error('Erro ao excluir:', error);
+        }
+      } else {
+        this.vehicles.update(list => list.filter(v => v.id !== id));
+      }
     }
   }
 }
