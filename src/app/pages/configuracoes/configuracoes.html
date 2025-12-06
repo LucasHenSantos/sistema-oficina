@@ -1,139 +1,145 @@
 <div class="page-container">
-  
-  <header class="page-header">
-    <div>
-      <h1>Configurações do Sistema</h1>
-      <p class="subtitle">Personalize a aparência e os dados da sua oficina</p>
-    </div>
-  </header>
+    <header class="page-header">
+        <h1>Configurações do Sistema</h1>
+        <p class="subtitle">Ajuste as preferências globais e os dados da sua oficina.</p>
+    </header>
 
-  <div class="settings-grid">
-    
-    <!-- 1. APARÊNCIA (TEMA) -->
-    <div class="card settings-card full-width">
-      <div class="card-header">
-        <h3>🎨 Aparência do Sistema</h3>
-        <p>Escolha o tema de sua preferência para trabalhar</p>
-      </div>
-      <div class="card-body theme-selector">
-        <button 
-          class="theme-btn light" 
-          [class.active]="theme() === 'light'"
-          (click)="toggleTheme('light')">
-          ☀️ Claro
-        </button>
-        <button 
-          class="theme-btn dark" 
-          [class.active]="theme() === 'dark'"
-          (click)="toggleTheme('dark')">
-          🌙 Escuro
-        </button>
-      </div>
-    </div>
-
-    <!-- 2. DADOS DA OFICINA (FORMULÁRIO COMPLETO) -->
-    <div class="card settings-card full-width">
-      <div class="card-header">
-        <h3>🏢 Dados da Oficina (Impressão)</h3>
-        <p>Estas informações aparecerão no cabeçalho dos orçamentos e relatórios.</p>
-      </div>
-      
-      <div class="card-body">
-        <form (ngSubmit)="saveCompanyData()" class="company-form">
-          
-          <!-- Linha 1 -->
-          <div class="form-row">
-            <div class="form-group col-2">
-              <label>Nome Fantasia da Oficina</label>
-              <input type="text" [(ngModel)]="companyData().name" name="name" placeholder="Ex: Mecânica Borges">
+    <div class="settings-grid">
+        
+        <div class="card">
+            <div class="card-header">
+                <h3><span class="icon">🎨</span> Aparência e Tema</h3>
+                <p>Mude o esquema de cores da aplicação.</p>
             </div>
-            <div class="form-group col-1">
-              <label>CNPJ / CPF</label>
-              <input type="text" [(ngModel)]="companyData().cnpj" name="cnpj" placeholder="00.000.000/0001-00">
+            <div class="card-body">
+                <div class="theme-selector">
+                    <button class="theme-btn" [class.active]="theme() === 'light'" (click)="toggleTheme('light')">
+                        ☀️ Tema Claro
+                    </button>
+                    <button class="theme-btn" [class.active]="theme() === 'dark'" (click)="toggleTheme('dark')">
+                        🌙 Tema Escuro
+                    </button>
+                </div>
             </div>
-          </div>
-
-          <!-- Linha 2 -->
-          <div class="form-row">
-            <div class="form-group col-1">
-              <label>Telefone / WhatsApp</label>
-              <input type="text" [(ngModel)]="companyData().phone" name="phone" placeholder="(00) 90000-0000">
-            </div>
-            <div class="form-group col-2">
-              <label>Email de Contato</label>
-              <input type="email" [(ngModel)]="companyData().email" name="email" placeholder="contato@oficina.com">
-            </div>
-          </div>
-
-          <!-- Linha 3 (Endereço) -->
-          <div class="form-row">
-            <div class="form-group col-2">
-              <label>Endereço (Rua, Nº, Bairro)</label>
-              <input type="text" [(ngModel)]="companyData().address" name="address" placeholder="Rua das Peças, 123 - Centro">
-            </div>
-            <div class="form-group col-1">
-              <label>Cidade / Estado</label>
-              <input type="text" [(ngModel)]="companyData().city" name="city" placeholder="São Paulo - SP">
-            </div>
-          </div>
-
-          <hr class="divider">
-
-          <!-- Linha 4 (Financeiro) -->
-          <div class="form-row">
-            <div class="form-group col-1">
-              <label>Chave Pix (Para Recebimento)</label>
-              <input type="text" [(ngModel)]="companyData().pixKey" name="pixKey" placeholder="CPF, Email ou Aleatória">
-            </div>
-            <div class="form-group col-2">
-              <label>Informações Bancárias Adicionais</label>
-              <input type="text" [(ngModel)]="companyData().bankInfo" name="bankInfo" placeholder="Banco X, Ag 0000, Cc 00000-0">
-            </div>
-          </div>
-
-          <!-- Linha 5 (Rodapé) -->
-          <div class="form-group">
-            <label>Texto de Rodapé do Orçamento</label>
-            <input type="text" [(ngModel)]="companyData().quoteFooterText" name="quoteFooterText" placeholder="Ex: Orçamento válido por 15 dias. Garantia de 3 meses.">
-          </div>
-
-          <div class="form-actions right">
-            <button type="submit" class="btn-save">💾 Salvar Dados da Empresa</button>
-          </div>
-
-        </form>
-      </div>
-    </div>
-
-    <!-- 3. CATEGORIAS DE SERVIÇO -->
-    <div class="card settings-card full-width">
-      <div class="card-header">
-        <h3>📂 Categorias de Serviço</h3>
-        <p>Gerencie os grupos usados no catálogo de serviços</p>
-      </div>
-      
-      <div class="card-body">
-        <div class="input-group">
-          <input 
-            type="text" 
-            placeholder="Nova categoria (ex: Funilaria)"
-            [ngModel]="newCategoryName()" 
-            (ngModelChange)="newCategoryName.set($event)"
-            (keyup.enter)="addCategory()"
-          >
-          <button class="btn-add" (click)="addCategory()">Adicionar</button>
         </div>
 
-        <ul class="category-list horizontal-list">
-          @for (cat of categories(); track cat; let i = $index) {
-            <li class="category-item">
-              <span>{{ cat }}</span>
-              <button class="btn-remove-icon" (click)="removeCategory(i)" title="Remover">×</button>
-            </li>
-          }
-        </ul>
-      </div>
-    </div>
+        <div class="card">
+            <div class="card-header">
+                <h3><span class="icon">🏢</span> Dados da Empresa</h3>
+                <p>Essencial para Orçamentos e Relatórios.</p>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="saveCompanyData()" class="company-form">
+                    <div class="form-row">
+                        <div class="form-group col-2">
+                            <label>Nome da Oficina *</label>
+                            <input type="text" [(ngModel)]="companyData().name" name="name" required>
+                        </div>
+                        <div class="form-group col-1">
+                            <label>CNPJ (Opcional)</label>
+                            <input type="text" [(ngModel)]="companyData().cnpj" name="cnpj">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-1">
+                            <label>Telefone / WhatsApp</label>
+                            <input type="text" [(ngModel)]="companyData().phone" name="phone">
+                        </div>
+                        <div class="form-group col-2">
+                            <label>E-mail</label>
+                            <input type="email" [(ngModel)]="companyData().email" name="email">
+                        </div>
+                    </div>
 
-  </div>
+                    <div class="divider"></div>
+
+                    <div class="form-row">
+                        <div class="form-group col-2">
+                            <label>Endereço</label>
+                            <input type="text" [(ngModel)]="companyData().address" name="address">
+                        </div>
+                        <div class="form-group col-1">
+                            <label>Cidade</label>
+                            <input type="text" [(ngModel)]="companyData().city" name="city">
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+                    
+                    <h4>Informações de Pagamento (Orçamento/Recibo)</h4>
+                    <div class="form-row">
+                        <div class="form-group col-1">
+                            <label>Chave PIX</label>
+                            <input type="text" [(ngModel)]="companyData().pixKey" name="pixKey">
+                        </div>
+                        <div class="form-group col-2">
+                            <label>Dados Bancários (Opcional)</label>
+                            <input type="text" [(ngModel)]="companyData().bankInfo" name="bankInfo">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rodapé do Orçamento</label>
+                        <textarea [(ngModel)]="companyData().quoteFooterText" name="quoteFooterText" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-actions right">
+                        <button type="submit" class="btn-save">
+                            <span class="icon">💾</span> Salvar Dados
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3><span class="icon">🏷️</span> Categorias de Produtos</h3>
+                <p>Gerencie as opções de categoria para o seu estoque.</p>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="addProductCategory()">
+                    <div class="input-group">
+                        <input type="text" [(ngModel)]="newProductCategoryName" name="newProductCategoryName" placeholder="Ex: Peças Elétricas" required>
+                        <button type="submit" class="btn-add">Adicionar</button>
+                    </div>
+                </form>
+
+                <ul class="category-list horizontal-list">
+                    @for (cat of productCategories(); track cat) {
+                        <li class="category-item">
+                            <span>{{ cat }}</span>
+                            <button type="button" class="btn-remove-icon" (click)="removeProductCategory(cat)">×</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3><span class="icon">🛠️</span> Categorias de Serviços</h3>
+                <p>Gerencie as opções de categoria para o catálogo de serviços.</p>
+            </div>
+            <div class="card-body">
+                <form (ngSubmit)="addServiceCategory()">
+                    <div class="input-group">
+                        <input type="text" [(ngModel)]="newServiceCategoryName" name="newServiceCategoryName" placeholder="Ex: Mecânica Geral" required>
+                        <button type="submit" class="btn-add">Adicionar</button>
+                    </div>
+                </form>
+
+                <ul class="category-list horizontal-list">
+                    @for (cat of serviceCategories(); track cat) {
+                        <li class="category-item">
+                            <span>{{ cat }}</span>
+                            <button type="button" class="btn-remove-icon" (click)="removeServiceCategory(cat)">×</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+    </div>
 </div>

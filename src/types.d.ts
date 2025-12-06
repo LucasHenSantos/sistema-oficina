@@ -3,6 +3,10 @@ export {};
 declare global {
   interface Window {
     electronAPI: {
+      // --- KPIS DO DASHBOARD (TIPAGEM CORRIGIDA) ---
+      getDailyRevenue: () => Promise<number>;
+      countLowStock: () => Promise<number>;
+      
       // --- CONFIGURAÇÕES/UTILS ---
       getConfig: (key: string) => Promise<any>;
       setConfig: (key: string, value: any) => Promise<any>;

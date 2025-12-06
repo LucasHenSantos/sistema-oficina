@@ -8,18 +8,18 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .page-header h1 { 
   font-size: 28px; 
-  color: var(--text-primary); /* Alterado para variável */
+  color: var(--text-primary);
   margin: 0; 
 }
 
 .subtitle { 
-  color: var(--text-secondary); /* Alterado para variável */
+  color: var(--text-secondary);
   margin: 4px 0 0 0; 
   font-size: 14px; 
 }
@@ -34,9 +34,9 @@
 
 /* Cards */
 .card {
-  background: var(--bg-card); /* Alterado */
+  background: var(--bg-card);
   border-radius: 12px;
-  border: 1px solid var(--border-color); /* Alterado */
+  border: 1px solid var(--border-color);
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -45,14 +45,15 @@
 
 .card-header {
   padding: 20px;
-  border-bottom: 1px solid var(--border-color); /* Alterado */
-  background: var(--hover-bg); /* Alterado: usa uma cor de fundo sutil */
+  border-bottom: 1px solid var(--border-color);
+  background: var(--hover-bg); 
 }
 
 .card-header h3 { 
   margin: 0; 
   font-size: 18px; 
-  color: var(--text-primary); /* Alterado */
+  font-weight: 600;
+  color: var(--text-primary);
   display: flex; 
   align-items: center; 
   gap: 8px; 
@@ -61,7 +62,7 @@
 .card-header p { 
   margin: 4px 0 0 0; 
   font-size: 13px; 
-  color: var(--text-secondary); /* Alterado */
+  color: var(--text-secondary);
 }
 
 .card-body { padding: 24px; }
@@ -75,13 +76,13 @@
 .theme-btn {
   flex: 1;
   padding: 20px;
-  border: 2px solid var(--border-color); /* Alterado */
+  border: 2px solid var(--border-color);
   border-radius: 12px;
-  background: var(--bg-card); /* Alterado */
+  background: var(--bg-card);
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary); /* Alterado */
+  color: var(--text-primary);
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -91,7 +92,7 @@
 
 .theme-btn:hover { 
   border-color: #d1d5db; 
-  background: var(--hover-bg); /* Alterado */
+  background: var(--hover-bg); 
 }
 
 .theme-btn.active {
@@ -100,7 +101,6 @@
   color: #2563eb;
 }
 
-/* Ajuste específico para o botão ativo no modo escuro para não ficar estranho */
 [data-theme="dark"] .theme-btn.active {
   background: rgba(37, 99, 235, 0.2);
   color: #60a5fa;
@@ -130,25 +130,28 @@
 .form-group label { 
   font-size: 13px; 
   font-weight: 600; 
-  color: var(--text-primary); /* Alterado */
+  color: var(--text-primary);
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
   padding: 10px 12px;
-  border: 1px solid var(--border-color); /* Alterado */
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px; /* Padrão de 8px nas bordas */
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  background-color: var(--input-bg); /* Alterado: Fundo do input */
-  color: var(--text-primary); /* Alterado: Texto digitado */
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
-.form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.form-group input:focus,
+.form-group textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
 .divider {
   border: 0;
-  border-top: 1px solid var(--border-color); /* Alterado */
+  border-top: 1px solid var(--border-color);
   margin: 10px 0;
 }
 
@@ -174,32 +177,52 @@
 .btn-save:hover { background: #1d4ed8; }
 
 /* --- CATEGORIAS (Input e Lista) --- */
-.input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.input-group { 
+  display: flex; 
+  gap: 10px; 
+  margin-bottom: 20px; 
+  align-items: center; 
+}
 
 .input-group input { 
   flex: 1; 
-  padding: 10px 12px; 
-  border: 1px solid var(--border-color); /* Alterado */
-  border-radius: 8px; 
-  outline: none; 
-  background-color: var(--input-bg); /* Alterado */
-  color: var(--text-primary); /* Alterado */
+  height: 40px; 
+  
+  /* CORREÇÃO: Aplica as bordas arredondadas e o estilo de input */
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px; /* Aplicação da borda arredondada */
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
 }
 
 .btn-add { 
-  background: #111827; 
+  background: #2563eb; 
   color: white; 
   border: none; 
   padding: 0 20px; 
   border-radius: 8px; 
   cursor: pointer; 
   font-weight: 600; 
+  transition: background 0.2s;
+  
+  height: 40px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
 }
-.btn-add:hover { background: #374151; }
+.btn-add:hover { 
+  background: #1d4ed8; 
+}
 
-/* Botão adicionar no modo escuro precisa clarear para aparecer */
-[data-theme="dark"] .btn-add { background: #374151; }
-[data-theme="dark"] .btn-add:hover { background: #4b5563; }
+[data-theme="dark"] .btn-add {
+  background: #2563eb;
+}
+[data-theme="dark"] .btn-add:hover { 
+  background: #1d4ed8; 
+}
 
 /* Lista Horizontal de Categorias (estilo tags) */
 .category-list.horizontal-list {
@@ -212,19 +235,19 @@
 }
 
 .category-item {
-  background: var(--hover-bg); /* Alterado */
-  border: 1px solid var(--border-color); /* Alterado */
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 14px;
-  color: var(--text-primary); /* Alterado */
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .btn-remove-icon {
-  background: rgba(0,0,0,0.1); /* Transparente escuro para funcionar em ambos */
+  background: var(--border-color);
   color: var(--text-secondary);
   border: none;
   width: 20px;

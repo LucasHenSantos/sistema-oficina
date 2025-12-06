@@ -6,51 +6,51 @@
 
     <div class="stats-grid">
         
-        <div class="card stat-card blue">
-            <div class="icon-box">🚗</div>
-            <div class="stat-info">
-                @if (loading()) {
-                    <h3>...</h3>
-                } @else {
-                    <h3>{{ vehiclesInProgress() }}</h3>
-                }
-                <p>Veículos na Oficina</p>
-                <span class="subtext">OS em Andamento/Pendente</span>
-            </div>
-        </div>
+        @if (loading()) {
+             <div class="card stat-card full-span-loading">
+                <p>Carregando dados do servidor...</p>
+             </div>
+        } @else {
         
-        <div class="card stat-card green">
-            <div class="icon-box">💰</div>
-            <div class="stat-info">
-                @if (loading()) {
-                    <h3>...</h3>
-                } @else {
-                    <h3>{{ monthlyRevenue() | currency:'BRL':'symbol':'1.2-2' }}</h3>
-                }
-                <p>Faturamento do Mês</p>
-                <span class="subtext">OS Finalizadas ({{ completedOrdersThisMonth().length }})</span>
+            <div class="card stat-card blue">
+                <div class="icon-box">🚗</div>
+                <div class="stat-info">
+                    <h3>Veículos na Oficina</h3>
+                    <h3 class="data-value">{{ vehiclesInProgress() }}</h3>
+                    <span class="subtext">OS em Andamento/Pendente</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="card stat-card red">
-            <div class="icon-box">📦</div>
-            <div class="stat-info">
-                <h3>2</h3> 
-                <p>Estoque Baixo</p>
-                <span class="subtext">Itens Críticos</span>
+            
+            <div class="card stat-card green">
+                <div class="icon-box">💵</div>
+                <div class="stat-info">
+                    <h3>Faturamento do Dia</h3>
+                    <h3 class="data-value">{{ dailyRevenue() | currency:'BRL':'symbol':'1.2-2' }}</h3>
+                    <span class="subtext">Total de OS Finalizadas hoje</span>
+                </div>
             </div>
-        </div>
+            
+            <div class="card stat-card red">
+                <div class="icon-box">📦</div>
+                <div class="stat-info">
+                    <h3>Estoque Baixo</h3>
+                    <h3 class="data-value">{{ lowStockCount() }}</h3>
+                    <span class="subtext">Itens abaixo do mínimo</span>
+                </div>
+            </div>
+        }
     </div>
 
     <div class="content-grid">
+        
         <div class="card activity-card">
             <h2>🔔 Atividades Recentes</h2>
             
             @if (loading()) {
-                <ul class="activity-list"><li><span class="time">...</span><span class="text">Carregando dados...</span></li></ul>
+                <ul class="activity-list"><li><span class="time">...</span><span class="text">Carregando atividades...</span></li></ul>
             } @else if (recentActivities().length === 0) {
                  <div class="empty-state">
-                    <p>Nenhuma Ordem de Serviço recente encontrada. 📝</p>
+                    <p>Nenhuma OS recente.</p>
                  </div>
             } @else {
                 <ul class="activity-list">

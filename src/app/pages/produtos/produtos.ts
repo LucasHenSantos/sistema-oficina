@@ -9,56 +9,50 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './produtos.html',
   styleUrl: './produtos.css'
 })
-export class Produtos implements OnInit { // Implementa OnInit
+export class Produtos implements OnInit { 
   searchTerm = signal('');
   showModal = signal(false);
 
-  // Categorias de Peças (Mantidas localmente, podem vir do banco de Configurações no futuro)
-  categories = signal([
-    'Óleos e Fluidos',
-    'Filtros',
-    'Freios',
-    'Suspensão',
-    'Motor',
-    'Pneus',
-    'Acessórios',
-    'Outros'
-  ]);
+  categories = signal<string[]>([]); 
 
-  // Objeto do Formulário
   currentProduct = signal({
     id: 0,
     code: '',
     name: '',
     brand: '',
-    category: 'Óleos e Fluidos',
+    category: '', 
     quantity: 0,
-    minQuantity: 5, // Ponto de alerta
+    minQuantity: 5, 
     costPrice: 0,
     sellPrice: 0,
-    location: '' // Ex: Prateleira A1
+    location: ''
   });
 
-  // Lista de Produtos (agora inicializada vazia)
   products = signal<any[]>([]);
 
-  // --- Ciclo de Vida: Carrega os dados ao iniciar ---
   ngOnInit(): void {
     this.loadProducts();
   }
   
   async loadProducts() {
-    if (window.electronAPI) {
-      try {
-        const data = await window.electronAPI.getProdutos();
-        this.products.set(data);
-      } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
+    if (!window.electronAPI) return;
+
+    try {
+      const data = await window.electronAPI.getProdutos();
+      this.products.set(data);
+      
+      const savedCategories = await window.electronAPI.getConfig('categorias_produtos');
+      
+      if (savedCategories && savedCategories.length > 0) {
+         this.categories.set(savedCategories);
+         this.currentProduct.update(p => ({...p, category: savedCategories[0]}));
       }
+
+    } catch (error) {
+      console.error('Erro ao carregar produtos ou categorias:', error);
     }
   }
 
-  // Filtro de Busca
   filteredProducts = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.products().filter(p => 
@@ -68,27 +62,33 @@ export class Produtos implements OnInit { // Implementa OnInit
     );
   });
 
-  // --- Helpers Visuais (Mantidos do código original) ---
-  getStockStatus(qty: number, min: number): 'ok' | 'low' | 'empty' {
-    if (qty === 0) return 'empty';
-    if (qty <= min) return 'low';
-    return 'ok';
+  // --- FUNÇÕES DE STATUS CORRIGIDAS ---
+  
+  // Retorna a CLASSE CSS que define a cor
+  getStockStatusClass(qty: number, min: number): 'status-ok' | 'status-low' | 'status-empty' {
+    if (qty === 0) return 'status-empty';
+    if (qty <= min) return 'status-low';
+    return 'status-ok';
   }
 
-  getStockLabel(qty: number, min: number): string {
+  // Retorna o TEXTO para a badge
+  getStockStatusText(qty: number, min: number): string {
     if (qty === 0) return 'Esgotado';
     if (qty <= min) return 'Baixo';
-    return 'Normal';
+    return 'Em Estoque';
   }
 
-  // --- Ações do CRUD ---
+  // --- AÇÕES CRUD ---
+  
   openModal() {
+    const defaultCat = this.categories()[0] || '';
+    
     this.currentProduct.set({
       id: 0,
       code: '',
       name: '',
       brand: '',
-      category: this.categories()[0], // Define a primeira categoria como padrão
+      category: defaultCat,
       quantity: 0,
       minQuantity: 5,
       costPrice: 0,
@@ -112,14 +112,12 @@ export class Produtos implements OnInit { // Implementa OnInit
 
     if (window.electronAPI) {
       try {
-        if (newProd.id === 0) {
-          // --- CRIAR NOVO ---
-          const saved = await window.electronAPI.addProduto(newProd);
-          this.products.update(list => [...list, saved]);
-        } else {
-          // --- ATUALIZAR EXISTENTE ---
+        if (newProd.id && newProd.id !== 0) {
           await window.electronAPI.updateProduto(newProd);
-          this.products.update(list => list.map(p => p.id === newProd.id ? newProd : p));
+          await this.loadProducts(); 
+        } else {
+          await window.electronAPI.addProduto(newProd);
+          await this.loadProducts(); 
         }
         this.closeModal();
       } catch (error) {
@@ -127,14 +125,6 @@ export class Produtos implements OnInit { // Implementa OnInit
         alert('Erro ao salvar no banco de dados.');
       }
     } else {
-      // Fallback para modo navegador (manteremos por enquanto, mas não salva)
-      this.products.update(list => {
-        if (newProd.id === 0) {
-          return [...list, { ...newProd, id: new Date().getTime() }];
-        } else {
-          return list.map(p => p.id === newProd.id ? newProd : p);
-        }
-      });
       this.closeModal();
     }
   }

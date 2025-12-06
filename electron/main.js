@@ -7,7 +7,6 @@ let win;
 
 // 1. Inicializa o Banco de Dados
 function initDatabase() {
-  // O banco será salvo na pasta de dados do aplicativo para persistência
   const dbPath = path.join(app.getPath('userData'), 'oficina.db');
   console.log('Banco de dados em:', dbPath);
 
@@ -21,7 +20,7 @@ function initDatabase() {
   });
 }
 
-// 2. Cria as Tabelas Iniciais (Baseado no mock de dados do Angular)
+// 2. Cria as Tabelas Iniciais
 function createTables() {
   // CLIENTES (cars será JSON string)
   const sqlClientes = `
@@ -128,14 +127,52 @@ function createTables() {
 
 // 3. Define as funções que o Angular vai chamar (IPC Handlers)
 function setupIpcHandlers() {
+
+  // --- KPI HANDLERS (NOVAS FUNÇÕES PARA O DASHBOARD) ---
+
+  // Faturamento do Dia (Filtra por data atual e status 'completed')
+  ipcMain.handle('get-daily-revenue', async () => {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    return new Promise((resolve, reject) => {
+        const sql = `
+            SELECT 
+                SUM(total) AS dailyRevenue
+            FROM 
+                ordens_servico
+            WHERE 
+                status = 'completed' AND date = ?
+        `;
+        db.get(sql, [today], (err, row) => {
+            if (err) return reject(err);
+            resolve(row?.dailyRevenue || 0);
+        });
+    });
+  });
+
+  // Contagem de Estoque Baixo (quantity <= minQuantity)
+  ipcMain.handle('count-low-stock', async () => {
+      return new Promise((resolve, reject) => {
+          const sql = `
+              SELECT 
+                  COUNT(id) AS lowStockCount
+              FROM 
+                  produtos
+              WHERE 
+                  quantity <= minQuantity;
+          `;
+          db.get(sql, [], (err, row) => {
+              if (err) return reject(err);
+              resolve(row?.lowStockCount || 0);
+          });
+      });
+  });
   
-  // --- UTILS / CONFIGURAÇÕES CRUD (Para categorias, por exemplo) ---
+  // --- UTILS / CONFIGURAÇÕES CRUD ---
 
   ipcMain.handle('get-config', async (event, key) => {
     return new Promise((resolve, reject) => {
       db.get("SELECT value FROM config WHERE key = ?", [key], (err, row) => {
         if (err) reject(err);
-        // Retorna o valor JSON desserializado, ou null se não houver
         else resolve(row ? JSON.parse(row.value) : null);
       });
     });
@@ -158,7 +195,6 @@ function setupIpcHandlers() {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM clientes", [], (err, rows) => {
         if (err) reject(err);
-        // Converte o campo 'cars' de volta para array
         else resolve(rows.map(row => ({ 
           ...row, 
           cars: row.cars ? JSON.parse(row.cars) : [] 
@@ -327,7 +363,6 @@ function setupIpcHandlers() {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM orcamentos", [], (err, rows) => {
         if (err) reject(err);
-        // Converte o campo 'items' de volta para JSON
         else resolve(rows.map(row => ({ 
           ...row, 
           items: row.items ? JSON.parse(row.items) : [] 
@@ -374,7 +409,6 @@ function setupIpcHandlers() {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM ordens_servico", [], (err, rows) => {
         if (err) reject(err);
-        // Converte o campo 'items' de volta para JSON
         else resolve(rows.map(row => ({ 
           ...row, 
           items: row.items ? JSON.parse(row.items) : [] 
@@ -418,7 +452,7 @@ function setupIpcHandlers() {
 }
 
 function createWindow() {
-  win = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
@@ -429,7 +463,6 @@ function createWindow() {
   });
 
   win.loadURL(`file://${path.join(__dirname, '../dist/sistema-oficina/index.html')}`);
-  // win.webContents.openDevTools(); // Descomente para debug
 }
 
 app.whenReady().then(() => {

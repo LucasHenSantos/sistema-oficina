@@ -1,161 +1,138 @@
 <div class="page-container">
-  
-  <header class="page-header">
-    <div>
-      <h1>Controle de Estoque</h1>
-      <p class="subtitle">Gerencie peças, quantidades e valores de venda</p>
+    <header class="page-header">
+        <h1>Produtos e Estoque</h1>
+        <p class="subtitle">Gerencie peças, lubrificantes e itens de venda.</p>
+        <button class="btn-primary" (click)="openModal()">
+            <span class="icon">➕</span> Novo Produto
+        </button>
+    </header>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input 
+                type="text" 
+                placeholder="Buscar por nome, código ou marca..."
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
+            >
+        </div>
     </div>
-    <button class="btn-primary" (click)="openModal()">
-      <span class="icon">📦</span> Novo Produto
-    </button>
-  </header>
 
-  <div class="toolbar">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input 
-        type="text" 
-        placeholder="Buscar por nome, código ou marca..."
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
-      >
-    </div>
-    
-    <!-- Filtros Rápidos (Visual apenas por enquanto) -->
-    <div class="quick-filters">
-      <span class="filter-chip alert">⚠️ Ver Estoque Baixo</span>
-    </div>
-  </div>
-
-  <div class="table-container card">
-    <table>
-      <thead>
-        <tr>
-          <th>Produto / Marca</th>
-          <th>Categoria</th>
-          <th>Localização</th>
-          <th>Estoque</th>
-          <th>Preços</th>
-          <th class="actions-col">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (prod of filteredProducts(); track prod.id) {
-          <tr>
-            <!-- Info Principal -->
-            <td>
-              <div class="product-info">
-                <div class="code-badge">{{ prod.code }}</div>
-                <div class="text-data">
-                  <strong>{{ prod.name }}</strong>
-                  <span class="brand-text">{{ prod.brand }}</span>
-                </div>
-              </div>
-            </td>
-            
-            <td><span class="cat-text">{{ prod.category }}</span></td>
-            
-            <td><span class="loc-text">📍 {{ prod.location }}</span></td>
-            
-            <!-- Estoque Colorido -->
-            <td>
-              <div class="stock-badge" [class]="getStockStatus(prod.quantity, prod.minQuantity)">
-                <span class="qty">{{ prod.quantity }} un</span>
-                <span class="status-dot"></span>
-                <span class="status-label">{{ getStockLabel(prod.quantity, prod.minQuantity) }}</span>
-              </div>
-            </td>
-
-            <!-- Preços -->
-            <td>
-              <div class="price-info">
-                <span class="sell-price">{{ prod.sellPrice | currency:'BRL' }}</span>
-                <span class="cost-price">Custo: {{ prod.costPrice | currency:'BRL' }}</span>
-              </div>
-            </td>
-
-            <td class="actions-cell">
-              <button class="btn-action edit" (click)="editProduct(prod)" title="Editar">✏️</button>
-              <button class="btn-action delete" (click)="deleteProduct(prod.id)" title="Excluir">🗑️</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-
-    @if (filteredProducts().length === 0) {
-      <div class="empty-state">
-        <p>Nenhum produto encontrado no estoque.</p>
-      </div>
-    }
-  </div>
-
-  <!-- MODAL DE CADASTRO -->
-  @if (showModal()) {
-    <div class="modal-overlay" (click)="closeModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <h2>{{ currentProduct().id === 0 ? 'Cadastrar Produto' : 'Editar Produto' }}</h2>
-        
-        <form (ngSubmit)="saveProduct()">
-          
-          <div class="form-row">
-            <div class="form-group col-3">
-              <label>Código (SKU)</label>
-              <input type="text" [(ngModel)]="currentProduct().code" name="code" placeholder="Ex: OLE-001" required>
-            </div>
-            <div class="form-group col-9">
-              <label>Nome do Produto</label>
-              <input type="text" [(ngModel)]="currentProduct().name" name="name" placeholder="Ex: Óleo 5W30" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-6">
-              <label>Marca</label>
-              <input type="text" [(ngModel)]="currentProduct().brand" name="brand" placeholder="Ex: Castrol">
-            </div>
-            <div class="form-group col-6">
-              <label>Categoria</label>
-              <select [(ngModel)]="currentProduct().category" name="category">
-                @for (cat of categories(); track cat) {
-                  <option [value]="cat">{{ cat }}</option>
+    <div class="table-container card">
+        <table>
+            <thead>
+                <tr>
+                    <th>CÓDIGO</th> 
+                    <th>PRODUTO / MARCA</th>
+                    <th>CATEGORIA</th>
+                    <th>PREÇO CUSTO</th>
+                    <th>PREÇO VENDA</th>
+                    <th>ESTOQUE</th>
+                    <th class="actions-col">AÇÕES</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (product of filteredProducts(); track product.id) {
+                    <tr>
+                        <td>{{ product.code }}</td> 
+                        <td>
+                            <div class="product-info">
+                                <strong>{{ product.name }}</strong>
+                                <span class="detail-text">{{ product.brand }}</span>
+                            </div>
+                        </td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.costPrice | currency:'BRL' }}</td>
+                        <td class="sell-price">{{ product.sellPrice | currency:'BRL' }}</td>
+                        <td>
+                            <span class="stock-badge" [class]="getStockStatusClass(product.quantity, product.minQuantity)">
+                                {{ getStockStatusText(product.quantity, product.minQuantity) }} ({{ product.quantity }})
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="btn-action edit" (click)="editProduct(product)">✏️</button>
+                            <button class="btn-action delete" (click)="deleteProduct(product.id)">🗑️</button>
+                        </td>
+                    </tr>
                 }
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-6">
-              <label>Localização (Prateleira)</label>
-              <input type="text" [(ngModel)]="currentProduct().location" name="location" placeholder="Ex: A1">
-            </div>
-            <div class="form-group col-3">
-              <label>Qtd. Atual</label>
-              <input type="number" [(ngModel)]="currentProduct().quantity" name="qty" required>
-            </div>
-            <div class="form-group col-3">
-              <label>Mínimo</label>
-              <input type="number" [(ngModel)]="currentProduct().minQuantity" name="min" title="Avisa quando baixar disso">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-6">
-              <label>Preço Custo (R$)</label>
-              <input type="number" [(ngModel)]="currentProduct().costPrice" name="cost" step="0.01">
-            </div>
-            <div class="form-group col-6">
-              <label>Preço Venda (R$)</label>
-              <input type="number" [(ngModel)]="currentProduct().sellPrice" name="sell" step="0.01" required>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn-save">Salvar Produto</button>
-          </div>
-        </form>
-      </div>
+            </tbody>
+        </table>
     </div>
-  }
+
+    @if (showModal()) {
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+                <h2>{{ currentProduct().id === 0 ? 'Novo Produto' : 'Editar Produto' }}</h2>
+                
+                <form (ngSubmit)="saveProduct()" #productForm="ngForm">
+                    
+                    <div class="form-section">
+                        <h4>Dados Básicos</h4>
+                        <div class="form-row">
+                            <div class="form-group col-1">
+                                <label>Código (Opcional)</label>
+                                <input type="text" [(ngModel)]="currentProduct().code" name="code" placeholder="Ex: FIL-001">
+                            </div>
+                            <div class="form-group col-2">
+                                <label>Nome do Produto *</label>
+                                <input type="text" [(ngModel)]="currentProduct().name" name="name" required placeholder="Ex: Filtro de Óleo 5w-30">
+                            </div>
+                            <div class="form-group col-1">
+                                <label>Marca</label>
+                                <input type="text" [(ngModel)]="currentProduct().brand" name="brand" placeholder="Ex: Shell">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-2">
+                                <label>Localização (Estoque)</label>
+                                <input type="text" [(ngModel)]="currentProduct().location" name="location" placeholder="Ex: Prateleira A1">
+                            </div>
+                            <div class="form-group col-2">
+                                <label>Categoria</label>
+                                <select [(ngModel)]="currentProduct().category" name="category">
+                                    @for (cat of categories(); track cat) {
+                                        <option [value]="cat">{{ cat }}</option>
+                                    }
+                                    @if (categories().length === 0) {
+                                        <option value="" disabled>Cadastre categorias em Configurações</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>Estoque e Preços</h4>
+                        <div class="form-row">
+                            <div class="form-group col-1">
+                                <label>Quantidade Atual *</label>
+                                <input type="number" [(ngModel)]="currentProduct().quantity" name="quantity" required min="0">
+                            </div>
+                            <div class="form-group col-1">
+                                <label>Alerta Mínimo</label>
+                                <input type="number" [(ngModel)]="currentProduct().minQuantity" name="minQuantity" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-1">
+                                <label>Preço de Custo *</label>
+                                <input type="number" [(ngModel)]="currentProduct().costPrice" name="costPrice" required min="0">
+                            </div>
+                            <div class="form-group col-1">
+                                <label>Preço de Venda *</label>
+                                <input type="number" [(ngModel)]="currentProduct().sellPrice" name="sellPrice" required min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+                        <button type="submit" class="btn-save" [disabled]="productForm.invalid">Salvar Produto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
 </div>

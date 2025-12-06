@@ -1,9 +1,9 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router'; // Importado para navigationTo
+import { RouterLink } from '@angular/router'; 
 
-// Interfaces/Tipagem
+// Interface de OS simplificada para o Dashboard
 interface OrdemServicoDashboard {
   id: number;
   client: string;
@@ -16,7 +16,7 @@ interface OrdemServicoDashboard {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, DatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -25,10 +25,19 @@ export class Dashboard implements OnInit {
   allOrders = signal<OrdemServicoDashboard[]>([]);
   loading = signal(true);
   
-  constructor(private router: Router) {}
+  // KPIs Buscados Diretamente do Backend
+  dailyRevenue = signal(0);
+  lowStockCount = signal(0);
+
+  // INJEÇÃO CORRIGIDA: Adicionar ChangeDetectorRef aqui
+  constructor(
+    private router: Router,
+    private cdr: ChangeDetectorRef // <<-- Adicionado
+  ) {}
 
   // --- CICLO DE VIDA ---
   ngOnInit(): void {
+    // É uma boa prática carregar os dados em uma função separada
     this.loadDashboardData();
   }
 
@@ -38,10 +47,22 @@ export class Dashboard implements OnInit {
     this.loading.set(true);
 
     try {
-      // Busca todas as Ordens de Serviço (OS)
-      const ordersData = await window.electronAPI.getOS();
+      // Carrega todos os dados assíncronos em paralelo
+      const [revenue, lowStock, ordersData] = await Promise.all([
+        window.electronAPI.getDailyRevenue(),
+        window.electronAPI.countLowStock(),
+        window.electronAPI.getOS()
+      ]);
+
+      // 1. Seta os KPIs
+      this.dailyRevenue.set(revenue);
+      this.lowStockCount.set(lowStock);
       
+      // 2. Seta os dados da lista
       this.allOrders.set(ordersData);
+      
+      // 3. Força a detecção de mudanças para renderizar na primeira vez
+      this.cdr.detectChanges(); // <<-- SOLUÇÃO PARA O PROBLEMA DO RECARREGAMENTO
       
     } catch (error) {
       console.error('Erro ao carregar dados do Dashboard:', error);
@@ -50,7 +71,7 @@ export class Dashboard implements OnInit {
     }
   }
 
-  // --- KPIS (COMPUTED SIGNALS) ---
+  // --- KPIS CALCULADOS NO FRONTEND ---
 
   // 1. Veículos na Oficina (Status 'in-progress' ou 'pending')
   vehiclesInProgress = computed(() => {
@@ -59,31 +80,8 @@ export class Dashboard implements OnInit {
     ).length;
   });
 
-  // 2. Ordens Finalizadas no Mês Atual (para faturamento rápido)
-  completedOrdersThisMonth = computed(() => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-
-    return this.allOrders().filter(order => {
-      // Converte a data da OS (YYYY-MM-DD)
-      const orderDate = new Date(order.date);
-      
-      return order.status === 'completed' &&
-             orderDate.getMonth() === currentMonth &&
-             orderDate.getFullYear() === currentYear;
-    });
-  });
-
-  // 3. Faturamento Total do Mês (soma dos 'completedOrdersThisMonth')
-  monthlyRevenue = computed(() => {
-    return this.completedOrdersThisMonth().reduce((acc, curr) => acc + curr.total, 0);
-  });
-  
-  // 4. Atividades Recentes (Últimas 5 OS criadas/atualizadas)
+  // 2. Atividades Recentes (Últimas 5 OS criadas/atualizadas)
   recentActivities = computed(() => {
-    // Ordena pelo ID de forma decrescente (presume-se que ID mais alto é mais recente)
-    // Pega as últimas 5.
     return [...this.allOrders()]
       .sort((a, b) => b.id - a.id)
       .slice(0, 5);
@@ -110,10 +108,5 @@ export class Dashboard implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     return `${day}/${month}`;
-  }
-  
-  // Atualizado para aceitar queryParams (opcional)
-  navigateTo(path: string, params: any = {}) {
-    this.router.navigate([path], { queryParams: params });
   }
 }

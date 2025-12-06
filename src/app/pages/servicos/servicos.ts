@@ -10,27 +10,23 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './servicos.css'
 })
 export class Servicos implements OnInit { 
-  // Sinais de Controle
   searchTerm = signal('');
   showModal = signal(false);
 
   // Lista de categorias (Carregada do Banco de Configurações)
   categories = signal<string[]>([]); 
 
-  // Objeto para o Formulário (Edição/Criação)
   currentService = signal({
     id: 0,
     name: '',
     description: '',
-    category: '', // Inicialmente vazio, será preenchido com a primeira categoria carregada
+    category: '', 
     time: '',
     price: 0
   });
 
-  // Lista de Serviços (agora vinda do banco)
   services = signal<any[]>([]);
 
-  // --- Ciclo de Vida: Carrega os dados ao iniciar ---
   ngOnInit(): void {
     this.loadData();
   }
@@ -43,8 +39,8 @@ export class Servicos implements OnInit {
       const servicesData = await window.electronAPI.getServicos();
       this.services.set(servicesData);
       
-      // 2. Carrega as Categorias salvas em Configurações
-      const savedCategories = await window.electronAPI.getConfig('categorias');
+      // 2. Carrega as Categorias salvas em Configurações (CHAVE CORRIGIDA)
+      const savedCategories = await window.electronAPI.getConfig('categorias_servicos'); 
       if (savedCategories && savedCategories.length > 0) {
          this.categories.set(savedCategories);
          // Define a primeira categoria carregada como padrão do formulário
@@ -57,7 +53,6 @@ export class Servicos implements OnInit {
   }
 
 
-  // Filtro de Busca (Computed Signal)
   filteredServices = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.services().filter(s => 
@@ -66,14 +61,15 @@ export class Servicos implements OnInit {
     );
   });
 
-  // --- Funções do Modal e Ações ---
-
   openNewServiceModal() {
+    // Seta a categoria padrão (primeira da lista)
+    const defaultCat = this.categories()[0] || '';
+
     this.currentService.set({
       id: 0,
       name: '',
       description: '',
-      category: this.categories()[0] || '', 
+      category: defaultCat, 
       time: '',
       price: 0
     });
@@ -94,14 +90,14 @@ export class Servicos implements OnInit {
 
     if (window.electronAPI) {
       try {
-        if (newSvc.id === 0) {
-          // Adicionar Novo 
-          const saved = await window.electronAPI.addServico(newSvc);
-          this.services.update(list => [...list, saved]);
-        } else {
-          // Atualizar Existente
+        if (newSvc.id && newSvc.id !== 0) {
+          // --- ATUALIZAR EXISTENTE ---
           await window.electronAPI.updateServico(newSvc);
-          this.services.update(list => list.map(s => s.id === newSvc.id ? newSvc : s));
+          await this.loadData(); // Recarrega
+        } else {
+          // --- CRIAR NOVO ---
+          await window.electronAPI.addServico(newSvc);
+          await this.loadData(); // Recarrega
         }
         this.closeModal();
       } catch (error) {

@@ -115,31 +115,23 @@ export class Orcamentos implements OnInit {
     if (confirm(`Converter o Orçamento #${budget.id} para uma nova Ordem de Serviço?`)) {
         if (!window.electronAPI) return;
 
-        // Prepara os dados para a OS
         const osData = {
-            // Copia dados básicos
             client: budget.client,
             vehicle: budget.vehicle,
             items: budget.items, 
             notes: `Gerado a partir do Orçamento #${budget.id}. Notas originais: ${budget.notes}`,
             total: budget.total,
-            // Valores padrão para nova OS
             date: new Date().toISOString().split('T')[0],
-            status: 'in-progress' // Começa como 'Em Andamento' na OS
+            status: 'in-progress'
         };
 
         try {
-            // 1. Chama a API do Electron para criar a OS
             await window.electronAPI.addOS(osData);
-            
-            // 2. Opcional: Atualiza o status do Orçamento para 'rejected' ou 'converted'
-            // Se você quiser marcar o orçamento como 'Rejeitado' (para tirá-lo de pendente):
-            // budget.status = 'rejected'; 
-            // await window.electronAPI.updateOrcamento(budget); 
-            // Para simplificar, apenas alertamos e o usuário pode rejeitar manualmente se necessário.
-            
             alert(`Orçamento #${budget.id} convertido com sucesso em Ordem de Serviço!`);
             
+            // Recarrega para que o novo OS apareça no Dashboard/OS
+            await this.loadData(); 
+
         } catch (error) {
             console.error('Erro ao converter orçamento para OS:', error);
             alert('Erro ao tentar converter para Ordem de Serviço no banco de dados.');
@@ -147,7 +139,7 @@ export class Orcamentos implements OnInit {
     }
   }
   
-  // --- AÇÕES CRUD ---
+  // --- AÇÕES CRUD (CORRIGIDO) ---
 
   openModal() {
     this.currentBudget.set(this.getEmptyBudget());
@@ -155,6 +147,7 @@ export class Orcamentos implements OnInit {
   }
 
   editBudget(budget: Orcamento) {
+    // Preserva o ID
     this.currentBudget.set(JSON.parse(JSON.stringify(budget)));
     this.showModal.set(true);
   }
@@ -184,13 +177,15 @@ export class Orcamentos implements OnInit {
 
     if (window.electronAPI) {
       try {
-        if (budget.id === 0) {
-          const saved = await window.electronAPI.addOrcamento(budget);
-          this.budgets.update(list => [saved, ...list]);
-        } else {
-          // Atualização: Necessário para atualizar o Status (Aprovado/Rejeitado)
+        // CORREÇÃO: Verifica se o ID é diferente de zero (existente)
+        if (budget.id && budget.id !== 0) {
+           // --- ATUALIZAR EXISTENTE ---
           await window.electronAPI.updateOrcamento(budget);
-          this.budgets.update(list => list.map(b => b.id === budget.id ? budget : b));
+          await this.loadData();
+        } else {
+          // --- CRIAR NOVO ---
+          await window.electronAPI.addOrcamento(budget);
+          await this.loadData();
         }
         this.closeModal();
       } catch (error) {
@@ -202,7 +197,7 @@ export class Orcamentos implements OnInit {
     }
   }
 
-  // --- ITENS (CORREÇÃO DE TIPO) ---
+  // --- ITENS (Cálculo no Frontend) ---
 
   addService() {
     const svcId = this.selectedServiceId();

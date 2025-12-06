@@ -10,10 +10,10 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './configuracoes.css'
 })
 export class Configuracoes implements OnInit { 
-  // --- TEMA (Aparência) - Mantém localStorage ---
+  // --- TEMA (Aparência) ---
   theme = signal<'light' | 'dark'>(this.loadTheme());
 
-  // --- DADOS DA OFICINA (Para Orçamentos e Relatórios) ---
+  // --- DADOS DA OFICINA ---
   companyData = signal({
     name: '',
     cnpj: '',
@@ -27,13 +27,15 @@ export class Configuracoes implements OnInit {
     quoteFooterText: 'Orçamento válido por 15 dias.'
   });
 
-  // --- CATEGORIAS (Gestão) ---
-  newCategoryName = signal('');
-  // Lista de categorias será carregada do banco
-  categories = signal<string[]>([]); 
+  // --- CATEGORIAS DE PRODUTOS ---
+  newProductCategoryName = signal(''); 
+  productCategories = signal<string[]>([]); 
+  
+  // --- CATEGORIAS DE SERVIÇOS (RESTAURO) ---
+  newServiceCategoryName = signal(''); 
+  serviceCategories = signal<string[]>([]); 
 
   constructor() {
-    // Efeito: Sempre que o tema mudar, aplica no corpo do HTML e salva LOCALMENTE
     effect(() => {
       const currentTheme = this.theme();
       document.body.setAttribute('data-theme', currentTheme);
@@ -47,7 +49,6 @@ export class Configuracoes implements OnInit {
     });
   }
 
-  // --- Ciclo de Vida: Carrega dados do banco ao iniciar ---
   ngOnInit(): void {
     this.loadAllData();
   }
@@ -62,20 +63,28 @@ export class Configuracoes implements OnInit {
         this.companyData.set(savedCompanyData);
       }
       
-      // 2. Carrega Categorias
-      const savedCategories = await window.electronAPI.getConfig('categorias');
-      
-      if (savedCategories && savedCategories.length > 0) {
-        this.categories.set(savedCategories);
-      } else {
-        // Se não houver categorias no banco, carrega os padrões e salva no banco
-        const defaultCats = ['Manutenção', 'Suspensão', 'Elétrica', 'Freios', 'Estética', 'Motor', 'Ar Condicionado', 'Pneus', 'Outros'];
-        this.categories.set(defaultCats);
-        await this.saveCategories(defaultCats);
-      }
+      // 2. Carrega Categorias de PRODUTOS
+      await this.loadAndSetCategories('categorias_produtos', this.productCategories, 
+        ['Óleos e Fluidos', 'Filtros', 'Freios', 'Suspensão', 'Motor', 'Pneus', 'Acessórios', 'Outros']);
+
+      // 3. Carrega Categorias de SERVIÇOS (RESTAURO)
+      await this.loadAndSetCategories('categorias_servicos', this.serviceCategories,
+        ['Mecânica Geral', 'Elétrica', 'Revisão', 'Pintura', 'Funilaria', 'Diagnóstico']);
+
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
     }
+  }
+  
+  private async loadAndSetCategories(key: string, signal: any, defaults: string[]) {
+      const savedCategories = await window.electronAPI.getConfig(key);
+      
+      if (savedCategories && savedCategories.length > 0) {
+        signal.set(savedCategories);
+      } else {
+        signal.set(defaults);
+        await this.saveCategories(key, defaults);
+      }
   }
 
 
@@ -85,7 +94,6 @@ export class Configuracoes implements OnInit {
   }
 
   private loadTheme(): 'light' | 'dark' {
-    // Carrega do localStorage de forma síncrona
     return (localStorage.getItem('oficina_theme') as 'light' | 'dark') || 'light';
   }
 
@@ -102,34 +110,52 @@ export class Configuracoes implements OnInit {
     }
   }
   
-  // --- MÉTODOS DE CATEGORIAS ---
-  async addCategory() {
-    const name = this.newCategoryName().trim();
-    if (name && !this.categories().includes(name)) {
-      this.categories.update(list => [...list, name]);
-      await this.saveCategories(this.categories());
-      this.newCategoryName.set('');
-    } else if (this.categories().includes(name)) {
-      alert('Esta categoria já existe!');
-    }
-  }
-
-  async removeCategory(index: number) {
-    if (confirm('Remover esta categoria?')) {
-      this.categories.update(list => list.filter((_, i) => i !== index));
-      await this.saveCategories(this.categories());
+  // --- MÉTODOS DE CATEGORIAS GENÉRICOS ---
+  private async saveCategories(key: string, cats: string[]) {
+    if (window.electronAPI) {
+      try {
+         await window.electronAPI.setConfig(key, cats);
+      } catch(error) {
+        console.error(`Erro ao salvar categorias para a chave ${key}:`, error);
+      }
     }
   }
   
-  // Salva o array de categorias no banco.
-  private async saveCategories(cats: string[]) {
-    if (window.electronAPI) {
-      try {
-         // O Electron salva como JSON string e usa a chave 'categorias'
-         await window.electronAPI.setConfig('categorias', cats);
-      } catch(error) {
-        console.error('Erro ao salvar categorias:', error);
-      }
+  // --- MÉTODOS DE CATEGORIAS DE PRODUTOS ---
+  async addProductCategory() {
+    const name = this.newProductCategoryName().trim();
+    if (name && !this.productCategories().includes(name)) {
+      this.productCategories.update(list => [...list, name]);
+      await this.saveCategories('categorias_produtos', this.productCategories());
+      this.newProductCategoryName.set('');
+    } else if (this.productCategories().includes(name)) {
+      alert('Esta categoria de produto já existe!');
+    }
+  }
+
+  async removeProductCategory(category: string) {
+    if (confirm(`Remover a categoria de produto "${category}"?`)) {
+      this.productCategories.update(list => list.filter(c => c !== category));
+      await this.saveCategories('categorias_produtos', this.productCategories());
+    }
+  }
+  
+  // --- MÉTODOS DE CATEGORIAS DE SERVIÇOS ---
+  async addServiceCategory() {
+    const name = this.newServiceCategoryName().trim();
+    if (name && !this.serviceCategories().includes(name)) {
+      this.serviceCategories.update(list => [...list, name]);
+      await this.saveCategories('categorias_servicos', this.serviceCategories());
+      this.newServiceCategoryName.set('');
+    } else if (this.serviceCategories().includes(name)) {
+      alert('Esta categoria de serviço já existe!');
+    }
+  }
+
+  async removeServiceCategory(category: string) {
+    if (confirm(`Remover a categoria de serviço "${category}"?`)) {
+      this.serviceCategories.update(list => list.filter(c => c !== category));
+      await this.saveCategories('categorias_servicos', this.serviceCategories());
     }
   }
 }

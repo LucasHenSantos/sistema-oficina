@@ -79,7 +79,7 @@ export class OrdemServico implements OnInit {
       this.availableProducts.set(productsData.map((p: any) => ({
         id: p.id,
         name: p.name,
-        price: p.sellPrice // Usa o preço de venda para calcular na OS
+        price: p.sellPrice 
       })));
 
       // Define cliente/veículo padrão para o formulário se houver dados
@@ -126,6 +126,7 @@ export class OrdemServico implements OnInit {
   }
 
   editOrder(order: any) {
+    // Preserva o ID
     this.currentOrder.set(JSON.parse(JSON.stringify(order)));
     this.showModal.set(true);
   }
@@ -139,7 +140,7 @@ export class OrdemServico implements OnInit {
     const svcId = this.selectedServiceId();
     if (svcId === null) return;
     
-    // FIX: Usa == (Loose Equality) para comparar string (input) com number (dados)
+    // FIX: Usa == (Loose Equality)
     const service = this.availableServices().find(s => s.id == svcId); 
 
     if (service) {
@@ -170,7 +171,6 @@ export class OrdemServico implements OnInit {
   private addItem(item: OrderItem) {
     this.currentOrder.update(o => {
       const newItems = [...o.items, item];
-      // Recalcula o total do orçamento a cada item adicionado/removido
       const newTotal = newItems.reduce((acc, i) => acc + i.total, 0); 
       return { ...o, items: newItems, total: newTotal };
     });
@@ -186,17 +186,19 @@ export class OrdemServico implements OnInit {
 
   async saveOrder() {
     const newOrder = this.currentOrder();
-    // Recalcula o total final antes de salvar (garantia)
     newOrder.total = newOrder.items.reduce((acc, i) => acc + i.total, 0);
 
     if (window.electronAPI) {
       try {
-        if (newOrder.id === 0) {
-          const saved = await window.electronAPI.addOS(newOrder);
-          this.orders.update(list => [saved, ...list]);
-        } else {
+        // CORREÇÃO: Verifica se o ID é diferente de zero (existente)
+        if (newOrder.id && newOrder.id !== 0) {
+           // --- ATUALIZAR EXISTENTE ---
           await window.electronAPI.updateOS(newOrder);
-          this.orders.update(list => list.map(o => o.id === newOrder.id ? newOrder : o));
+          await this.loadData();
+        } else {
+          // --- CRIAR NOVO ---
+          await window.electronAPI.addOS(newOrder);
+          await this.loadData();
         }
         this.closeModal();
       } catch (error) {
