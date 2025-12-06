@@ -58,7 +58,8 @@
               <span class="status-badge" [class]="client.status">{{ client.statusLabel }}</span>
             </td>
             <td class="actions-cell">
-              <button class="btn-action whatsapp" (click)="openWhatsApp(client.phone)">📱</button>
+              <button class="btn-action view" (click)="viewClient(client.name)" title="Visualizar Detalhes">👁️</button>
+              
               <button class="btn-action edit" (click)="editClient(client)">✏️</button>
               <button class="btn-action delete" (click)="deleteClient(client.id)">🗑️</button>
             </td>
@@ -93,9 +94,51 @@
 
           <div class="form-actions">
             <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn-save" [disabled]="clientForm.invalid">Salvar Cliente</button>
+            <button type="submit" class="btn-save">Salvar Cliente</button>
           </div>
         </form>
+      </div>
+    </div>
+  }
+  
+  @if (showViewModal()) {
+    <div class="modal-overlay" (click)="closeViewModal()">
+      <div class="modal-content large-modal view-modal" (click)="$event.stopPropagation()">
+        
+        @if (clientDetails()) {
+          <h2>Detalhes do Cliente: {{ clientDetails().client.name }}</h2>
+          
+          <div class="client-view-details">
+            <div class="detail-group">
+                <h4>Contato e Status</h4>
+                <p><strong>Telefone:</strong> {{ clientDetails().client.phone }}</p>
+                <p><strong>E-mail:</strong> {{ clientDetails().client.email }}</p>
+                <p><strong>Status:</strong> <span class="status-badge" [class]="clientDetails().client.status">{{ clientDetails().client.statusLabel }}</span></p>
+                <p><strong>Última Visita:</strong> {{ clientDetails().client.lastVisit | date:'dd/MM/yyyy' }}</p>
+            </div>
+
+            <div class="detail-group vehicles-group">
+                <h4>Veículos Vinculados (Total: {{ clientDetails().vehicles.length }})</h4>
+                
+                @if (clientDetails().vehicles.length > 0) {
+                    <ul class="vehicle-list-view">
+                        @for (v of clientDetails().vehicles; track v.id) {
+                            <li>
+                                <strong>{{ v.plate }}</strong> - {{ v.brand }} {{ v.model }} ({{ v.year }})
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="no-veiculo">Nenhum veículo cadastrado para este cliente.</p>
+                }
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="closeViewModal()">Fechar</button>
+            <button type="button" class="btn-save" (click)="editClient(clientDetails().client)">✏️ Editar Cliente</button>
+          </div>
+        }
       </div>
     </div>
   }

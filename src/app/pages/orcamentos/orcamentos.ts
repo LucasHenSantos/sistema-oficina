@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,8 +14,8 @@ interface OrcamentoItem {
 
 interface Orcamento {
   id: number;
-  client: string;
-  vehicle: string;
+  client: string; // Nome do Cliente
+  vehicle: string; // Placa/Modelo do Veículo
   date: string;
   validUntil: string;
   status: 'pending' | 'approved' | 'rejected';
@@ -34,10 +34,11 @@ interface Orcamento {
 export class Orcamentos implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
+  showViewModal = signal(false); 
 
-  // Listas de Apoio (Dados reais do banco)
   clientsList = signal<string[]>([]);
-  vehiclesList = signal<string[]>([]);
+  private allVehicles: any[] = []; 
+  availableVehicles = signal<string[]>([]); 
   
   availableServices = signal<any[]>([]);
   availableProducts = signal<any[]>([]);
@@ -45,6 +46,7 @@ export class Orcamentos implements OnInit {
   budgets = signal<Orcamento[]>([]);
 
   currentBudget = signal<Orcamento>(this.getEmptyBudget());
+  budgetItemToView = signal<Orcamento | null>(null); 
 
   // Controles de Adição
   selectedServiceId = signal<number | null>(null);
@@ -53,6 +55,8 @@ export class Orcamentos implements OnInit {
 
   // Dados da Empresa (Carregados do Config)
   companyData = signal<any>(null);
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   // --- CICLO DE VIDA ---
   ngOnInit(): void {
@@ -63,39 +67,32 @@ export class Orcamentos implements OnInit {
     if (!window.electronAPI) return;
 
     try {
-      // 1. Carrega a Lista Principal
       const budgetsData = await window.electronAPI.getOrcamentos();
       this.budgets.set(budgetsData);
       
-      // 2. Carrega Listas de Apoio (Para Selects)
       const clientsData = await window.electronAPI.getClientes();
-      const vehiclesData = await window.electronAPI.getVeiculos();
+      this.allVehicles = await window.electronAPI.getVeiculos();
       const servicesData = await window.electronAPI.getServicos();
       const productsData = await window.electronAPI.getProdutos();
       const companyConfig = await window.electronAPI.getConfig('dados_empresa');
 
-      // Mapeia para o formato de string simples
       this.clientsList.set(clientsData.map((c: any) => c.name));
-      this.vehiclesList.set(vehiclesData.map((v: any) => `${v.model} (${v.plate})`));
-      
       this.availableServices.set(servicesData);
       this.availableProducts.set(productsData);
-
-      // Carrega dados da empresa para impressão
-      if (companyConfig) {
-        this.companyData.set(companyConfig);
-      }
+      this.companyData.set(companyConfig);
 
       // Define cliente/veículo padrão se houver
       const defaultClient = this.clientsList()[0] || '';
-      const defaultVehicle = this.vehiclesList()[0] || '';
-      this.currentBudget.set(this.getEmptyBudget(defaultClient, defaultVehicle));
+      this.currentBudget.set(this.getEmptyBudget(defaultClient));
+      this.onClientChange(defaultClient); 
 
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Erro ao carregar dados de orçamento:', error);
     }
   }
-
+  
+  // --- FUNÇÃO DE FILTRO (COMPUTED SIGNAL RESTAURADA) ---
   filteredBudgets = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.budgets().filter(b => 
@@ -104,55 +101,44 @@ export class Orcamentos implements OnInit {
       b.id.toString().includes(term)
     );
   });
+  
+  // --- FLUXO DE SELEÇÃO DE VEÍCULO ---
+  onClientChange(clientName: string) {
+    const filtered = this.allVehicles.filter(v => v.client === clientName);
+    const vehiclesFormatted = filtered.map(v => `${v.model} (${v.plate})`);
+    
+    this.availableVehicles.set(vehiclesFormatted);
 
-  // --- NOVO MÉTODO DE CONVERSÃO ---
-  async convertToOS(budget: Orcamento) {
-    if (budget.status !== 'approved') {
-        alert('Apenas orçamentos com status "Aprovado" podem ser convertidos em Ordem de Serviço.');
-        return;
-    }
+    this.currentBudget.update(b => ({ ...b, vehicle: vehiclesFormatted[0] || '' }));
+  }
 
-    if (confirm(`Converter o Orçamento #${budget.id} para uma nova Ordem de Serviço?`)) {
-        if (!window.electronAPI) return;
-
-        const osData = {
-            client: budget.client,
-            vehicle: budget.vehicle,
-            items: budget.items, 
-            notes: `Gerado a partir do Orçamento #${budget.id}. Notas originais: ${budget.notes}`,
-            total: budget.total,
-            date: new Date().toISOString().split('T')[0],
-            status: 'in-progress'
-        };
-
-        try {
-            await window.electronAPI.addOS(osData);
-            alert(`Orçamento #${budget.id} convertido com sucesso em Ordem de Serviço!`);
-            
-            // Recarrega para que o novo OS apareça no Dashboard/OS
-            await this.loadData(); 
-
-        } catch (error) {
-            console.error('Erro ao converter orçamento para OS:', error);
-            alert('Erro ao tentar converter para Ordem de Serviço no banco de dados.');
-        }
-    }
+  // --- AÇÕES DE VISUALIZAÇÃO ---
+  viewBudget(budget: Orcamento) {
+    this.budgetItemToView.set(JSON.parse(JSON.stringify(budget)));
+    this.showViewModal.set(true);
   }
   
-  // --- AÇÕES CRUD (CORRIGIDO) ---
+  closeViewModal() {
+    this.showViewModal.set(false);
+    this.budgetItemToView.set(null);
+  }
+
+  // --- AÇÕES CRUD ---
 
   openModal() {
-    this.currentBudget.set(this.getEmptyBudget());
+    const defaultClient = this.clientsList()[0] || '';
+    this.currentBudget.set(this.getEmptyBudget(defaultClient));
+    this.onClientChange(defaultClient); 
     this.showModal.set(true);
   }
 
   editBudget(budget: Orcamento) {
-    // Preserva o ID
     this.currentBudget.set(JSON.parse(JSON.stringify(budget)));
+    this.onClientChange(budget.client); 
     this.showModal.set(true);
   }
 
-  closeModal() {
+  closeModal() { 
     this.showModal.set(false);
   }
 
@@ -177,13 +163,10 @@ export class Orcamentos implements OnInit {
 
     if (window.electronAPI) {
       try {
-        // CORREÇÃO: Verifica se o ID é diferente de zero (existente)
         if (budget.id && budget.id !== 0) {
-           // --- ATUALIZAR EXISTENTE ---
           await window.electronAPI.updateOrcamento(budget);
           await this.loadData();
         } else {
-          // --- CRIAR NOVO ---
           await window.electronAPI.addOrcamento(budget);
           await this.loadData();
         }
@@ -197,13 +180,41 @@ export class Orcamentos implements OnInit {
     }
   }
 
+  async convertToOS(budget: Orcamento) {
+    if (budget.status !== 'approved') {
+        alert('Apenas orçamentos com status "Aprovado" podem ser convertidos em Ordem de Serviço.');
+        return;
+    }
+
+    if (confirm(`Converter o Orçamento #${budget.id} para uma nova Ordem de Serviço?`)) {
+        if (!window.electronAPI) return;
+
+        const osData = {
+            client: budget.client,
+            vehicle: budget.vehicle,
+            items: budget.items, 
+            notes: `Gerado a partir do Orçamento #${budget.id}. Notas originais: ${budget.notes}`,
+            total: budget.total,
+            date: new Date().toISOString().split('T')[0],
+            status: 'in-progress' 
+        };
+
+        try {
+            await window.electronAPI.addOS(osData);
+            alert(`Orçamento #${budget.id} convertido com sucesso em Ordem de Serviço!`);
+        } catch (error) {
+            console.error('Erro ao converter orçamento para OS:', error);
+            alert('Erro ao tentar converter para Ordem de Serviço no banco de dados.');
+        }
+    }
+  }
+
   // --- ITENS (Cálculo no Frontend) ---
 
   addService() {
     const svcId = this.selectedServiceId();
     if (svcId === null) return;
     
-    // FIX: Usa == (Loose Equality) para encontrar o ID
     const svc = this.availableServices().find(s => s.id == svcId);
     if (svc) {
       this.addItem({ type: 'service', id: svc.id, name: svc.name, qty: 1, price: svc.price, total: svc.price });
@@ -216,7 +227,6 @@ export class Orcamentos implements OnInit {
     const qty = this.productQty();
     if (prodId === null || qty <= 0) return;
     
-    // FIX: Usa == (Loose Equality) para encontrar o ID
     const prod = this.availableProducts().find(p => p.id == prodId);
     if (prod) {
       this.addItem({ type: 'product', id: prod.id, name: prod.name, qty: qty, price: prod.sellPrice, total: prod.sellPrice * qty });
@@ -244,8 +254,11 @@ export class Orcamentos implements OnInit {
   // --- HELPERS ---
   
   printBudget(budget?: Orcamento) {
+    // Usamos budgetItemToView para carregar os dados na área de impressão
     if (budget) {
-      this.currentBudget.set(JSON.parse(JSON.stringify(budget)));
+      this.budgetItemToView.set(JSON.parse(JSON.stringify(budget)));
+    } else {
+      this.budgetItemToView.set(this.currentBudget());
     }
     setTimeout(() => window.print(), 200);
   }
@@ -255,9 +268,9 @@ export class Orcamentos implements OnInit {
     return map[status] || status;
   }
 
-  private getEmptyBudget(defaultClient: string = '', defaultVehicle: string = ''): Orcamento {
+  private getEmptyBudget(defaultClient: string = ''): Orcamento {
     return {
-      id: 0, client: defaultClient, vehicle: defaultVehicle, date: new Date().toISOString().split('T')[0],
+      id: 0, client: defaultClient, vehicle: '', date: new Date().toISOString().split('T')[0],
       validUntil: '', status: 'pending', total: 0, items: [], notes: ''
     };
   }

@@ -1,84 +1,104 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Interfaces simplificadas (Baseadas nas suas originais)
 interface Cliente {
   id: number;
   name: string;
   phone: string;
   email: string;
-  cars: string[]; // Mock data original (não usaremos, mas o backend pode esperar)
+  cars?: any[]; // <--- PROPRIEDADE OBRIGATÓRIA NO BANCO/FORMULÁRIO
   lastVisit: string;
   status: string;
   statusLabel: string;
-  // Propriedade para a exibição de veículos vinculados
-  associatedVehicles?: string[]; 
+  associatedVehicles?: string[]; // Para exibição na tabela
 }
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './clientes.html',
   styleUrl: './clientes.css'
 })
 export class Clientes implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
+  showViewModal = signal(false); // NOVO: Controla o modal de visualização
+  
+  // Dados do cliente para o modal de visualização
+  clientDetails = signal<any>(null); 
 
-  // Objeto para o Formulário
-  currentClient = signal<Cliente>(this.getEmptyClient());
+  // Objeto para o Formulário (Edição/Criação)
+  currentClient = signal<any>(this.getEmptyClient());
 
-  // Lista de Clientes (agora com tipagem)
+  // Lista de Clientes
   clients = signal<Cliente[]>([]);
 
-  // --- CICLO DE VIDA ---
+  // Lista bruta de veículos
+  private vehiclesData: any[] = [];
+  loading = signal(true);
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
   ngOnInit() {
     this.loadData();
   }
 
   async loadData() {
     if (!window.electronAPI) return;
+    this.loading.set(true);
 
     try {
-      // 1. Carrega Clientes (Clientes Data)
+      // 1. Carrega Clientes
       const clientsData: Cliente[] = await window.electronAPI.getClientes();
       
-      // 2. Carrega Veículos (Veiculos Data)
-      const vehiclesData: any[] = await window.electronAPI.getVeiculos();
+      // 2. Carrega Veículos
+      this.vehiclesData = await window.electronAPI.getVeiculos();
       
-      // 3. Mapeamento e Associação
+      // 3. Mapeamento e Associação (para exibição na tabela)
       const clientsWithVehicles = clientsData.map(client => {
-        // Encontra todos os veículos cujo campo 'client' (string) bate com o nome do cliente
-        const vehicles = vehiclesData
+        const vehicles = this.vehiclesData
           .filter(v => v.client === client.name)
-          // Mapeia para um formato amigável para o badge: 'Modelo (Placa)'
           .map(v => `${v.model} (${v.plate})`); 
         
         return {
           ...client,
-          // Adiciona a propriedade que o HTML vai usar para os badges
           associatedVehicles: vehicles 
         } as Cliente;
       });
 
       this.clients.set(clientsWithVehicles);
-
+      this.cdr.detectChanges(); 
     } catch (error) {
       console.error('Erro ao carregar dados de Clientes e Veículos:', error);
+    } finally {
+      this.loading.set(false);
     }
   }
 
-  filteredClients = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    return this.clients().filter(client => 
-      client.name.toLowerCase().includes(term) || 
-      (client.phone && client.phone.includes(term))
-    );
-  });
+  // --- AÇÕES DE VISUALIZAÇÃO (NOVO) ---
+  async viewClient(clientName: string) {
+    if (!window.electronAPI) return;
+    
+    try {
+      // Chama o novo handler IPC
+      const result = await window.electronAPI.getClientWithVehicles(clientName);
+      if (result) {
+        this.clientDetails.set(result);
+        this.showViewModal.set(true);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar detalhes do cliente:', error);
+    }
+  }
 
-  // --- AÇÕES ---
+  closeViewModal() {
+    this.showViewModal.set(false);
+    this.clientDetails.set(null);
+  }
+
+  // --- AÇÕES CRUD (Modal de Edição) ---
   
   openModal() {
     this.currentClient.set(this.getEmptyClient());
@@ -86,7 +106,6 @@ export class Clientes implements OnInit {
   }
 
   editClient(client: any) {
-    // Clona o objeto e remove a propriedade temporária antes de editar, se existir
     const clientToEdit = { ...client };
     delete clientToEdit.associatedVehicles; 
     this.currentClient.set(clientToEdit);
@@ -102,24 +121,17 @@ export class Clientes implements OnInit {
 
     if (window.electronAPI) {
       try {
-        if (newClient.id === 0) {
-          // --- CRIAR NOVO ---
-          const savedClient = await window.electronAPI.addCliente(newClient);
-          // Recarrega todos os dados para atualizar a lista
-          await this.loadData(); 
-        } else {
-          // --- EDITAR EXISTENTE ---
+        if (newClient.id && newClient.id !== 0) {
           await window.electronAPI.updateCliente(newClient);
-          // Recarrega todos os dados para atualizar a lista (incluindo o link de veículos)
-          await this.loadData();
+        } else {
+          await window.electronAPI.addCliente(newClient);
         }
         this.closeModal();
+        await this.loadData(); 
       } catch (error) {
         console.error('Erro ao salvar cliente:', error);
         alert('Erro ao salvar no banco de dados.');
       }
-    } else {
-      this.closeModal();
     }
   }
 
@@ -128,7 +140,7 @@ export class Clientes implements OnInit {
       if (window.electronAPI) {
         try {
           await window.electronAPI.deleteCliente(id);
-          await this.loadData(); // Recarrega para refletir a exclusão
+          await this.loadData();
         } catch (error) {
           console.error('Erro ao excluir cliente:', error);
           alert('Erro ao excluir do banco.');
@@ -137,6 +149,7 @@ export class Clientes implements OnInit {
     }
   }
 
+  // --- HELPERS ---
   openWhatsApp(phone: string) {
     console.log(`Abrindo WhatsApp: ${phone}`);
   }
@@ -145,17 +158,25 @@ export class Clientes implements OnInit {
     console.log(`Nova OS para: ${name}`);
   }
 
-  private getEmptyClient(): Cliente {
-    return {
-      id: 0,
-      name: '',
-      phone: '',
-      email: '',
-      cars: [],
-      lastVisit: new Date().toLocaleDateString('pt-BR'),
-      status: 'active',
-      statusLabel: 'Novo',
-      associatedVehicles: [] // Limpa ao iniciar
-    };
-  }
+  filteredClients = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    return this.clients().filter(client => 
+      client.name.toLowerCase().includes(term) || 
+      (client.phone && client.phone.includes(term))
+    );
+  });
+  
+private getEmptyClient(): Cliente {
+  return {
+    id: 0,
+    name: '',
+    phone: '',
+    email: '',
+    cars: [], // <--- CORRIGIDO: Adicionado 'cars' como array vazio
+    lastVisit: new Date().toLocaleDateString('pt-BR'),
+    status: 'active',
+    statusLabel: 'Novo',
+    associatedVehicles: [] // Para compatibilidade de tipagem
+  };
+}
 }

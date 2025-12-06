@@ -1,7 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // --- KPI HANDLERS (NOVOS) ---
+  // --- NOVO: Cliente e Veículos ---
+  getClientWithVehicles: (clientName) => ipcRenderer.invoke('get-client-with-vehicles', clientName),
+
+  // --- KPI HANDLERS ---
   getDailyRevenue: () => ipcRenderer.invoke('get-daily-revenue'),
   countLowStock: () => ipcRenderer.invoke('count-low-stock'),
 

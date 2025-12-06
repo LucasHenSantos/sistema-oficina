@@ -3,7 +3,10 @@ export {};
 declare global {
   interface Window {
     electronAPI: {
-      // --- KPIS DO DASHBOARD (TIPAGEM CORRIGIDA) ---
+      // --- NOVO: Cliente e Veículos ---
+      getClientWithVehicles: (clientName: string) => Promise<any>;
+      
+      // --- KPIS DO DASHBOARD ---
       getDailyRevenue: () => Promise<number>;
       countLowStock: () => Promise<number>;
       

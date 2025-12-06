@@ -20,9 +20,8 @@ function initDatabase() {
   });
 }
 
-// 2. Cria as Tabelas Iniciais
+// 2. Cria as Tabelas Iniciais (COMPLETO)
 function createTables() {
-  // CLIENTES (cars será JSON string)
   const sqlClientes = `
     CREATE TABLE IF NOT EXISTS clientes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +35,6 @@ function createTables() {
     )
   `;
   
-  // VEÍCULOS
   const sqlVeiculos = `
     CREATE TABLE IF NOT EXISTS veiculos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,7 +49,6 @@ function createTables() {
     )
   `;
 
-  // PRODUTOS/ESTOQUE
   const sqlProdutos = `
     CREATE TABLE IF NOT EXISTS produtos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +64,6 @@ function createTables() {
     )
   `;
   
-  // SERVIÇOS
   const sqlServicos = `
     CREATE TABLE IF NOT EXISTS servicos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +75,6 @@ function createTables() {
     )
   `;
 
-  // ORDENS DE SERVIÇO (items será JSON string)
   const sqlOS = `
     CREATE TABLE IF NOT EXISTS ordens_servico (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -93,7 +88,6 @@ function createTables() {
     )
   `;
 
-  // ORÇAMENTOS (items será JSON string)
   const sqlOrcamentos = `
     CREATE TABLE IF NOT EXISTS orcamentos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,7 +102,6 @@ function createTables() {
     )
   `;
 
-  // CONFIGURAÇÕES (Para guardar categorias e dados da empresa, como JSON)
   const sqlConfig = `
     CREATE TABLE IF NOT EXISTS config (
       key TEXT PRIMARY KEY,
@@ -128,11 +121,32 @@ function createTables() {
 // 3. Define as funções que o Angular vai chamar (IPC Handlers)
 function setupIpcHandlers() {
 
-  // --- KPI HANDLERS (NOVAS FUNÇÕES PARA O DASHBOARD) ---
+  // --- NOVO: Handler para buscar Cliente com Veículos ---
+  ipcMain.handle('get-client-with-vehicles', async (event, clientName) => {
+    return new Promise((resolve, reject) => {
+      db.get("SELECT * FROM clientes WHERE name = ?", [clientName], (err, clientRow) => {
+        if (err) return reject(err);
+        
+        if (!clientRow) return resolve(null);
+        
+        db.all("SELECT * FROM veiculos WHERE client = ?", [clientName], (err, vehicleRows) => {
+          if (err) return reject(err);
+          
+          clientRow.cars = clientRow.cars ? JSON.parse(clientRow.cars) : [];
+          
+          resolve({ 
+            client: clientRow, 
+            vehicles: vehicleRows 
+          });
+        });
+      });
+    });
+  });
 
-  // Faturamento do Dia (Filtra por data atual e status 'completed')
+  // --- KPI HANDLERS (Dashboard) ---
+
   ipcMain.handle('get-daily-revenue', async () => {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
     return new Promise((resolve, reject) => {
         const sql = `
             SELECT 
@@ -149,7 +163,6 @@ function setupIpcHandlers() {
     });
   });
 
-  // Contagem de Estoque Baixo (quantity <= minQuantity)
   ipcMain.handle('count-low-stock', async () => {
       return new Promise((resolve, reject) => {
           const sql = `
@@ -167,8 +180,8 @@ function setupIpcHandlers() {
       });
   });
   
-  // --- UTILS / CONFIGURAÇÕES CRUD ---
-
+  // --- UTILS / CONFIGURAÇÕES CRUD (Restante dos handlers) ---
+  
   ipcMain.handle('get-config', async (event, key) => {
     return new Promise((resolve, reject) => {
       db.get("SELECT value FROM config WHERE key = ?", [key], (err, row) => {
@@ -189,7 +202,7 @@ function setupIpcHandlers() {
     });
   });
 
-  // --- CLIENTES CRUD ---
+  // --- CLIENTES CRUD (Restante dos handlers) ---
 
   ipcMain.handle('get-clientes', async () => {
     return new Promise((resolve, reject) => {
@@ -240,7 +253,7 @@ function setupIpcHandlers() {
     });
   });
   
-  // --- VEÍCULOS CRUD ---
+  // --- VEÍCULOS CRUD (Restante dos handlers) ---
 
   ipcMain.handle('get-veiculos', async () => {
     return new Promise((resolve, reject) => {
@@ -280,7 +293,7 @@ function setupIpcHandlers() {
     });
   });
 
-  // --- PRODUTOS CRUD ---
+  // --- PRODUTOS CRUD (Restante dos handlers) ---
   ipcMain.handle('get-produtos', async () => {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM produtos", [], (err, rows) => {
@@ -319,7 +332,7 @@ function setupIpcHandlers() {
     });
   });
 
-  // --- SERVIÇOS CRUD ---
+  // --- SERVIÇOS CRUD (Restante dos handlers) ---
   ipcMain.handle('get-servicos', async () => {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM servicos", [], (err, rows) => {
@@ -358,7 +371,7 @@ function setupIpcHandlers() {
     });
   });
   
-  // --- ORÇAMENTOS CRUD ---
+  // --- ORÇAMENTOS CRUD (Restante dos handlers) ---
   ipcMain.handle('get-orcamentos', async () => {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM orcamentos", [], (err, rows) => {
@@ -404,7 +417,7 @@ function setupIpcHandlers() {
     });
   });
 
-  // --- ORDENS DE SERVIÇO CRUD ---
+  // --- ORDENS DE SERVIÇO CRUD (Restante dos handlers) ---
   ipcMain.handle('get-os', async () => {
     return new Promise((resolve, reject) => {
       db.all("SELECT * FROM ordens_servico", [], (err, rows) => {
