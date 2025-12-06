@@ -22,7 +22,6 @@
     </div>
   </div>
 
-  <!-- TABELA PRINCIPAL -->
   <div class="table-container card">
     <table>
       <thead>
@@ -62,7 +61,6 @@
     </table>
   </div>
 
-  <!-- MODAL DE OS -->
   @if (showModal()) {
     <div class="modal-overlay" (click)="closeModal()">
       <div class="modal-content large-modal" (click)="$event.stopPropagation()">
@@ -76,19 +74,28 @@
         
         <form (ngSubmit)="saveOrder()">
           
-          <!-- DADOS GERAIS -->
           <div class="form-section">
             <div class="form-row">
               <div class="form-group col-4">
                 <label>Cliente</label>
-                <select [(ngModel)]="currentOrder().client" name="client" required>
+                <select 
+                  [(ngModel)]="currentOrder().client" 
+                  name="client" 
+                  required
+                  (ngModelChange)="onClientChange(currentOrder().client)"
+                >
                   <option value="" disabled selected>Selecione...</option>
                   @for (c of clientsList(); track c) { <option [value]="c">{{ c }}</option> }
                 </select>
               </div>
               <div class="form-group col-4">
                 <label>Veículo</label>
-                <select [(ngModel)]="currentOrder().vehicle" name="vehicle" required>
+                <select 
+                  [(ngModel)]="currentOrder().vehicle" 
+                  name="vehicle" 
+                  required
+                  [disabled]="!currentOrder().client"
+                >
                   <option value="" disabled selected>Selecione...</option>
                   @for (v of vehiclesList(); track v) { <option [value]="v">{{ v }}</option> }
                 </select>
@@ -108,10 +115,8 @@
             </div>
           </div>
 
-          <!-- ADICIONAR ITENS (SERVIÇOS E PEÇAS) -->
           <div class="items-section">
             <div class="add-row">
-              <!-- Adicionar Serviço -->
               <div class="add-group service-group">
                 <label>Adicionar Serviço</label>
                 <div class="input-with-btn">
@@ -125,7 +130,6 @@
                 </div>
               </div>
 
-              <!-- Adicionar Produto -->
               <div class="add-group product-group">
                 <label>Adicionar Peça/Produto</label>
                 <div class="input-with-btn">
@@ -141,7 +145,6 @@
               </div>
             </div>
 
-            <!-- LISTA DE ITENS DA OS -->
             <div class="items-list-container">
               <table class="items-table">
                 <thead>

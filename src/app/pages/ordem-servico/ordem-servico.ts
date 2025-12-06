@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -37,6 +37,7 @@ export class OrdemServico implements OnInit {
   // --- Listas de Apoio (Dados reais do banco) ---
   clientsList = signal<string[]>([]);
   vehiclesList = signal<string[]>([]);
+  private allVehicles: any[] = []; // Armazena todos os veículos do banco
   availableServices = signal<any[]>([]);
   availableProducts = signal<any[]>([]);
   
@@ -51,6 +52,9 @@ export class OrdemServico implements OnInit {
   // --- LISTA DE OS (TABELA) ---
   orders = signal<OrdemServicoModel[]>([]);
   
+  // Injeção do ChangeDetectorRef
+  constructor(private cdr: ChangeDetectorRef) {} // <--- AJUSTADO
+
   // --- CICLO DE VIDA: Carrega todos os dados ---
   ngOnInit(): void {
     this.loadData();
@@ -66,14 +70,13 @@ export class OrdemServico implements OnInit {
       
       // 2. Carrega Listas de Apoio (Para Selects e itens)
       const clientsData = await window.electronAPI.getClientes();
-      const vehiclesData = await window.electronAPI.getVeiculos();
+      this.allVehicles = await window.electronAPI.getVeiculos(); // <--- ARMAZENA TODOS
       const servicesData = await window.electronAPI.getServicos();
       const productsData = await window.electronAPI.getProdutos();
 
       // Mapeia para o formato de string simples
       this.clientsList.set(clientsData.map((c: any) => c.name));
-      this.vehiclesList.set(vehiclesData.map((v: any) => `${v.model} (${v.plate})`));
-      
+
       // Produtos usam 'sellPrice'
       this.availableServices.set(servicesData);
       this.availableProducts.set(productsData.map((p: any) => ({
@@ -82,15 +85,32 @@ export class OrdemServico implements OnInit {
         price: p.sellPrice 
       })));
 
-      // Define cliente/veículo padrão para o formulário se houver dados
+      // Define cliente padrão para o formulário
       const defaultClient = this.clientsList()[0] || '';
-      const defaultVehicle = this.vehiclesList()[0] || '';
 
-      this.currentOrder.set(this.getEmptyOrder(defaultClient, defaultVehicle));
+      this.currentOrder.set(this.getEmptyOrder(defaultClient));
+      this.onClientChange(defaultClient); // <--- FILTRA VEÍCULOS INICIALMENTE
+      this.cdr.detectChanges(); // Força detecção de mudanças
 
     } catch (error) {
       console.error('Erro ao carregar dados de OS:', error);
     }
+  }
+
+  // --- NOVO MÉTODO: Lógica de Filtragem de Veículos ---
+  /**
+   * Filtra a lista de veículos disponíveis com base no cliente selecionado.
+   * @param clientName Nome do cliente selecionado.
+   */
+  onClientChange(clientName: string) {
+    const filtered = this.allVehicles.filter((v: any) => v.client === clientName);
+    // Formata para exibição (Modelo (Placa))
+    const vehiclesFormatted = filtered.map((v: any) => `${v.model} (${v.plate})`);
+    
+    this.vehiclesList.set(vehiclesFormatted);
+
+    // Seleciona o primeiro veículo automaticamente, ou limpa se não houver.
+    this.currentOrder.update(o => ({ ...o, vehicle: vehiclesFormatted[0] || '' }));
   }
 
 
@@ -120,14 +140,16 @@ export class OrdemServico implements OnInit {
 
   openModal() {
     const defaultClient = this.clientsList()[0] || '';
-    const defaultVehicle = this.vehiclesList()[0] || '';
-    this.currentOrder.set(this.getEmptyOrder(defaultClient, defaultVehicle));
+    
+    this.currentOrder.set(this.getEmptyOrder(defaultClient));
+    this.onClientChange(defaultClient); // <--- FILTRA VEÍCULOS
     this.showModal.set(true);
   }
 
   editOrder(order: any) {
     // Preserva o ID
     this.currentOrder.set(JSON.parse(JSON.stringify(order)));
+    this.onClientChange(order.client); // <--- FILTRA VEÍCULOS DO CLIENTE ATUAL
     this.showModal.set(true);
   }
 
@@ -227,11 +249,11 @@ export class OrdemServico implements OnInit {
     }
   }
 
-  private getEmptyOrder(defaultClient: string = '', defaultVehicle: string = ''): OrdemServicoModel {
+  private getEmptyOrder(defaultClient: string = ''): OrdemServicoModel {
     return {
       id: 0,
       client: defaultClient,
-      vehicle: defaultVehicle,
+      vehicle: '',
       status: 'pending',
       date: new Date().toISOString().split('T')[0],
       items: [],
