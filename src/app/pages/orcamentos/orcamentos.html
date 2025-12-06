@@ -52,7 +52,6 @@
             </td>
             <td class="total-col">{{ budget.total | currency:'BRL' }}</td>
             <td class="actions-cell">
-              
               <button class="btn-action view" (click)="viewBudget(budget)" title="Visualizar Detalhes">👁️</button>
               
               @if (budget.status === 'approved') {
@@ -301,7 +300,99 @@
       </div>
     </div>
   }
-  
-  <div class="printable-invoice" id="invoice">
+
+</div> <div class="printable-invoice" id="invoice">
+  @if (budgetItemToView()) {
+    <div class="invoice-accent-bar"></div>
+
+    <header class="invoice-header-flex">
+      <div class="company-details">
+        <h1>{{ companyData()?.name || 'Mecânica Borges' }}</h1>
+        <div class="company-contact">
+          <p>{{ companyData()?.address }}</p>
+          <p>{{ companyData()?.city }}</p>
+          <p>{{ companyData()?.phone ? 'Tel: ' + companyData()?.phone : '' }} {{ companyData()?.email ? '| ' + companyData()?.email : '' }}</p>
+          @if (companyData()?.cnpj) { <p>CNPJ: {{ companyData()?.cnpj }}</p> }
+        </div>
+      </div>
+      <div class="invoice-meta-box">
+        <div class="meta-title">ORÇAMENTO</div>
+        <div class="meta-number">#{{ budgetItemToView()!.id }}</div>
+        <div class="meta-dates">
+          <p><strong>Data de Emissão:</strong> {{ budgetItemToView()!.date | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Válido até:</strong> {{ budgetItemToView()!.validUntil | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="client-section">
+      <h3>Preparado para:</h3>
+      <div class="client-info-box">
+        <div class="client-data">
+          <p class="client-name">{{ budgetItemToView()!.client }}</p>
+        </div>
+        <div class="vehicle-data">
+           <span class="label-vehicle">Veículo:</span>
+           <span class="vehicle-name">{{ budgetItemToView()!.vehicle }}</span>
+        </div>
+      </div>
+    </section>
+
+    <table class="invoice-table-modern">
+      <thead>
+        <tr>
+          <th class="col-desc">Descrição</th>
+          <th class="col-type center">Tipo</th>
+          <th class="col-qty center">Qtd.</th>
+          <th class="col-price right">Valor Unit.</th>
+          <th class="col-total right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of budgetItemToView()!.items; track $index) {
+          <tr>
+            <td class="col-desc">{{ item.name }}</td>
+            <td class="col-type center"><span class="print-badge {{ item.type }}">{{ item.type === 'service' ? 'Serviço' : 'Peça' }}</span></td>
+            <td class="col-qty center">{{ item.qty }}</td>
+            <td class="col-price right">{{ item.price | currency:'BRL' }}</td>
+            <td class="col-total right">{{ item.total | currency:'BRL' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="invoice-totals-section">
+      <div class="totals-box">
+         <div class="grand-total-row">
+           <span class="total-label">TOTAL GERAL</span>
+           <span class="total-amount">{{ budgetItemToView()!.total | currency:'BRL' }}</span>
+         </div>
+      </div>
     </div>
+
+    <footer class="invoice-footer-flex">
+      <div class="invoice-notes-box">
+        @if (budgetItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
+          <h3>Observações e Pagamento</h3>
+          <div class="notes-content">
+             {{ budgetItemToView()!.notes }}
+             @if(budgetItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
+             @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
+             {{ companyData()?.bankInfo }}
+          </div>
+        }
+      </div>
+      
+      <div class="invoice-signatures">
+        <div class="signature-line">
+          __________________________________________<br>
+          Responsável Técnico
+        </div>
+      </div>
+    </footer>
+
+    <div class="terms-footer">
+      {{ companyData()?.quoteFooterText || 'Este orçamento tem validade de 15 dias. Após este prazo, os valores podem sofrer alterações.' }}
+    </div>
+  }
 </div>
