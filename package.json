@@ -1,16 +1,17 @@
 {
   "name": "sistema-oficina",
   "main": "electron/main.js",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --base-href ./",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "start:desktop": "npm run build && electron electron/main.js",
     "rebuild": "electron-rebuild -f -w sqlite3",
-    "start:desktop": "npm run build && electron electron/main.js"
-    
+    "electron:build": "npm run build -- --configuration production && npx electron-builder",
+    "electron:pack": "npm run electron:build"
   },
   "prettier": {
     "printWidth": 100,
@@ -43,13 +44,36 @@
     "@angular/build": "^21.0.2",
     "@angular/cli": "^21.0.2",
     "@angular/compiler-cli": "^21.0.0",
-    "@electron/rebuild": "^3.7.2",
-    "@types/sqlite3": "^3.1.11",
+    "@electron/rebuild": "^3.6.0",
     "concurrently": "^9.2.1",
     "electron": "^39.2.5",
+    "electron-builder": "^26.0.12",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8",
     "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.sistema.oficina",
+    "productName": "Sistema Oficina",
+    "copyright": "Copyright © 2025 Lucas",
+    "files": [
+      "dist/sistema-oficina/**/*",
+      "electron/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "src/assets/logo.png"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
