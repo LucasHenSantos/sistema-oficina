@@ -52,8 +52,11 @@ export class OrdemServico implements OnInit {
   // --- LISTA DE OS (TABELA) ---
   orders = signal<OrdemServicoModel[]>([]);
   
+  // --- DADOS PARA IMPRESSÃO ---
+  companyData = signal<any>(null);
+  osItemToView = signal<OrdemServicoModel | null>(null);
   // Injeção do ChangeDetectorRef
-  constructor(private cdr: ChangeDetectorRef) {} // <--- AJUSTADO
+  constructor(private cdr: ChangeDetectorRef) {}  // <--- AJUSTADO
 
   // --- CICLO DE VIDA: Carrega todos os dados ---
   ngOnInit(): void {
@@ -73,6 +76,8 @@ export class OrdemServico implements OnInit {
       this.allVehicles = await window.electronAPI.getVeiculos(); // <--- ARMAZENA TODOS
       const servicesData = await window.electronAPI.getServicos();
       const productsData = await window.electronAPI.getProdutos();
+      const companyConfig = await window.electronAPI.getConfig('dados_empresa');
+      this.companyData.set(companyConfig);
 
       // Mapeia para o formato de string simples
       this.clientsList.set(clientsData.map((c: any) => c.name));
@@ -247,6 +252,16 @@ export class OrdemServico implements OnInit {
         this.orders.update(list => list.filter(o => o.id !== id));
       }
     }
+  }
+  
+  // --- IMPRESSÃO ---
+  printOS(os?: OrdemServicoModel) {
+    if (os) {
+      this.osItemToView.set(JSON.parse(JSON.stringify(os)));
+    } else {
+      this.osItemToView.set(this.currentOrder());
+    }
+    setTimeout(() => window.print(), 200);
   }
 
   private getEmptyOrder(defaultClient: string = ''): OrdemServicoModel {

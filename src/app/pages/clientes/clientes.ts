@@ -25,9 +25,9 @@ export class Clientes implements OnInit {
   searchTerm = signal('');
   showModal = signal(false);
   showViewModal = signal(false); // NOVO: Controla o modal de visualização
-  
+
   // Dados do cliente para o modal de visualização
-  clientDetails = signal<any>(null); 
+  clientDetails = signal<any>(null);
 
   // Objeto para o Formulário (Edição/Criação)
   currentClient = signal<any>(this.getEmptyClient());
@@ -39,7 +39,7 @@ export class Clientes implements OnInit {
   private vehiclesData: any[] = [];
   loading = signal(true);
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.loadData();
@@ -52,24 +52,24 @@ export class Clientes implements OnInit {
     try {
       // 1. Carrega Clientes
       const clientsData: Cliente[] = await window.electronAPI.getClientes();
-      
+
       // 2. Carrega Veículos
       this.vehiclesData = await window.electronAPI.getVeiculos();
-      
+
       // 3. Mapeamento e Associação (para exibição na tabela)
       const clientsWithVehicles = clientsData.map(client => {
         const vehicles = this.vehiclesData
           .filter(v => v.client === client.name)
-          .map(v => `${v.model} (${v.plate})`); 
-        
+          .map(v => `${v.model} (${v.plate})`);
+
         return {
           ...client,
-          associatedVehicles: vehicles 
+          associatedVehicles: vehicles
         } as Cliente;
       });
 
       this.clients.set(clientsWithVehicles);
-      this.cdr.detectChanges(); 
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Erro ao carregar dados de Clientes e Veículos:', error);
     } finally {
@@ -80,7 +80,7 @@ export class Clientes implements OnInit {
   // --- AÇÕES DE VISUALIZAÇÃO (NOVO) ---
   async viewClient(clientName: string) {
     if (!window.electronAPI) return;
-    
+
     try {
       // Chama o novo handler IPC
       const result = await window.electronAPI.getClientWithVehicles(clientName);
@@ -99,7 +99,7 @@ export class Clientes implements OnInit {
   }
 
   // --- AÇÕES CRUD (Modal de Edição) ---
-  
+
   openModal() {
     this.currentClient.set(this.getEmptyClient());
     this.showModal.set(true);
@@ -107,7 +107,7 @@ export class Clientes implements OnInit {
 
   editClient(client: any) {
     const clientToEdit = { ...client };
-    delete clientToEdit.associatedVehicles; 
+    delete clientToEdit.associatedVehicles;
     this.currentClient.set(clientToEdit);
     this.showModal.set(true);
   }
@@ -127,7 +127,7 @@ export class Clientes implements OnInit {
           await window.electronAPI.addCliente(newClient);
         }
         this.closeModal();
-        await this.loadData(); 
+        await this.loadData();
       } catch (error) {
         console.error('Erro ao salvar cliente:', error);
         alert('Erro ao salvar no banco de dados.');
@@ -136,7 +136,7 @@ export class Clientes implements OnInit {
   }
 
   async deleteClient(id: number) {
-    if(confirm('Excluir este cliente?')) {
+    if (confirm('Excluir este cliente?')) {
       if (window.electronAPI) {
         try {
           await window.electronAPI.deleteCliente(id);
@@ -160,23 +160,23 @@ export class Clientes implements OnInit {
 
   filteredClients = computed(() => {
     const term = this.searchTerm().toLowerCase();
-    return this.clients().filter(client => 
-      client.name.toLowerCase().includes(term) || 
+    return this.clients().filter(client =>
+      client.name.toLowerCase().includes(term) ||
       (client.phone && client.phone.includes(term))
     );
   });
-  
-private getEmptyClient(): Cliente {
-  return {
-    id: 0,
-    name: '',
-    phone: '',
-    email: '',
-    cars: [], // <--- CORRIGIDO: Adicionado 'cars' como array vazio
-    lastVisit: new Date().toLocaleDateString('pt-BR'),
-    status: 'active',
-    statusLabel: 'Novo',
-    associatedVehicles: [] // Para compatibilidade de tipagem
-  };
-}
+
+  private getEmptyClient(): Cliente {
+    return {
+      id: 0,
+      name: '',
+      phone: '',
+      email: '',
+      cars: [], // <--- CORRIGIDO: Adicionado 'cars' como array vazio
+      lastVisit: new Date().toLocaleDateString('pt-BR'),
+      status: 'active',
+      statusLabel: 'Novo',
+      associatedVehicles: [] // Para compatibilidade de tipagem
+    };
+  }
 }

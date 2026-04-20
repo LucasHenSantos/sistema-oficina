@@ -8,8 +8,9 @@
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "electron/database.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
+    
   ]
 }

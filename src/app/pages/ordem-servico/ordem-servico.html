@@ -22,6 +22,8 @@
     </div>
   </div>
 
+  <div class="page-container no-print"></div>
+
   <div class="table-container card">
     <table>
       <thead>
@@ -54,6 +56,7 @@
             <td class="actions-cell">
               <button class="btn-action edit" (click)="editOrder(os)">✏️</button>
               <button class="btn-action delete" (click)="deleteOrder(os.id)">🗑️</button>
+              <button class="btn-action print" (click)="printOS(os)" title="Imprimir">🖨️</button>
             </td>
           </tr>
         }
@@ -67,8 +70,13 @@
         
         <div class="modal-header">
           <h2>{{ currentOrder().id === 0 ? 'Nova Ordem de Serviço' : 'Editar OS #' + currentOrder().id }}</h2>
-          <div class="total-display">
-            Total: {{ currentOrder().total | currency:'BRL' }}
+          <div class="header-actions">
+            @if (currentOrder().id !== 0) {
+              <button type="button" class="btn-print" (click)="printOS(currentOrder())">🖨️ Imprimir</button>
+            }
+            <div class="total-display">
+              Total: {{ currentOrder().total | currency:'BRL' }}
+            </div>
           </div>
         </div>
         
@@ -196,5 +204,100 @@
         </form>
       </div>
     </div>
+  }
+</div>
+<div class="printable-invoice" id="invoice">
+  @if (osItemToView()) {
+    <div class="invoice-accent-bar"></div>
+
+    <header class="invoice-header-flex">
+      <div class="company-details">
+        <h1>{{ companyData()?.name || 'Mecânica Borges' }}</h1>
+        <div class="company-contact">
+          <p>{{ companyData()?.address }}</p>
+          <p>{{ companyData()?.city }}</p>
+          <p>{{ companyData()?.phone ? 'Tel: ' + companyData()?.phone : '' }} {{ companyData()?.email ? '| ' + companyData()?.email : '' }}</p>
+          @if (companyData()?.cnpj) { <p>CNPJ: {{ companyData()?.cnpj }}</p> }
+        </div>
+      </div>
+      <div class="invoice-meta-box">
+        <div class="meta-title">ORDEM DE SERVIÇO</div>
+        <div class="meta-number">#{{ osItemToView()!.id }}</div>
+        <div class="meta-dates">
+          <p><strong>Data:</strong> {{ osItemToView()!.date | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Status:</strong> {{ getStatusLabel(osItemToView()!.status) }}</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="client-section">
+      <h3>Cliente:</h3>
+      <div class="client-info-box">
+        <div class="client-data">
+          <p class="client-name">{{ osItemToView()!.client }}</p>
+        </div>
+        <div class="vehicle-data">
+           <span class="label-vehicle">Veículo:</span>
+           <span class="vehicle-name">{{ osItemToView()!.vehicle }}</span>
+        </div>
+      </div>
+    </section>
+
+    <table class="invoice-table-modern">
+      <thead>
+        <tr>
+          <th class="col-desc">Descrição</th>
+          <th class="col-type center">Tipo</th>
+          <th class="col-qty center">Qtd.</th>
+          <th class="col-price right">Valor Unit.</th>
+          <th class="col-total right">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of osItemToView()!.items; track $index) {
+          <tr>
+            <td class="col-desc">{{ item.name }}</td>
+            <td class="col-type center"><span class="print-badge {{ item.type }}">{{ item.type === 'service' ? 'Serviço' : 'Peça' }}</span></td>
+            <td class="col-qty center">{{ item.qty }}</td>
+            <td class="col-price right">{{ item.price | currency:'BRL' }}</td>
+            <td class="col-total right">{{ item.total | currency:'BRL' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="invoice-totals-section">
+      <div class="totals-box">
+         <div class="grand-total-row">
+           <span class="total-label">TOTAL GERAL</span>
+           <span class="total-amount">{{ osItemToView()!.total | currency:'BRL' }}</span>
+         </div>
+      </div>
+    </div>
+
+    <footer class="invoice-footer-flex">
+      <div class="invoice-notes-box">
+        @if (osItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
+          <h3>Diagnóstico e Observações</h3>
+          <div class="notes-content">
+             {{ osItemToView()!.notes }}
+             @if(osItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
+             @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
+             {{ companyData()?.bankInfo }}
+          </div>
+        }
+      </div>
+      
+      <div class="invoice-signatures">
+        <div class="signature-line">
+          __________________________________________<br>
+          Responsável Técnico
+        </div>
+        <div class="signature-line" style="margin-top: 30px;">
+          __________________________________________<br>
+          Assinatura do Cliente
+        </div>
+      </div>
+    </footer>
   }
 </div>
