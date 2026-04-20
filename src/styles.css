@@ -169,3 +169,80 @@ body {
     border: none !important;
   }
 }
+/* PADRONIZAÇÃO DAS BARRAS DE BUSCA DO SISTEMA */
+.search-box {
+  flex: 1;
+  height: 42px !important; /* Trava a altura para sempre ser igual */
+  background: white;
+  padding: 0 16px !important; 
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-sizing: border-box;
+}
+
+.search-box input {
+  height: 100% !important;
+  border: none !important;
+  outline: none !important;
+  width: 100%;
+  font-size: 15px;
+  color: #374151;
+  background: transparent;
+  padding: 0 !important;
+}
+/* PADRONIZAÇÃO DE IMPRESSÃO UNIFICADA */
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  
+  body { background: white !important; margin: 0 !important; padding: 0 !important; }
+
+  /* Garante o início no topo da folha */
+  #invoice, .print-container {
+    position: absolute; top: 0; left: 0;
+    width: 100% !important;
+    padding: 1cm 1.5cm !important;
+    display: block !important;
+  }
+
+  /* Notas ocupando 100% para não comprimir */
+  .invoice-notes-box {
+    width: 100% !important;
+    margin-top: 20px !important;
+  }
+
+  .notes-content {
+    border: 1.5px solid #000 !important;
+    padding: 10px !important;
+    min-height: 60px;
+    font-size: 9pt !important;
+  }
+
+  /* Assinaturas em linha abaixo das notas */
+  .invoice-signatures-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-top: 50px !important; /* Espaço para não encostar nas notas */
+    width: 100% !important;
+  }
+
+  .signature-wrapper {
+    width: 45% !important; /* Cada assinatura ocupa quase metade da folha */
+    text-align: center;
+  }
+
+  .signature-line {
+    margin-top: 50px !important; /* Espaço em branco para a caneta */
+    border-top: 1.5px solid #000 !important; /* A única linha que deve existir */
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding-top: 5px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9pt;
+  }
+}

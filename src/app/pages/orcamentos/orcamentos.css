@@ -1,12 +1,21 @@
-/* ==========================================
-   LAYOUT PADRÃO E ANIMAÇÃO DE ENTRADA
-========================================== */
+:host {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --secondary-hover: #475569;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --border-color: #e2e8f0;
+    --bg-light: #f8fafc;
+    --text-dark: #1e293b;
+}
+
 .page-container {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    padding-bottom: 40px;
-    animation: fadeIn 0.3s ease-in; /* A mágica da animação de entrada */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
@@ -70,38 +79,20 @@
 .status-badge.rejected { background-color: #fee2e2; color: #991b1b; }
 
 /* --- TOOLBAR E PESQUISA --- */
-.toolbar {
-    margin-bottom: 1.5rem;
-}
+.toolbar { display: flex; gap: 16px; align-items: center; }
 
 .search-box {
-    position: relative;
-    max-width: 400px;
+  flex: 1;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
-.search-box .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--secondary-color);
-}
-
-.search-box input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
+.search-box input { border: none; outline: none; width: 100%; font-size: 15px; color: #374151; }
 /* --- TABELA --- */
 .card {
     background: white;
@@ -411,8 +402,7 @@ tr:last-child td {
     background-color: var(--primary-color); color: white; border: none;
     padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;
 }
-.btn-save:hover { background-color: var(--primary-hover); }
-
+.btn-save:hover { background-color: var(--primary-hover); }s
 /* --- ESTILOS DE LEITURA (VIEW MODAL) --- */
 .view-modal .read-only-details { margin-bottom: 2rem; }
 .view-modal .read-only-value { font-size: 1.1rem; color: var(--text-dark); padding: 0.5rem 0; margin: 0; }
@@ -435,6 +425,7 @@ tr:last-child td {
 
 /* 2. CONFIGURAÇÕES DE IMPRESSÃO (ALTO CONTRASTE) */
 /* 2. CONFIGURAÇÕES DE IMPRESSÃO (ALTO CONTRASTE CORRIGIDO) */
+  body * { visibility: hidden; }
 @media print {
   
   *, *::before, *::after { box-sizing: border-box; }

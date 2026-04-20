@@ -49,37 +49,6 @@
   background-color: #1d4ed8;
 }
 
-/* Barra de Ferramentas */
-.toolbar {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.search-box {
-  flex: 1;
-  background: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.search-box input {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 15px;
-  color: #374151;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-}
 
 .btn-icon {
   background: white;
@@ -395,38 +364,20 @@ input:focus {
 }
 
 /* --- TOOLBAR E PESQUISA --- */
-.toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
+.toolbar { display: flex; gap: 16px; align-items: center; }
 
 .search-box {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--input-bg);
-    flex-grow: 1;
-    max-width: 400px;
+  flex: 1;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
-.search-icon {
-    color: var(--text-secondary);
-    margin-right: 8px;
-    font-size: 14px;
-}
-
-.search-box input {
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--text-primary);
-    flex-grow: 1;
-    font-size: 14px;
-}
+.search-box input { border: none; outline: none; width: 100%; font-size: 15px; color: #374151; }
 
 /* --- TABELA DE CLIENTES --- */
 .table-container {

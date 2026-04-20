@@ -16,37 +16,25 @@
    LAYOUT PADRÃO E ANIMAÇÃO DE ENTRADA
 ========================================== */
 .page-container {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    padding-bottom: 40px;
-    animation: fadeIn 0.3s ease-in; /* A mágica da animação de entrada */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.page-header h1 {
-    font-size: 28px; /* Tamanho padronizado igual ao de Clientes */
-    font-weight: 700;
-    color: var(--text-primary, #111827);
-    margin: 0;
-}
-
-.page-header .subtitle {
-    color: var(--text-secondary, #6b7280);
-    margin: 4px 0 0 0;
-    font-size: 14px;
-}
-
+.page-header h1 { font-size: 28px; color: #111827; margin: 0; }
+.subtitle { color: #6b7280; margin: 4px 0 0 0; font-size: 14px; }
 /* --- BOTÕES --- */
 .btn-primary {
     background-color: var(--primary-color);
@@ -89,37 +77,21 @@
 .status-badge.canceled { background: #f3f4f6; color: #4b5563; text-decoration: line-through; }
 
 /* --- TOOLBAR E PESQUISA --- */
-.toolbar {
-    margin-bottom: 1.5rem;
-}
+
+.toolbar { display: flex; gap: 16px; align-items: center; }
 
 .search-box {
-    position: relative;
-    max-width: 400px;
+  flex: 1;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-
-.search-box .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--secondary-color);
-}
-
-.search-box input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
+.search-box input { border: none; outline: none; width: 100%; font-size: 15px; color: #374151; }
 
 /* --- TABELA --- */
 .card {

@@ -284,29 +284,27 @@
       </div>
     </div>
 
-    <footer class="invoice-footer-flex">
-      <div class="invoice-notes-box">
-        @if (osItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
-          <h3>Diagnóstico e Observações</h3>
-          <div class="notes-content">
-             {{ osItemToView()!.notes }}
-             @if(osItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
-             @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
-             {{ companyData()?.bankInfo }}
-          </div>
-        }
+    <footer class="invoice-footer-container">
+  <div class="invoice-notes-box">
+    @if (osItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
+      <h3>Diagnóstico e Observações</h3>
+      <div class="notes-content">
+          {{ osItemToView()!.notes }}
+          @if(osItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
+          @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
+          {{ companyData()?.bankInfo }}
       </div>
-      
-      <div class="invoice-signatures">
-        <div class="signature-line">
-          __________________________________________<br>
-          Responsável Técnico
-        </div>
-        <div class="signature-line" style="margin-top: 30px;">
-          __________________________________________<br>
-          Assinatura do Cliente
-        </div>
-      </div>
-    </footer>
+    }
+  </div>
+  
+  <div class="invoice-signatures-row">
+    <div class="signature-wrapper">
+      <div class="signature-line">Responsável Técnico</div>
+    </div>
+    <div class="signature-wrapper">
+      <div class="signature-line">Assinatura do Cliente</div>
+    </div>
+  </div>
+</footer>
   }
 </div>
