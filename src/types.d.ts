@@ -49,6 +49,8 @@ declare global {
       addOS: (order: any) => Promise<any>;
       updateOS: (order: any) => Promise<any>;
       deleteOS: (id: number) => Promise<boolean>;
+
+      backupDatabase: () => Promise<{ success: boolean; path?: string; error?: string }>;
     };
   }
 }

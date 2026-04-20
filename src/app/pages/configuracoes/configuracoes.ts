@@ -158,4 +158,14 @@ export class Configuracoes implements OnInit {
       await this.saveCategories('categorias_servicos', this.serviceCategories());
     }
   }
+  async realizarBackup() {
+  if (window.electronAPI) {
+    const result = await window.electronAPI.backupDatabase();
+    if (result.success) {
+      alert('Backup realizado com sucesso em: ' + result.path);
+    } else if (result.error !== 'Operação cancelada') {
+      alert('Erro ao realizar backup: ' + result.error);
+    }
+  }
+}
 }

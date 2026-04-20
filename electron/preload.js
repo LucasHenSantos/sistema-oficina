@@ -47,4 +47,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addOS: (order) => ipcRenderer.invoke('add-os', order),
   updateOS: (order) => ipcRenderer.invoke('update-os', order),
   deleteOS: (id) => ipcRenderer.invoke('delete-os', id),
+
+  backupDatabase: () => ipcRenderer.invoke('backup-database'),
 });

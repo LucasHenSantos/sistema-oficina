@@ -24,15 +24,15 @@
 
   <div class="page-container no-print"></div>
 
-  <div class="table-container card">
+ <div class="table-container card">
     <table>
       <thead>
         <tr>
           <th>Nº OS</th>
           <th>Cliente / Veículo</th>
           <th>Data</th>
-          <th>Status</th>
-          <th>Total</th>
+          <th>Status do Serviço</th>
+          <th>Pagamento</th> <th>Total</th>
           <th class="actions-col">Ações</th>
         </tr>
       </thead>
@@ -52,10 +52,19 @@
                 {{ getStatusLabel(os.status) }}
               </span>
             </td>
+            <td>
+              <select class="payment-select" 
+                      [class]="os.paymentStatus || 'pending'" 
+                      [ngModel]="os.paymentStatus || 'pending'" 
+                      (ngModelChange)="updatePayment(os, $event)">
+                <option value="pending">Pendente</option>
+                <option value="paid">Pago</option>
+              </select>
+            </td>
             <td class="total-col">{{ os.total | currency:'BRL' }}</td>
             <td class="actions-cell">
-              <button class="btn-action edit" (click)="editOrder(os)">✏️</button>
-              <button class="btn-action delete" (click)="deleteOrder(os.id)">🗑️</button>
+              <button class="btn-action edit" (click)="editOrder(os)" title="Editar">✏️</button>
+              <button class="btn-action delete" (click)="deleteOrder(os.id)" title="Excluir">🗑️</button>
               <button class="btn-action print" (click)="printOS(os)" title="Imprimir">🖨️</button>
             </td>
           </tr>

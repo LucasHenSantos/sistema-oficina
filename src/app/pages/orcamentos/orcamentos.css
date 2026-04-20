@@ -1,45 +1,37 @@
-/* --- VARIÁVEIS GLOBAIS DO COMPONENTE --- */
-:host {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --secondary-color: #64748b;
-    --secondary-hover: #475569;
-    --success-color: #22c55e;
-    --danger-color: #ef4444;
-    --warning-color: #f59e0b;
-    --border-color: #e2e8f0;
-    --bg-light: #f8fafc;
-    --text-dark: #1e293b;
-}
-
-/* --- LAYOUT PRINCIPAL --- */
+/* ==========================================
+   LAYOUT PADRÃO E ANIMAÇÃO DE ENTRADA
+========================================== */
 .page-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 40px;
+    animation: fadeIn 0.3s ease-in; /* A mágica da animação de entrada */
 }
 
-/* --- CABEÇALHO --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
 }
 
 .page-header h1 {
-    font-size: 2rem;
+    font-size: 28px; /* Tamanho padronizado igual ao de Clientes */
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary, #111827);
     margin: 0;
 }
 
 .page-header .subtitle {
-    color: var(--secondary-color);
-    margin-top: 0.5rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 4px 0 0 0;
     font-size: 14px;
 }
-
 /* --- BOTÕES --- */
 .btn-primary {
     background-color: var(--primary-color);

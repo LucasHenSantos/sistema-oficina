@@ -12,31 +12,38 @@
     --text-dark: #1e293b;
 }
 
-/* --- LAYOUT PRINCIPAL --- */
+/* ==========================================
+   LAYOUT PADRÃO E ANIMAÇÃO DE ENTRADA
+========================================== */
 .page-container {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 40px;
+    animation: fadeIn 0.3s ease-in; /* A mágica da animação de entrada */
 }
 
-/* --- CABEÇALHO --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
 }
 
 .page-header h1 {
-    font-size: 2rem;
+    font-size: 28px; /* Tamanho padronizado igual ao de Clientes */
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-primary, #111827);
     margin: 0;
 }
 
 .page-header .subtitle {
-    color: var(--secondary-color);
-    margin-top: 0.5rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 4px 0 0 0;
     font-size: 14px;
 }
 
@@ -66,16 +73,20 @@
 
 /* --- BADGES --- */
 .status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: capitalize;
+ padding: 6px 12px; 
+    border-radius: 20px; 
+    font-size: 12px; 
+    font-weight: 700; 
+    border: 1px solid currentColor; /* O contorno pega a cor do texto automaticamente */
+    display: inline-block;
+    text-align: center;
 }
 
-.status-badge.pending { background-color: #fef3c7; color: #92400e; }
-.status-badge.approved { background-color: #dcfce7; color: #166534; }
-.status-badge.rejected { background-color: #fee2e2; color: #991b1b; }
+.status-badge.pending { background: #fff7ed; color: #ea580c; }
+.status-badge.approved { background: #eff6ff; color: #2563eb; }
+.status-badge.in-progress { background: #f3e8ff; color: #7e22ce; }
+.status-badge.completed { background: #f0fdf4; color: #16a34a; } /* Verde para finalizado */
+.status-badge.canceled { background: #f3f4f6; color: #4b5563; text-decoration: line-through; }
 
 /* --- TOOLBAR E PESQUISA --- */
 .toolbar {
@@ -446,7 +457,6 @@ tr:last-child td {
   
   *, *::before, *::after { box-sizing: border-box; }
 
-  /* Esconde a interface do sistema e mostra apenas o documento */
   body * { visibility: hidden; }
   #invoice, #invoice * { visibility: visible !important; }
 
@@ -457,40 +467,38 @@ tr:last-child td {
   
   .modal-overlay, .sidebar, .no-print { display: none !important; }
 
-  @page { margin: 1.5cm 1.5cm; size: A4 portrait; }
+  /* Margem reduzida para caber em 1 página */
+  @page { margin: 1cm 1.2cm; size: A4 portrait; }
   
-  /* Textos em preto puro para máxima nitidez no papel */
   html, body {
-      height: auto; background: #fff; font-size: 11pt;
+      height: auto; background: #fff; font-size: 10.5pt;
       font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
       color: #000; overflow: visible !important;
   }
 
-  /* Cabeçalho e Cores de Destaque (Azul Marinho Escuro) */
-  .invoice-accent-bar { height: 8px; background-color: #1e3a8a; margin-bottom: 25px; width: 100%; }
+  .invoice-accent-bar { height: 6px; background-color: #1e3a8a; margin-bottom: 15px; width: 100%; }
   
-  .invoice-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #000; padding-bottom: 25px; }
-  .company-details h1 { font-size: 22pt; font-weight: 800; margin: 0 0 10px 0; color: #1e3a8a; text-transform: uppercase; }
-  .company-details .company-contact p { margin: 3px 0; color: #000; font-size: 9pt; font-weight: 600; }
+  .invoice-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+  .company-details h1 { font-size: 20pt; font-weight: 800; margin: 0 0 5px 0; color: #1e3a8a; text-transform: uppercase; }
+  .company-details .company-contact p { margin: 2px 0; color: #000; font-size: 8.5pt; font-weight: 600; }
   
   .invoice-meta-box { text-align: right; }
-  .invoice-meta-box .meta-title { font-size: 14pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: 1px; }
-  .invoice-meta-box .meta-number { font-size: 26pt; font-weight: 800; color: #000; margin: 5px 0 15px 0; }
-  .invoice-meta-box .meta-dates p { margin: 4px 0; font-size: 10pt; color: #000; font-weight: 700; }
+  .invoice-meta-box .meta-title { font-size: 12pt; font-weight: 800; color: #000; text-transform: uppercase; }
+  .invoice-meta-box .meta-number { font-size: 22pt; font-weight: 800; color: #000; margin: 2px 0 10px 0; }
+  .invoice-meta-box .meta-dates p { margin: 2px 0; font-size: 9pt; color: #000; font-weight: 700; }
 
-  /* Seção do Cliente e Veículo */
-  .client-section { margin-bottom: 35px; }
-  .client-section h3 { font-size: 11pt; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px; display: inline-block; font-weight: 800; }
-  .client-info-box { display: flex; justify-content: space-between; background-color: #f1f5f9; padding: 15px; border-radius: 6px; border: 2px solid #000; }
-  .client-info-box .client-name { font-size: 14pt; font-weight: 800; margin: 0; color: #000; }
+  .client-section { margin-bottom: 20px; }
+  .client-section h3 { font-size: 10pt; text-transform: uppercase; color: #000; margin-bottom: 8px; border-bottom: 2px solid #333; padding-bottom: 3px; display: inline-block; font-weight: 800; }
+  .client-info-box { display: flex; justify-content: space-between; background-color: #f1f5f9; padding: 12px; border-radius: 6px; border: 2px solid #000; }
+  .client-info-box .client-name { font-size: 13pt; font-weight: 800; margin: 0; color: #000; }
   .client-info-box .vehicle-data { text-align: right; }
-  .client-info-box .label-vehicle { display: block; font-size: 9pt; color: #000; text-transform: uppercase; font-weight: 800; }
-  .client-info-box .vehicle-name { font-size: 12pt; font-weight: 800; color: #000; }
+  .client-info-box .label-vehicle { display: block; font-size: 8.5pt; color: #000; text-transform: uppercase; font-weight: 800; }
+  .client-info-box .vehicle-name { font-size: 11pt; font-weight: 800; color: #000; }
 
-  /* Tabela de Itens (Linhas e Textos Escuros) */
-  .invoice-table-modern { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-  .invoice-table-modern th { padding: 12px 8px; background-color: #eee; border: 2px solid #000; font-weight: 800; color: #000; text-transform: uppercase; font-size: 9pt; text-align: left; }
-  .invoice-table-modern td { padding: 12px 8px; border: 1px solid #000; vertical-align: middle; color: #000; font-weight: 500; }
+  /* FECHAMENTO DA TABELA: border-bottom adicionado para não ficar "aberta" */
+  .invoice-table-modern { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-bottom: 2px solid #000; }
+  .invoice-table-modern th { padding: 10px 8px; background-color: #eee; border: 2px solid #000; font-weight: 800; color: #000; text-transform: uppercase; font-size: 8.5pt; text-align: left; }
+  .invoice-table-modern td { padding: 8px; border: 1px solid #000; vertical-align: middle; color: #000; font-weight: 500; }
   
   .col-desc { text-align: left; width: 45%; }
   .col-type { width: 10%; text-align: center; }
@@ -498,23 +506,66 @@ tr:last-child td {
   .col-price { width: 15%; text-align: right; }
   .col-total { width: 20%; font-weight: 800; text-align: right; }
   
-  /* Selos de Tipo (Serviço/Peça) */
-  .print-badge { font-size: 8pt; padding: 2px 6px; border-radius: 4px; border: 2px solid #000; font-weight: 800; display: inline-block; color: #000 !important; }
+  .print-badge { font-size: 7.5pt; padding: 2px 5px; border-radius: 4px; border: 1.5px solid #000; font-weight: 800; display: inline-block; color: #000 !important; }
 
-  /* Totais e Rodapé */
-  .invoice-totals-section { display: flex; justify-content: flex-end; margin-bottom: 40px; }
-  .totals-box { width: 45%; }
+  .invoice-totals-section { display: flex; justify-content: flex-end; margin-bottom: 25px; }
+  .totals-box { width: 40%; }
   .grand-total-row { display: flex; justify-content: space-between; align-items: center; background-color: #1e3a8a; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 2px solid #000; }
-  .grand-total-row .total-label { font-size: 12pt; font-weight: 800; text-transform: uppercase; color: white !important; padding-left: 10px; }
-  .grand-total-row .total-amount { font-size: 20pt; font-weight: 800; color: white !important; padding: 10px; }
+  .grand-total-row .total-label { font-size: 11pt; font-weight: 800; text-transform: uppercase; color: white !important; padding-left: 10px; }
+  .grand-total-row .total-amount { font-size: 18pt; font-weight: 800; color: white !important; padding: 8px; }
 
-  .invoice-footer-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 40px; border-top: 2px solid #000; padding-top: 30px; page-break-inside: avoid; }
+  .invoice-footer-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 25px; padding-top: 15px; page-break-inside: avoid; }
   .invoice-notes-box { width: 60%; }
-  .invoice-notes-box h3 { font-size: 11pt; text-transform: uppercase; color: #000; margin: 0 0 10px 0; font-weight: 800; }
-  .invoice-notes-box .notes-content { font-size: 10pt; color: #000; line-height: 1.6; white-space: pre-wrap; background: #f8fafc; padding: 15px; border: 2px solid #000; border-radius: 6px; font-weight: 600; }
+  .invoice-notes-box h3 { font-size: 10pt; text-transform: uppercase; color: #000; margin: 0 0 8px 0; font-weight: 800; }
+  .invoice-notes-box .notes-content { font-size: 9pt; color: #000; line-height: 1.4; white-space: pre-wrap; background: #f8fafc; padding: 12px; border: 2px solid #000; border-radius: 6px; font-weight: 600; }
   
+  /* ASSINATURAS: border-top: none para remover a duplicação! */
   .invoice-signatures { width: 35%; text-align: center; }
-  .invoice-signatures .signature-line { margin-top: 50px; font-size: 10pt; color: #000; line-height: 1.4; font-weight: 700; border-top: 1px solid #000; padding-top: 5px; }
+  .invoice-signatures .signature-line { margin-top: 40px; font-size: 9.5pt; color: #000; line-height: 1.4; font-weight: 700; padding-top: 0; border-top: none; }
   
-  .terms-footer { margin-top: 50px; text-align: center; font-size: 9pt; color: #000; border-top: 1px solid #000; padding-top: 15px; font-weight: 600; }
+  .terms-footer { margin-top: 30px; text-align: center; font-size: 8.5pt; color: #000; border-top: none; padding-top: 10px; font-weight: 600; }
+}
+.payment-select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    border: 1.5px solid;
+    text-align: center;
+    transition: all 0.2s;
+    /* Remove a setinha feia padrão do HTML */
+    -webkit-appearance: none; 
+    appearance: none; 
+}
+.payment-select:hover {
+    filter: brightness(0.95);
+}
+
+/* Cores do Pagamento */
+.payment-select.pending { 
+    background-color: #fef2f2; 
+    color: #dc2626; 
+    border-color: #fca5a5; 
+}
+.payment-select.paid { 
+    background-color: #f0fdf4; 
+    color: #16a34a; 
+    border-color: #86efac; 
+}
+.os-info { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 2px; 
+}
+.os-info strong { 
+    font-size: 15px; 
+    color: var(--text-primary); 
+    font-weight: 700; 
+}
+.os-info .detail-text { 
+    font-size: 13px; 
+    color: var(--text-secondary); 
+    font-weight: 500;
 }

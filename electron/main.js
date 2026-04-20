@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
@@ -11,7 +12,7 @@ function initDatabase() {
   console.log('Banco de dados em:', dbPath);
 
   db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
+    if (err) {  
       console.error('Erro ao abrir o banco:', err.message);
     } else {
       console.log('Conectado ao SQLite.');
@@ -33,6 +34,7 @@ function createTables() {
       status TEXT,
       statusLabel TEXT
     )
+      
   `;
   
   const sqlVeiculos = `
@@ -116,6 +118,8 @@ function createTables() {
   db.run(sqlOS);
   db.run(sqlOrcamentos);
   db.run(sqlConfig);
+  db.run("ALTER TABLE ordens_servico ADD COLUMN paymentStatus TEXT DEFAULT 'pending'", (err) => {});
+
 }
 
 // 3. Define as funções que o Angular vai chamar (IPC Handlers)
@@ -430,12 +434,12 @@ function setupIpcHandlers() {
     });
   });
 
-  ipcMain.handle('add-os', async (event, order) => {
+ipcMain.handle('add-os', async (event, order) => {
     return new Promise((resolve, reject) => {
-      const sql = "INSERT INTO ordens_servico (client, vehicle, status, date, items, notes, total) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      const sql = "INSERT INTO ordens_servico (client, vehicle, status, date, items, notes, total, paymentStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
       const itemsJson = JSON.stringify(order.items || []);
       
-      db.run(sql, [order.client, order.vehicle, order.status, order.date, itemsJson, order.notes, order.total], function(err) {
+      db.run(sql, [order.client, order.vehicle, order.status, order.date, itemsJson, order.notes, order.total, order.paymentStatus || 'pending'], function(err) {
         if (err) reject(err);
         else resolve({ id: this.lastID, ...order });
       });
@@ -444,16 +448,15 @@ function setupIpcHandlers() {
 
   ipcMain.handle('update-os', async (event, order) => {
     return new Promise((resolve, reject) => {
-      const sql = `UPDATE ordens_servico SET client=?, vehicle=?, status=?, date=?, items=?, notes=?, total=? WHERE id=?`;
+      const sql = `UPDATE ordens_servico SET client=?, vehicle=?, status=?, date=?, items=?, notes=?, total=?, paymentStatus=? WHERE id=?`;
       const itemsJson = JSON.stringify(order.items || []);
       
-      db.run(sql, [order.client, order.vehicle, order.status, order.date, itemsJson, order.notes, order.total, order.id], function(err) {
+      db.run(sql, [order.client, order.vehicle, order.status, order.date, itemsJson, order.notes, order.total, order.paymentStatus || 'pending', order.id], function(err) {
         if (err) reject(err);
         else resolve(order);
       });
     });
   });
-
   ipcMain.handle('delete-os', async (event, id) => {
     return new Promise((resolve, reject) => {
       db.run("DELETE FROM ordens_servico WHERE id = ?", [id], function(err) {
@@ -462,6 +465,30 @@ function setupIpcHandlers() {
       });
     });
   });
+  ipcMain.handle('backup-database', async () => {
+  const dbPath = path.join(app.getPath('userData'), 'oficina.db');
+  
+  // Abre a janela de "Salvar Como"
+  const { filePath } = await dialog.showSaveDialog({
+    title: 'Exportar Backup do Banco de Dados',
+    defaultPath: path.join(app.getPath('downloads'), `backup_oficina_${new Date().toISOString().split('T')[0]}.db`),
+    filters: [
+      { name: 'SQLite Database', extensions: ['db'] }
+    ]
+  });
+
+  if (filePath) {
+    try {
+      // Realiza a cópia física do arquivo para o local escolhido
+      fs.copyFileSync(dbPath, filePath);
+      return { success: true, path: filePath };
+    } catch (error) {
+      console.error('Erro ao copiar arquivo:', error);
+      return { success: false, error: error.message };
+    }
+  }
+  return { success: false, error: 'Operação cancelada' };
+});
 }
 
 function createWindow() {

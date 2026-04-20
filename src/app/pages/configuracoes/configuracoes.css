@@ -261,3 +261,22 @@
   line-height: 1;
 }
 .btn-remove-icon:hover { background: #fee2e2; color: #dc2626; }
+
+.btn-backup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #16a34a; /* Verde sucesso */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 15px;
+}
+
+.btn-backup:hover {
+    background-color: #15803d;
+}

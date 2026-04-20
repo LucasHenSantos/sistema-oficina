@@ -21,6 +21,7 @@ interface OrdemServicoModel {
     items: OrderItem[];
     notes: string;
     total: number;
+    paymentStatus?: string;
 }
 
 @Component({
@@ -253,6 +254,16 @@ export class OrdemServico implements OnInit {
       }
     }
   }
+  async updatePayment(os: OrdemServicoModel, newStatus: string) {
+    os.paymentStatus = newStatus;
+    if (window.electronAPI) {
+      try {
+        await window.electronAPI.updateOS(os);
+      } catch (error) {
+        console.error('Erro ao atualizar pagamento', error);
+      }
+    }
+  }
   
   // --- IMPRESSÃO ---
   printOS(os?: OrdemServicoModel) {
@@ -273,7 +284,10 @@ export class OrdemServico implements OnInit {
       date: new Date().toISOString().split('T')[0],
       items: [],
       notes: '',
-      total: 0
+      total: 0,
+      paymentStatus: 'pending'
     };
+
+
   }
 }
