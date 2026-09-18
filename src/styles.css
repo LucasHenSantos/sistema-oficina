@@ -2,78 +2,110 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
+
 /* ==========================================================================
-   VARIÁVEIS DE TEMA (CLARO / ESCURO)
+   VARIÁVEIS DE TEMA
    ========================================================================== */
+
 :root {
-  /* Tema Claro (Padrão) - Cores originais do seu projeto */
+  /* Tema Claro */
   --bg-body: #f3f4f6;
   --bg-card: #ffffff;
   --bg-sidebar: #1f2937;
+
   --text-primary: #111827;
   --text-secondary: #6b7280;
+
   --border-color: #e5e7eb;
+
   --input-bg: #ffffff;
   --hover-bg: #f9fafb;
 }
 
-/* Tema Escuro (Sobrescreve as variáveis quando ativado) */
+
+/* ==========================================================================
+   TEMA ESCURO
+   ========================================================================== */
+
 [data-theme="dark"] {
-  --bg-body: #111827;        /* Fundo bem escuro */
-  --bg-card: #1f2937;        /* Cards cinza escuro */
-  --bg-sidebar: #0f172a;     /* Sidebar quase preta */
-  --text-primary: #f9fafb;   /* Texto branco */
-  --text-secondary: #9ca3af; /* Texto cinza claro */
-  --border-color: #374151;   /* Bordas escuras */
-  --input-bg: #374151;       /* Inputs escuros */
-  --hover-bg: #374151;       /* Hover mais claro */
+  --bg-body: #111827;
+  --bg-card: #1f2937;
+  --bg-sidebar: #0f172a;
+
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+
+  --border-color: #374151;
+
+  --input-bg: #374151;
+  --hover-bg: #374151;
 }
+
 
 /* ==========================================================================
    ESTILOS GLOBAIS
    ========================================================================== */
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
   padding: 0;
+
   font-family: 'Roboto', sans-serif;
-  /* Usa as variáveis para permitir a troca de tema */
+
   background-color: var(--bg-body);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* --- REGRAS ESPECÍFICAS PARA O MODO ESCURO --- */
-/* Força a aplicação das variáveis em componentes que têm cor fixa no CSS original */
+
+/* ==========================================================================
+   MODO ESCURO
+   ========================================================================== */
 
 [data-theme="dark"] .layout-container,
 [data-theme="dark"] .content {
   background-color: var(--bg-body) !important;
 }
 
+
 [data-theme="dark"] .card,
-[data-theme="dark"] .modal-content, 
+[data-theme="dark"] .modal-content,
 [data-theme="dark"] .search-box {
   background-color: var(--bg-card) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
 }
 
+
 [data-theme="dark"] .sidebar {
   background-color: var(--bg-sidebar) !important;
 }
 
-/* Textos e Títulos */
-[data-theme="dark"] h1, 
-[data-theme="dark"] h2, 
-[data-theme="dark"] h3, 
+
+/* ==========================================================================
+   TEXTOS - MODO ESCURO
+   ========================================================================== */
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
 [data-theme="dark"] strong,
 [data-theme="dark"] .sell-price,
 [data-theme="dark"] .total-col {
   color: var(--text-primary) !important;
 }
 
-[data-theme="dark"] p, 
-[data-theme="dark"] span, 
+
+[data-theme="dark"] p,
+[data-theme="dark"] span,
 [data-theme="dark"] label,
 [data-theme="dark"] .subtitle,
 [data-theme="dark"] td,
@@ -81,7 +113,11 @@ body {
   color: var(--text-secondary) !important;
 }
 
-/* Inputs e Formulários */
+
+/* ==========================================================================
+   INPUTS E FORMULÁRIOS - MODO ESCURO
+   ========================================================================== */
+
 [data-theme="dark"] input,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
@@ -90,159 +126,834 @@ body {
   color: var(--text-primary) !important;
 }
 
-/* Tabelas */
+
+/* ==========================================================================
+   TABELAS - MODO ESCURO
+   ========================================================================== */
+
 [data-theme="dark"] th {
   background-color: #374151 !important;
-  color: #fff !important;
+  color: #ffffff !important;
   border-color: var(--border-color) !important;
 }
+
 
 [data-theme="dark"] td {
   border-color: var(--border-color) !important;
 }
 
+
 [data-theme="dark"] tr:hover td {
   background-color: var(--hover-bg) !important;
 }
 
-/* Ícones */
+
+/* ==========================================================================
+   ÍCONES - MODO ESCURO
+   ========================================================================== */
+
 [data-theme="dark"] .icon-box,
 [data-theme="dark"] .stat-icon {
   background-color: #374151 !important;
-  color: #fff !important;
+  color: #ffffff !important;
 }
 
+
 /* ==========================================================================
-   REGRAS DE IMPRESSÃO GLOBAIS (CRÍTICO PARA O PDF FUNCIONAR)
+   BARRA DE BUSCA GLOBAL
    ========================================================================== */
+
+.search-box {
+  flex: 1;
+
+  height: 42px !important;
+
+  padding: 0 16px !important;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  box-sizing: border-box;
+
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.search-box input {
+  width: 100%;
+  height: 100% !important;
+
+  padding: 0 !important;
+
+  border: none !important;
+  outline: none !important;
+
+  background: transparent;
+
+  color: var(--text-primary);
+
+  font-size: 15px;
+}
+
+
+/* ==========================================================================
+   DOCUMENTOS DE IMPRESSÃO
+
+   O documento permanece no HTML, mas não aparece durante o uso normal
+   do sistema.
+   ========================================================================== */
+
+.printable-invoice {
+  display: none;
+}
+
+
+/* ==========================================================================
+   IMPRESSÃO A4
+   ORÇAMENTOS E ORDENS DE SERVIÇO
+   ========================================================================== */
+
 @media print {
-  /* 1. Esconde TUDO por padrão usando visibility
-     (display: none mataria os filhos, visibility permite reverter nos filhos) */
-  body * {
-    visibility: hidden;
+
+  /* ------------------------------------------------------------------------
+     CONFIGURAÇÃO DA FOLHA
+     ------------------------------------------------------------------------ */
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm;
   }
 
-  /* 2. Esconde explicitamente containers de UI para garantir que não ocupem espaço */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box !important;
+  }
+
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     RESET DO LAYOUT DO ANGULAR
+     ------------------------------------------------------------------------ */
+
+  app-root,
+  app-layout,
+  .layout-container,
+  .content,
+  .page-container {
+    width: 100% !important;
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    position: static !important;
+
+    background: #ffffff !important;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     ESCONDE A INTERFACE DO SISTEMA
+     ------------------------------------------------------------------------ */
+
+  body * {
+    visibility: hidden !important;
+  }
+
+
   .sidebar,
-  .no-print,
-  .modal-overlay {
+  .no-print {
     display: none !important;
   }
 
-  /* 3. Reseta o layout principal para não interferir */
-  body, html, app-root, app-layout, .layout-container, .content, .page-container {
-    background: white !important;
-    height: auto !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    position: static !important;
-    /* Força texto preto na impressão para economizar tinta e garantir leitura */
-    color: black !important; 
-  }
 
-  /* 4. MÁGICA: Torna visível APENAS a fatura e seus conteúdos */
-  .printable-invoice, 
+  /* ------------------------------------------------------------------------
+     MOSTRA SOMENTE O DOCUMENTO
+     ------------------------------------------------------------------------ */
+
+  .printable-invoice,
   .printable-invoice * {
     visibility: visible !important;
   }
 
-  /* 5. Posiciona a fatura para ocupar a folha inteira */
+
   .printable-invoice {
     display: block !important;
+
     position: absolute !important;
-    left: 0 !important;
+
     top: 0 !important;
+    left: 0 !important;
+
     width: 100% !important;
+    max-width: none !important;
+
+    min-height: 0 !important;
+
     margin: 0 !important;
-    padding: 20px !important;
-    background: white !important;
-    z-index: 999999 !important; /* Fica acima de tudo */
-    font-family: 'Helvetica Neue', Arial, sans-serif !important;
-    color: black !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    background: #ffffff !important;
+    color: #111111 !important;
+
+    font-family: Arial, 'Segoe UI', sans-serif !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
+
+    z-index: 999999 !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* Remove sombras e bordas extras na impressão */
-  .card, .modal-content {
-    box-shadow: none !important;
+
+  /* ==========================================================================
+     BARRA SUPERIOR
+     ========================================================================== */
+
+  .invoice-accent-bar {
+    width: 100% !important;
+    height: 2.2mm !important;
+
+    margin: 0 0 5mm 0 !important;
+
+    background: #1e3a8a !important;
+
     border: none !important;
   }
-}
-/* PADRONIZAÇÃO DAS BARRAS DE BUSCA DO SISTEMA */
-.search-box {
-  flex: 1;
-  height: 42px !important; /* Trava a altura para sempre ser igual */
-  background: white;
-  padding: 0 16px !important; 
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  box-sizing: border-box;
-}
 
-.search-box input {
-  height: 100% !important;
-  border: none !important;
-  outline: none !important;
-  width: 100%;
-  font-size: 15px;
-  color: #374151;
-  background: transparent;
-  padding: 0 !important;
-}
-/* PADRONIZAÇÃO DE IMPRESSÃO UNIFICADA */
-@media print {
-  @page { size: A4 portrait; margin: 0; }
-  
-  body { background: white !important; margin: 0 !important; padding: 0 !important; }
 
-  /* Garante o início no topo da folha */
-  #invoice, .print-container {
-    position: absolute; top: 0; left: 0;
+  /* ==========================================================================
+     CABEÇALHO
+     ========================================================================== */
+
+  .invoice-header-flex {
+    display: flex !important;
+
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+
+    gap: 8mm !important;
+
     width: 100% !important;
-    padding: 1cm 1.5cm !important;
-    display: block !important;
+
+    margin: 0 0 6mm 0 !important;
+    padding: 0 0 4mm 0 !important;
+
+    border-bottom: 1.2px solid #111111 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  /* Notas ocupando 100% para não comprimir */
+
+  /* ------------------------------------------------------------------------
+     DADOS DA EMPRESA
+     ------------------------------------------------------------------------ */
+
+  .company-details {
+    flex: 1 1 auto !important;
+
+    min-width: 0 !important;
+
+    color: #111111 !important;
+  }
+
+
+  .company-details h1 {
+    margin: 0 0 2mm 0 !important;
+    padding: 0 !important;
+
+    color: #1e3a8a !important;
+
+    font-size: 17pt !important;
+    line-height: 1.1 !important;
+    font-weight: 800 !important;
+
+    text-transform: uppercase !important;
+  }
+
+
+  .company-details .company-contact {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+
+  .company-details .company-contact p {
+    margin: 0.7mm 0 !important;
+    padding: 0 !important;
+
+    color: #222222 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.3 !important;
+    font-weight: 500 !important;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     DADOS DO DOCUMENTO
+     ------------------------------------------------------------------------ */
+
+  .invoice-meta-box {
+    flex: 0 0 58mm !important;
+
+    min-width: 58mm !important;
+
+    text-align: right !important;
+  }
+
+
+  .invoice-meta-box .meta-title {
+    margin: 0 !important;
+
+    color: #111111 !important;
+
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    font-weight: 800 !important;
+
+    letter-spacing: 0.5px !important;
+
+    text-transform: uppercase !important;
+  }
+
+
+  .invoice-meta-box .meta-number {
+    margin: 1mm 0 2.5mm 0 !important;
+
+    color: #111111 !important;
+
+    font-size: 19pt !important;
+    line-height: 1 !important;
+    font-weight: 800 !important;
+  }
+
+
+  .invoice-meta-box .meta-dates {
+    margin: 0 !important;
+  }
+
+
+  .invoice-meta-box .meta-dates p {
+    margin: 0.8mm 0 !important;
+
+    color: #222222 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+  }
+
+
+  .invoice-meta-box .meta-dates strong {
+    color: #111111 !important;
+  }
+
+
+  /* ==========================================================================
+     CLIENTE E VEÍCULO
+     ========================================================================== */
+
+  .client-section {
+    width: 100% !important;
+
+    margin: 0 0 5mm 0 !important;
+    padding: 0 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+
+  .client-section h3 {
+    display: inline-block !important;
+
+    margin: 0 0 2mm 0 !important;
+    padding: 0 0 1mm 0 !important;
+
+    border-bottom: 1px solid #555555 !important;
+
+    color: #111111 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    text-transform: uppercase !important;
+  }
+
+
+  .client-info-box {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 6mm !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 3mm 3.5mm !important;
+
+    border: 1px solid #444444 !important;
+    border-radius: 2mm !important;
+
+    background: #f7f7f7 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+
+  .client-info-box .client-data,
+  .client-info-box .vehicle-data {
+    min-width: 0 !important;
+  }
+
+
+  .client-info-box .client-data {
+    flex: 1 1 auto !important;
+  }
+
+
+  .client-info-box .client-name {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #111111 !important;
+
+    font-size: 11pt !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+
+  .client-info-box .vehicle-data {
+    flex: 0 1 auto !important;
+
+    text-align: right !important;
+  }
+
+
+  .client-info-box .label-vehicle {
+    display: block !important;
+
+    margin: 0 0 0.5mm 0 !important;
+
+    color: #444444 !important;
+
+    font-size: 7.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+
+    text-transform: uppercase !important;
+  }
+
+
+  .client-info-box .vehicle-name {
+    color: #111111 !important;
+
+    font-size: 9.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+  }
+
+
+  /* ==========================================================================
+     TABELA DE ITENS
+     ========================================================================== */
+
+  .invoice-table-modern {
+    width: 100% !important;
+
+    margin: 0 0 5mm 0 !important;
+
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+
+    table-layout: fixed !important;
+
+    color: #111111 !important;
+  }
+
+
+  /*
+     Caso a tabela continue para outra página, o Chromium tenta
+     repetir o cabeçalho.
+  */
+  .invoice-table-modern thead {
+    display: table-header-group !important;
+  }
+
+
+  .invoice-table-modern tbody {
+    display: table-row-group !important;
+  }
+
+
+  /*
+     Evita uma linha começar em uma página e terminar na próxima.
+  */
+  .invoice-table-modern tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+
+  .invoice-table-modern th {
+    padding: 2.2mm 1.6mm !important;
+
+    border: 1px solid #333333 !important;
+
+    background: #ececec !important;
+    color: #111111 !important;
+
+    font-size: 7.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    text-align: left !important;
+    text-transform: uppercase !important;
+
+    vertical-align: middle !important;
+  }
+
+
+  .invoice-table-modern td {
+    padding: 2.2mm 1.6mm !important;
+
+    border: 1px solid #666666 !important;
+
+    background: #ffffff !important;
+    color: #111111 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.25 !important;
+    font-weight: 400 !important;
+
+    vertical-align: middle !important;
+
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     LARGURA DAS COLUNAS
+     ------------------------------------------------------------------------ */
+
+  .invoice-table-modern .col-desc {
+    width: 45% !important;
+
+    text-align: left !important;
+  }
+
+
+  .invoice-table-modern .col-type {
+    width: 10% !important;
+
+    text-align: center !important;
+  }
+
+
+  .invoice-table-modern .col-qty {
+    width: 9% !important;
+
+    text-align: center !important;
+  }
+
+
+  .invoice-table-modern .col-price {
+    width: 16% !important;
+
+    text-align: right !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  .invoice-table-modern .col-total {
+    width: 20% !important;
+
+    text-align: right !important;
+
+    font-weight: 700 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  .invoice-table-modern .center {
+    text-align: center !important;
+  }
+
+
+  .invoice-table-modern .right {
+    text-align: right !important;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     BADGE PEÇA / SERVIÇO
+     ------------------------------------------------------------------------ */
+
+  .print-badge {
+    display: inline-block !important;
+
+    padding: 0.5mm 1.2mm !important;
+
+    border: 1px solid #555555 !important;
+    border-radius: 1mm !important;
+
+    background: #ffffff !important;
+    color: #111111 !important;
+
+    font-size: 6.8pt !important;
+    line-height: 1.1 !important;
+    font-weight: 700 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  /* ==========================================================================
+     TOTAL
+     ========================================================================== */
+
+  .invoice-totals-section {
+    display: flex !important;
+
+    justify-content: flex-end !important;
+
+    width: 100% !important;
+
+    margin: 0 0 6mm 0 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+
+  .totals-box {
+    width: 68mm !important;
+    max-width: 100% !important;
+  }
+
+
+  .grand-total-row {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 4mm !important;
+
+    width: 100% !important;
+
+    padding: 2.5mm 3mm !important;
+
+    border: 1.3px solid #222222 !important;
+
+    background: #f1f1f1 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+
+  .grand-total-row .total-label {
+    color: #111111 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    text-transform: uppercase !important;
+  }
+
+
+  .grand-total-row .total-amount {
+    color: #111111 !important;
+
+    font-size: 14pt !important;
+    line-height: 1 !important;
+    font-weight: 800 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  /* ==========================================================================
+     RODAPÉ DO DOCUMENTO
+     ========================================================================== */
+
+  .invoice-footer-container {
+    width: 100% !important;
+
+    margin: 2mm 0 0 0 !important;
+    padding: 0 !important;
+  }
+
+
+  /* ==========================================================================
+     OBSERVAÇÕES E PAGAMENTO
+     ========================================================================== */
+
   .invoice-notes-box {
     width: 100% !important;
-    margin-top: 20px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
   }
+
+
+  .invoice-notes-box h3 {
+    margin: 0 0 2mm 0 !important;
+    padding: 0 !important;
+
+    color: #111111 !important;
+
+    font-size: 8.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+
+    text-transform: uppercase !important;
+  }
+
 
   .notes-content {
-    border: 1.5px solid #000 !important;
-    padding: 10px !important;
-    min-height: 60px;
-    font-size: 9pt !important;
+    width: 100% !important;
+
+    min-height: 12mm !important;
+
+    margin: 0 !important;
+    padding: 2.5mm 3mm !important;
+
+    border: 1px solid #555555 !important;
+    border-radius: 1.5mm !important;
+
+    background: #fafafa !important;
+    color: #111111 !important;
+
+    font-size: 8pt !important;
+    line-height: 1.4 !important;
+
+    white-space: pre-wrap !important;
+
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  /* Assinaturas em linha abaixo das notas */
+
+  .notes-content strong {
+    color: #111111 !important;
+  }
+
+
+  /* ==========================================================================
+     ASSINATURAS
+     ========================================================================== */
+
   .invoice-signatures-row {
     display: flex !important;
+
+    align-items: flex-end !important;
     justify-content: space-between !important;
-    margin-top: 50px !important; /* Espaço para não encostar nas notas */
+
+    gap: 14mm !important;
+
     width: 100% !important;
+
+    margin: 14mm 0 0 0 !important;
+    padding: 0 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
+
 
   .signature-wrapper {
-    width: 45% !important; /* Cada assinatura ocupa quase metade da folha */
-    text-align: center;
+    flex: 1 1 0 !important;
+
+    min-width: 0 !important;
+
+    text-align: center !important;
   }
 
+
   .signature-line {
-    margin-top: 50px !important; /* Espaço em branco para a caneta */
-    border-top: 1.5px solid #000 !important; /* A única linha que deve existir */
-    border-bottom: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    padding-top: 5px !important;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 9pt;
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 2mm 1mm 0 1mm !important;
+
+    border-top: 1px solid #222222 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+
+    color: #222222 !important;
+    background: transparent !important;
+
+    font-size: 7.5pt !important;
+    line-height: 1.2 !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+
+  /* ==========================================================================
+     LIMPEZA VISUAL PARA IMPRESSÃO
+     ========================================================================== */
+
+  .card,
+  .modal-content {
+    box-shadow: none !important;
+  }
+
+
+  button,
+  .btn,
+  .form-actions {
+    box-shadow: none !important;
   }
 }
