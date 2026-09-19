@@ -1,86 +1,566 @@
 <div class="dashboard-container">
-    <header class="header">
-        <h1>Visão Geral</h1>
-        <p class="date">Hoje, {{ 'now' | date:'dd/MM/yyyy' }}</p>
+
+    <!-- ================================================================
+         CABEÇALHO
+         ================================================================ -->
+
+    <header class="dashboard-header">
+
+        <div class="header-content">
+
+            <span class="header-eyebrow">
+                Painel da Oficina
+            </span>
+
+            <h1>
+                Visão Geral
+            </h1>
+
+            <p class="header-description">
+                Acompanhe rapidamente o movimento da oficina,
+                faturamento e situação do estoque.
+            </p>
+
+        </div>
+
+
+        <div class="header-date">
+
+            <span class="header-date-icon">
+                📅
+            </span>
+
+            <div>
+
+                <span class="header-date-label">
+                    Hoje
+                </span>
+
+                <strong>
+                    {{ 'now' | date:'dd/MM/yyyy' }}
+                </strong>
+
+            </div>
+
+        </div>
+
     </header>
 
-    <div class="stats-grid">
-        
-        @if (loading()) {
-             <div class="card stat-card full-span-loading">
-                <p>Carregando dados do servidor...</p>
-             </div>
-        } @else {
-        
-            <div class="card stat-card blue">
-                <div class="icon-box">🚗</div>
-                <div class="stat-info">
-                    <h3>Veículos na Oficina</h3>
-                    <h3 class="data-value">{{ vehiclesInProgress() }}</h3>
-                    <span class="subtext">OS em Andamento/Pendente</span>
-                </div>
-            </div>
-            
-            <div class="card stat-card green">
-                <div class="icon-box">💵</div>
-                <div class="stat-info">
-                    <h3>Faturamento do Dia</h3>
-                    <h3 class="data-value">{{ dailyRevenue() | currency:'BRL':'symbol':'1.2-2' }}</h3>
-                    <span class="subtext">Total de OS Finalizadas hoje</span>
-                </div>
-            </div>
-            
-            <div class="card stat-card red">
-                <div class="icon-box">📦</div>
-                <div class="stat-info">
-                    <h3>Estoque Baixo</h3>
-                    <h3 class="data-value">{{ lowStockCount() }}</h3>
-                    <span class="subtext">Itens abaixo do mínimo</span>
-                </div>
-            </div>
-        }
-    </div>
 
-    <div class="content-grid">
-        
-        <div class="card activity-card">
-            <h2>🔔 Atividades Recentes</h2>
-            
-            @if (loading()) {
-                <ul class="activity-list"><li><span class="time">...</span><span class="text">Carregando atividades...</span></li></ul>
-            } @else if (recentActivities().length === 0) {
-                 <div class="empty-state">
-                    <p>Nenhuma OS recente.</p>
-                 </div>
-            } @else {
-                <ul class="activity-list">
-                    @for (activity of recentActivities(); track activity.id) {
-                        <li [class]="activity.status | lowercase">
-                            <span class="time">{{ formatDate(activity.date) }}</span>
-                            <span class="text">
-                                OS #{{ activity.id }} - {{ activity.client }} ({{ activity.vehicle }})
-                            </span>
-                        </li>
-                    }
-                </ul>
-            }
+    <!-- ================================================================
+         INDICADORES
+         ================================================================ -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-eyebrow">
+                    Resumo
+                </span>
+
+                <h2>
+                    Situação atual
+                </h2>
+
+            </div>
+
         </div>
+
+
+        <div class="stats-grid">
+
+            @if (loading()) {
+
+                <div class="card loading-card">
+
+                    <div class="loading-indicator">
+                        <span class="loading-spinner">
+                            ↻
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Carregando informações
+                            </strong>
+
+                            <p>
+                                Buscando os dados mais recentes da oficina...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            } @else {
+
+                <!-- ======================================================
+                     VEÍCULOS
+                     ====================================================== -->
+
+                <div class="card stat-card stat-blue">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon stat-icon-blue">
+                            🚗
+                        </div>
+
+                        <span class="stat-status">
+                            Operação
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Veículos na Oficina
+                        </span>
+
+                        <strong class="stat-value">
+                            {{ vehiclesInProgress() }}
+                        </strong>
+
+                        <p class="stat-description">
+                            Ordens pendentes ou em andamento
+                        </p>
+
+                    </div>
+
+
+                    <div class="stat-footer">
+
+                        <span class="stat-dot blue"></span>
+
+                        <span>
+                            Serviços em aberto
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ======================================================
+                     FATURAMENTO
+                     ====================================================== -->
+
+                <div class="card stat-card stat-green">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon stat-icon-green">
+                            💵
+                        </div>
+
+                        <span class="stat-status">
+                            Financeiro
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Faturamento do Dia
+                        </span>
+
+                        <strong class="stat-value stat-value-money">
+                            {{
+                                dailyRevenue()
+                                | currency:'BRL':'symbol':'1.2-2'
+                            }}
+                        </strong>
+
+                        <p class="stat-description">
+                            Total de OS finalizadas hoje
+                        </p>
+
+                    </div>
+
+
+                    <div class="stat-footer">
+
+                        <span class="stat-dot green"></span>
+
+                        <span>
+                            Movimento de hoje
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ======================================================
+                     ESTOQUE
+                     ====================================================== -->
+
+                <div class="card stat-card stat-red">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon stat-icon-red">
+                            📦
+                        </div>
+
+                        <span class="stat-status">
+                            Estoque
+                        </span>
+
+                    </div>
+
+
+                    <div class="stat-content">
+
+                        <span class="stat-label">
+                            Estoque Baixo
+                        </span>
+
+                        <strong class="stat-value">
+                            {{ lowStockCount() }}
+                        </strong>
+
+                        <p class="stat-description">
+                            Produtos abaixo do estoque mínimo
+                        </p>
+
+                    </div>
+
+
+                    <div class="stat-footer">
+
+                        <span class="stat-dot red"></span>
+
+                        <span>
+                            Itens que precisam de atenção
+                        </span>
+
+                    </div>
+
+                </div>
+
+            }
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================================
+         CONTEÚDO PRINCIPAL
+         ================================================================ -->
+
+    <section class="dashboard-content-grid">
+
+
+        <!-- ==============================================================
+             ATIVIDADES RECENTES
+             ============================================================== -->
+
+        <div class="card activity-card">
+
+            <div class="card-heading">
+
+                <div class="card-heading-icon activity">
+                    🔔
+                </div>
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        Movimentação
+                    </span>
+
+                    <h2>
+                        Atividades Recentes
+                    </h2>
+
+                    <p>
+                        Últimas ordens de serviço registradas
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="activity-content">
+
+                @if (loading()) {
+
+                    <div class="activity-loading">
+
+                        <span class="loading-spinner">
+                            ↻
+                        </span>
+
+                        <span>
+                            Carregando atividades...
+                        </span>
+
+                    </div>
+
+                } @else if (
+                    recentActivities().length === 0
+                ) {
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            📋
+                        </div>
+
+                        <strong>
+                            Nenhuma atividade recente
+                        </strong>
+
+                        <p>
+                            As ordens de serviço mais recentes
+                            aparecerão aqui.
+                        </p>
+
+                    </div>
+
+                } @else {
+
+                    <div class="activity-list">
+
+                        @for (
+                            activity of recentActivities();
+                            track activity.id
+                        ) {
+
+                            <div
+                                class="activity-item"
+                                [class]="
+                                    'activity-item ' +
+                                    (activity.status | lowercase)
+                                "
+                            >
+
+                                <div class="activity-marker">
+
+                                    <span class="activity-dot"></span>
+
+                                </div>
+
+
+                                <div class="activity-info">
+
+                                    <div class="activity-title-row">
+
+                                        <strong>
+                                            OS #{{ activity.id }}
+                                        </strong>
+
+                                        <span class="activity-time">
+                                            {{ formatDate(activity.date) }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="activity-client">
+                                        {{ activity.client }}
+                                    </div>
+
+
+                                    <div class="activity-vehicle">
+
+                                        <span>
+                                            🚗
+                                        </span>
+
+                                        {{ activity.vehicle }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- ==============================================================
+             AÇÕES RÁPIDAS
+             ============================================================== -->
 
         <div class="card actions-card">
-            <h2>🚀 Ações Rápidas</h2>
-            <div class="actions-buttons">
-                <a class="btn-action" routerLink="/veiculos" [queryParams]="{ open: 'true' }">
-                    Nova Entrada de Veículo
-                </a>
-                
-                <a class="btn-action" routerLink="/orcamentos" [queryParams]="{ open: 'true' }">
-                    Novo Orçamento
-                </a>
-                
-                <a class="btn-action" routerLink="/produtos" [queryParams]="{ open: 'true' }">
-                    Novo Produto (Peça)
-                </a>
+
+            <div class="card-heading">
+
+                <div class="card-heading-icon actions">
+                    ⚡
+                </div>
+
+                <div>
+
+                    <span class="card-eyebrow">
+                        Atalhos
+                    </span>
+
+                    <h2>
+                        Ações Rápidas
+                    </h2>
+
+                    <p>
+                        Acesse as tarefas mais usadas
+                    </p>
+
+                </div>
+
             </div>
+
+
+            <div class="quick-actions">
+
+
+                <!-- ======================================================
+                     NOVO VEÍCULO
+                     ====================================================== -->
+
+                <a
+                    class="quick-action quick-action-blue"
+                    routerLink="/veiculos"
+                    [queryParams]="{
+                        open: 'true'
+                    }"
+                >
+
+                    <div class="quick-action-icon">
+                        🚗
+                    </div>
+
+
+                    <div class="quick-action-content">
+
+                        <strong>
+                            Nova Entrada de Veículo
+                        </strong>
+
+                        <span>
+                            Cadastre um veículo na oficina
+                        </span>
+
+                    </div>
+
+
+                    <span class="quick-action-arrow">
+                        ›
+                    </span>
+
+                </a>
+
+
+                <!-- ======================================================
+                     ORÇAMENTO
+                     ====================================================== -->
+
+                <a
+                    class="quick-action quick-action-green"
+                    routerLink="/orcamentos"
+                    [queryParams]="{
+                        open: 'true'
+                    }"
+                >
+
+                    <div class="quick-action-icon">
+                        🧾
+                    </div>
+
+
+                    <div class="quick-action-content">
+
+                        <strong>
+                            Novo Orçamento
+                        </strong>
+
+                        <span>
+                            Monte um orçamento para o cliente
+                        </span>
+
+                    </div>
+
+
+                    <span class="quick-action-arrow">
+                        ›
+                    </span>
+
+                </a>
+
+
+                <!-- ======================================================
+                     PRODUTO
+                     ====================================================== -->
+
+                <a
+                    class="quick-action quick-action-orange"
+                    routerLink="/produtos"
+                    [queryParams]="{
+                        open: 'true'
+                    }"
+                >
+
+                    <div class="quick-action-icon">
+                        📦
+                    </div>
+
+
+                    <div class="quick-action-content">
+
+                        <strong>
+                            Novo Produto
+                        </strong>
+
+                        <span>
+                            Cadastre uma peça ou produto
+                        </span>
+
+                    </div>
+
+
+                    <span class="quick-action-arrow">
+                        ›
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="actions-tip">
+
+                <span>
+                    💡
+                </span>
+
+                <p>
+                    Use estes atalhos para iniciar as operações
+                    mais comuns sem sair da tela inicial.
+                </p>
+
+            </div>
+
         </div>
-    </div>
+
+    </section>
+
 </div>

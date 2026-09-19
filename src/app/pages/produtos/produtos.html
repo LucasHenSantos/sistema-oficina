@@ -1330,8 +1330,8 @@
 
 
     <!-- =====================================================================
-       SCANNER RÁPIDO DE CÓDIGO DE BARRAS
-       ===================================================================== -->
+   SCANNER RÁPIDO DE CÓDIGO DE BARRAS
+   ===================================================================== -->
 
     @if (
     showBarcodeScanner() &&
@@ -1342,43 +1342,206 @@
 
         <div class="modal-content scanner-modal" (click)="$event.stopPropagation()">
 
-            <div class="scanner-modal-icon">
-                ▥
+            <!-- =============================================================
+             FECHAR
+             ============================================================= -->
+
+            <button type="button" class="scanner-close" (click)="closeBarcodeScanner()"
+                [disabled]="scannerState() === 'saving'" title="Fechar">
+                ×
+            </button>
+
+
+            <!-- =============================================================
+             ÍCONE
+             ============================================================= -->
+
+            <div class="scanner-visual">
+
+                <div class="scanner-symbol">
+                    ▥
+                </div>
+
             </div>
 
 
-            <h2>
-                Código de Barras
-            </h2>
+            <!-- =============================================================
+             CABEÇALHO
+             ============================================================= -->
+
+            <div class="scanner-heading">
+
+                <span class="scanner-eyebrow">
+                    Leitura rápida
+                </span>
 
 
-            <p class="scanner-product-name">
-                {{ scannerProduct()!.name }}
-            </p>
+                <h2>
+                    Código de Barras
+                </h2>
 
 
-            <p class="scanner-instruction">
-                Escaneie o código de barras ou digite manualmente.
-            </p>
+                <p>
+                    Escaneie o código de barras ou digite
+                    manualmente para vincular ao produto.
+                </p>
+
+            </div>
 
 
-            <input id="quick-barcode-input" class="scanner-input" type="text" autocomplete="off"
-                placeholder="Aguardando leitura..." [ngModel]="scannerBarcode()"
-                (ngModelChange)="scannerBarcode.set($event)" (keydown)="onQuickScannerKeydown($event)"
-                [disabled]="scannerState() === 'saving'">
+            <!-- =============================================================
+             PRODUTO SELECIONADO
+             ============================================================= -->
+
+            <div class="scanner-product-card">
+
+                <div class="scanner-product-icon">
+                    📦
+                </div>
 
 
-            @if (scannerMessage()) {
+                <div class="scanner-product-data">
+
+                    <span class="scanner-product-label">
+                        PRODUTO SELECIONADO
+                    </span>
+
+
+                    <strong>
+                        {{ scannerProduct()!.name }}
+                    </strong>
+
+
+                    @if (
+                    scannerProduct()!.brand
+                    ) {
+
+                    <span>
+                        {{ scannerProduct()!.brand }}
+                    </span>
+
+                    }
+
+
+                    @if (
+                    scannerProduct()!.code
+                    ) {
+
+                    <span>
+                        Código interno:
+                        {{ scannerProduct()!.code }}
+                    </span>
+
+                    }
+
+
+                    @if (
+                    scannerProduct()!.barcode
+                    ) {
+
+                    <div class="current-barcode">
+
+                        Código atual:
+
+                        <strong>
+                            {{ scannerProduct()!.barcode }}
+                        </strong>
+
+                    </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================================
+             LEITURA
+             ============================================================= -->
+
+            <div class="scanner-input-area">
+
+                <label for="quick-barcode-input">
+                    Código de barras
+                </label>
+
+
+                <div class="scanner-input-box" [class.success]="scannerState() === 'success'"
+                    [class.error]="scannerState() === 'error'" [class.saving]="scannerState() === 'saving'">
+
+                    <span class="scanner-input-symbol">
+                        ▥
+                    </span>
+
+
+                    <input id="quick-barcode-input" type="text" autocomplete="off" placeholder="Aguardando leitura..."
+                        [ngModel]="scannerBarcode()" (ngModelChange)="scannerBarcode.set($event)"
+                        (keydown)="onQuickScannerKeydown($event)" [disabled]="scannerState() === 'saving'">
+
+                </div>
+
+
+                <p class="scanner-tip">
+
+                    <strong>Dica:</strong>
+
+                    após escanear, você pode pressionar
+                    Enter para salvar rapidamente.
+
+                </p>
+
+            </div>
+
+
+            <!-- =============================================================
+             MENSAGEM
+             ============================================================= -->
+
+            @if (
+            scannerMessage()
+            ) {
 
             <div class="scanner-message" [class.success]="scannerState() === 'success'"
                 [class.error]="scannerState() === 'error'">
+
+                @if (
+                scannerState() === 'success'
+                ) {
+
+                <span>
+                    ✓
+                </span>
+
+                } @else if (
+                scannerState() === 'error'
+                ) {
+
+                <span>
+                    !
+                </span>
+
+                } @else {
+
+                <span class="loading-dot">
+                    •
+                </span>
+
+                }
+
+
                 {{ scannerMessage() }}
+
             </div>
 
             }
 
 
-            <div class="scanner-actions">
+            <!-- =============================================================
+             AÇÕES
+             ============================================================= -->
+
+            <div class="scanner-footer">
 
                 <button type="button" class="btn-cancel" (click)="closeBarcodeScanner()"
                     [disabled]="scannerState() === 'saving'">
@@ -1389,11 +1552,17 @@
                 <button type="button" class="btn-save" (click)="saveQuickBarcode()"
                     [disabled]="scannerState() === 'saving'">
 
-                    {{
+                    @if (
                     scannerState() === 'saving'
-                    ? 'Salvando...'
-                    : 'Salvar Código'
-                    }}
+                    ) {
+
+                    Salvando...
+
+                    } @else {
+
+                    Salvar Código
+
+                    }
 
                 </button>
 
@@ -1405,48 +1574,58 @@
 
     }
 
-
     <!-- =====================================================================
-       MODO SCANNER EM LOTE
-       ===================================================================== -->
+   MODO SCANNER EM LOTE
+   ===================================================================== -->
 
     @if (showBulkScanner()) {
 
-    <div class="modal-overlay scanner-overlay" (click)="closeBulkBarcodeScanner()">
+    <div class="modal-overlay bulk-scanner-overlay" (click)="closeBulkBarcodeScanner()">
 
         <div class="modal-content bulk-scanner-modal" (click)="$event.stopPropagation()">
 
-            <!-- CABEÇALHO -->
-            <div class="bulk-header">
+            <!-- =============================================================
+             CABEÇALHO
+             ============================================================= -->
+
+            <div class="bulk-scanner-header">
 
                 <div>
+
+                    <span class="scanner-eyebrow">
+                        Cadastro em lote
+                    </span>
 
                     <h2>
                         Modo Scanner
                     </h2>
 
                     <p>
-                        Cadastre códigos de barras rapidamente nos produtos pendentes.
+                        Cadastre códigos de barras rapidamente
+                        nos produtos pendentes.
                     </p>
 
                 </div>
 
 
-                <button type="button" class="modal-close" (click)="closeBulkBarcodeScanner()"
-                    [disabled]="bulkState() === 'saving'">
+                <button type="button" class="scanner-close" (click)="closeBulkBarcodeScanner()"
+                    [disabled]="bulkState() === 'saving'" title="Fechar">
                     ×
                 </button>
 
             </div>
 
 
-            <!-- PROGRESSO -->
-            <div class="bulk-progress">
+            <!-- =============================================================
+             PROGRESSO
+             ============================================================= -->
+
+            <div class="bulk-progress-area">
 
                 <div class="bulk-progress-info">
 
                     <span>
-                        Progresso
+                        Progresso do cadastro
                     </span>
 
                     <strong>
@@ -1460,12 +1639,37 @@
 
                 <div class="bulk-progress-track">
 
-                    <div class="bulk-progress-bar" [style.width.%]="getBulkProgress()"></div>
+                    <div class="bulk-progress-fill" [style.width.%]="getBulkProgress()">
+                    </div>
+
+                </div>
+
+
+                <div class="bulk-progress-footer">
+
+                    <span>
+                        {{ getBulkProgress() | number:'1.0-0' }}%
+                        concluído
+                    </span>
+
+
+                    <span>
+                        {{ getBulkRemaining() }}
+                        pendente{{
+                        getBulkRemaining() === 1
+                        ? ''
+                        : 's'
+                        }}
+                    </span>
 
                 </div>
 
             </div>
 
+
+            <!-- =============================================================
+             CONCLUÍDO
+             ============================================================= -->
 
             @if (
             bulkState() === 'finished'
@@ -1473,16 +1677,19 @@
 
             <div class="bulk-finished">
 
-                <div class="finished-icon">
+                <div class="bulk-finished-icon">
                     ✓
                 </div>
+
 
                 <h3>
                     Cadastro concluído
                 </h3>
 
+
                 <p>
-                    Todos os produtos da fila possuem código de barras.
+                    Todos os produtos da fila possuem
+                    código de barras cadastrado.
                 </p>
 
 
@@ -1492,62 +1699,102 @@
 
             </div>
 
-            } @else if (currentBulkProduct()) {
+            } @else if (
+            currentBulkProduct()
+            ) {
 
-            <!-- PRODUTO ATUAL -->
-            <div class="bulk-product-card">
 
-                <span class="bulk-label">
-                    Produto atual
+            <!-- =============================================================
+             PRODUTO ATUAL
+             ============================================================= -->
+
+            <div class="bulk-current-product">
+
+                <span class="bulk-current-label">
+                    PRODUTO ATUAL
                 </span>
 
 
-                <h3>
-                    {{ currentBulkProduct()!.name }}
-                </h3>
+                <div class="bulk-product-content">
+
+                    <div class="bulk-product-icon">
+                        📦
+                    </div>
 
 
-                <div class="bulk-product-meta">
+                    <div class="bulk-product-info">
 
-                    @if (currentBulkProduct()!.code) {
-
-                    <span>
-                        Código:
-                        <strong>
-                            {{ currentBulkProduct()!.code }}
-                        </strong>
-                    </span>
-
-                    }
+                        <h3>
+                            {{ currentBulkProduct()!.name }}
+                        </h3>
 
 
-                    @if (currentBulkProduct()!.brand) {
+                        <div class="bulk-product-meta">
 
-                    <span>
-                        Marca:
-                        <strong>
-                            {{ currentBulkProduct()!.brand }}
-                        </strong>
-                    </span>
+                            @if (
+                            currentBulkProduct()!.code
+                            ) {
 
-                    }
+                            <span>
+                                Código:
+
+                                <strong>
+                                    {{ currentBulkProduct()!.code }}
+                                </strong>
+                            </span>
+
+                            }
+
+
+                            @if (
+                            currentBulkProduct()!.brand
+                            ) {
+
+                            <span>
+                                Marca:
+
+                                <strong>
+                                    {{ currentBulkProduct()!.brand }}
+                                </strong>
+                            </span>
+
+                            }
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </div>
 
 
-            <!-- INPUT -->
-            <div class="bulk-scanner-input-area">
+            <!-- =============================================================
+             LEITURA DO CÓDIGO
+             ============================================================= -->
 
-                <label>
-                    Código de barras
-                </label>
+            <div class="bulk-scan-area">
+
+                <div class="scanner-symbol">
+                    ▥
+                </div>
 
 
-                <div class="bulk-input-wrapper">
+                <h3>
+                    Leia o código de barras
+                </h3>
 
-                    <span>
+
+                <p>
+                    Aponte o leitor para o produto atual
+                    ou digite o código manualmente.
+                </p>
+
+
+                <div class="scanner-input-box bulk" [class.success]="bulkState() === 'success'"
+                    [class.error]="bulkState() === 'error'" [class.saving]="bulkState() === 'saving'">
+
+                    <span class="scanner-input-symbol">
                         ▥
                     </span>
 
@@ -1559,56 +1806,98 @@
                 </div>
 
 
-                <span class="bulk-hint">
+                <span class="bulk-enter-hint">
                     O leitor pode pressionar Enter automaticamente.
                 </span>
 
+
+                <!-- =========================================================
+                 MENSAGEM
+                 ========================================================= -->
+
+                @if (
+                bulkMessage()
+                ) {
+
+                <div class="scanner-message bulk-message" [class.success]="bulkState() === 'success'"
+                    [class.error]="bulkState() === 'error'">
+
+                    @if (
+                    bulkState() === 'success'
+                    ) {
+
+                    <span>
+                        ✓
+                    </span>
+
+                    } @else if (
+                    bulkState() === 'error'
+                    ) {
+
+                    <span>
+                        !
+                    </span>
+
+                    } @else {
+
+                    <span class="loading-dot">
+                        •
+                    </span>
+
+                    }
+
+
+                    {{ bulkMessage() }}
+
+                </div>
+
+                }
+
             </div>
 
 
-            <!-- MENSAGEM -->
-            @if (bulkMessage()) {
+            <!-- =============================================================
+             NAVEGAÇÃO
+             ============================================================= -->
 
-            <div class="scanner-message bulk-message" [class.success]="bulkState() === 'success'"
-                [class.error]="bulkState() === 'error'">
-                {{ bulkMessage() }}
-            </div>
-
-            }
-
-
-            <!-- NAVEGAÇÃO -->
             <div class="bulk-navigation">
 
-                <button type="button" class="btn-bulk-nav" (click)="previousBulkProduct()" [disabled]="
-                getBulkRemaining() <= 1 ||
-                bulkState() === 'saving'
-              ">
+                <button type="button" class="btn-secondary" (click)="previousBulkProduct()" [disabled]="
+                    getBulkRemaining() <= 1 ||
+                    bulkState() === 'saving'
+                ">
                     ← Anterior
                 </button>
 
 
-                <span class="remaining-count">
+                <div class="bulk-navigation-center">
+
                     {{ getBulkRemaining() }}
+
                     pendente{{
                     getBulkRemaining() === 1
                     ? ''
                     : 's'
                     }}
-                </span>
+
+                </div>
 
 
-                <button type="button" class="btn-bulk-nav" (click)="nextBulkProduct()" [disabled]="
-                getBulkRemaining() <= 1 ||
-                bulkState() === 'saving'
-              ">
+                <button type="button" class="btn-secondary" (click)="nextBulkProduct()" [disabled]="
+                    getBulkRemaining() <= 1 ||
+                    bulkState() === 'saving'
+                ">
                     Próximo →
                 </button>
 
             </div>
 
 
-            <div class="bulk-actions">
+            <!-- =============================================================
+             AÇÕES
+             ============================================================= -->
+
+            <div class="scanner-footer">
 
                 <button type="button" class="btn-cancel" (click)="closeBulkBarcodeScanner()"
                     [disabled]="bulkState() === 'saving'">
@@ -1618,11 +1907,19 @@
 
                 <button type="button" class="btn-save" (click)="saveBulkBarcode()"
                     [disabled]="bulkState() === 'saving'">
-                    {{
+
+                    @if (
                     bulkState() === 'saving'
-                    ? 'Salvando...'
-                    : 'Salvar e Continuar'
-                    }}
+                    ) {
+
+                    Salvando...
+
+                    } @else {
+
+                    Salvar e Continuar
+
+                    }
+
                 </button>
 
             </div>

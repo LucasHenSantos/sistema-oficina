@@ -80,6 +80,28 @@ function writeJson(
 }
 
 
+function isYes(
+    value
+) {
+
+    const normalized =
+        String(
+            value || ''
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+        normalized === 's' ||
+        normalized === 'sim' ||
+        normalized === 'y' ||
+        normalized === 'yes'
+    );
+
+}
+
+
 /* ==========================================================================
    VERSÃO
    ========================================================================== */
@@ -178,7 +200,7 @@ function getNextPatchVersion(
 function getLastBuiltVersion() {
 
     /*
-      Primeiro usamos nosso histórico próprio.
+      Primeiro usamos nosso próprio histórico.
     */
     if (
         fs.existsSync(
@@ -207,7 +229,7 @@ function getLastBuiltVersion() {
 
         } catch {
 
-            // continua
+            // Continua para a próxima tentativa.
 
         }
 
@@ -215,8 +237,8 @@ function getLastBuiltVersion() {
 
 
     /*
-      Se ainda não existir histórico, tentamos descobrir
-      pelo latest.yml gerado pelo electron-builder.
+      Se ainda não existir histórico,
+      tentamos descobrir pelo latest.yml.
     */
     if (
         fs.existsSync(
@@ -249,7 +271,7 @@ function getLastBuiltVersion() {
 
         } catch {
 
-            // continua
+            // Continua normalmente.
 
         }
 
@@ -262,7 +284,7 @@ function getLastBuiltVersion() {
 
 
 /* ==========================================================================
-   PERGUNTA NO TERMINAL
+   TERMINAL
    ========================================================================== */
 
 const rl =
@@ -276,19 +298,20 @@ const rl =
 
 
 function question(
-    text
+    message
 ) {
 
     return new Promise(
         resolve => {
 
             rl.question(
-                text,
+                message,
                 answer => {
 
                     resolve(
-                        String(answer)
-                            .trim()
+                        String(
+                            answer || ''
+                        ).trim()
                     );
 
                 }
@@ -301,23 +324,86 @@ function question(
 
 
 /* ==========================================================================
-   BUILD
+   EXECUTA COMANDO
+   ========================================================================== */
+
+function runCommand(
+    command
+) {
+
+    return spawnSync(
+        command,
+        {
+            cwd:
+                rootDir,
+
+            stdio:
+                'inherit',
+
+            shell:
+                true,
+
+            env:
+                process.env
+        }
+    );
+
+}
+
+
+/* ==========================================================================
+   RESTAURA PACKAGE.JSON / PACKAGE-LOCK
+   ========================================================================== */
+
+function restoreOriginalFiles(
+    originalPackage,
+    originalPackageLock
+) {
+
+    fs.writeFileSync(
+        packagePath,
+        originalPackage,
+        'utf8'
+    );
+
+
+    if (
+        originalPackageLock !== null
+    ) {
+
+        fs.writeFileSync(
+            packageLockPath,
+            originalPackageLock,
+            'utf8'
+        );
+
+    }
+
+}
+
+
+/* ==========================================================================
+   PROCESSO PRINCIPAL
    ========================================================================== */
 
 async function main() {
 
     console.log('');
     console.log(
-        '==============================================='
+        '==================================================='
     );
     console.log(
-        '      SISTEMA OFICINA - NOVA COMPILAÇÃO'
+        '       SISTEMA OFICINA - NOVA VERSÃO'
     );
     console.log(
-        '==============================================='
+        '==================================================='
     );
     console.log('');
 
+
+    /* ------------------------------------------------------------------------
+       GUARDA ARQUIVOS ORIGINAIS
+       ------------------------------------------------------------------------ */
 
     const originalPackage =
         fs.readFileSync(
@@ -355,6 +441,10 @@ async function main() {
         getLastBuiltVersion();
 
 
+    /* ------------------------------------------------------------------------
+       MOSTRA VERSÕES
+       ------------------------------------------------------------------------ */
+
     console.log(
         `Versão atual do projeto: ${currentVersion}`
     );
@@ -380,6 +470,10 @@ async function main() {
     console.log('');
 
 
+    /* ------------------------------------------------------------------------
+       SUGESTÃO DA PRÓXIMA VERSÃO
+       ------------------------------------------------------------------------ */
+
     const baseVersion =
         lastBuiltVersion ||
         currentVersion;
@@ -402,6 +496,10 @@ async function main() {
         suggestedVersion;
 
 
+    /* ------------------------------------------------------------------------
+       VALIDA VERSÃO
+       ------------------------------------------------------------------------ */
+
     if (
         !isValidVersion(
             newVersion
@@ -414,7 +512,7 @@ async function main() {
         );
 
         console.error(
-            'Use o formato: 1.0.1'
+            'Use o formato: 1.1.2'
         );
 
         rl.close();
@@ -445,29 +543,105 @@ async function main() {
     }
 
 
+    /* ------------------------------------------------------------------------
+       PERGUNTA SE DEVE PUBLICAR
+       ------------------------------------------------------------------------ */
+
     console.log('');
     console.log(
-        `Será gerado: Sistema Oficina ${newVersion}`
+        `Nova versão: Sistema Oficina ${newVersion}`
     );
     console.log('');
 
 
+    const publishAnswer =
+        await question(
+            'Publicar esta versão no GitHub após compilar? (s/n): '
+        );
+
+
+    const shouldPublish =
+        isYes(
+            publishAnswer
+        );
+
+
+    /* ------------------------------------------------------------------------
+       VALIDA TOKEN ANTES DE COMEÇAR
+       ------------------------------------------------------------------------ */
+
+    if (
+        shouldPublish &&
+        !process.env.GITHUB_RELEASE_TOKEN
+    ) {
+
+        console.error('');
+        console.error(
+            'Token do GitHub não encontrado.'
+        );
+
+        console.error('');
+        console.error(
+            'A variável GITHUB_RELEASE_TOKEN precisa estar configurada.'
+        );
+
+        console.error(
+            'Abra um novo terminal depois de configurar o token.'
+        );
+
+        rl.close();
+
+        process.exit(1);
+
+    }
+
+
+    console.log('');
+
+
+    if (
+        shouldPublish
+    ) {
+
+        console.log(
+            `Será compilada e publicada a versão ${newVersion}.`
+        );
+
+        console.log(
+            `Release esperada: v${newVersion}`
+        );
+
+    } else {
+
+        console.log(
+            `Será compilada localmente a versão ${newVersion}.`
+        );
+
+    }
+
+
+    console.log('');
+
+
+    /* ------------------------------------------------------------------------
+       CONFIRMAÇÃO FINAL
+       ------------------------------------------------------------------------ */
+
     const confirmation =
         await question(
-            'Continuar com a compilação? (s/n): '
+            'Continuar? (s/n): '
         );
 
 
     if (
-        confirmation.toLowerCase() !==
-        's' &&
-        confirmation.toLowerCase() !==
-        'sim'
+        !isYes(
+            confirmation
+        )
     ) {
 
         console.log('');
         console.log(
-            'Compilação cancelada.'
+            'Operação cancelada.'
         );
 
         rl.close();
@@ -480,9 +654,9 @@ async function main() {
     rl.close();
 
 
-    /* --------------------------------------------------------------------------
-       ATUALIZA PACKAGE.JSON
-       -------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------
+       ALTERA PACKAGE.JSON
+       ------------------------------------------------------------------------ */
 
     packageJson.version =
         newVersion;
@@ -494,12 +668,13 @@ async function main() {
     );
 
 
-    /* --------------------------------------------------------------------------
-       ATUALIZA PACKAGE-LOCK.JSON
-       -------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------
+       ALTERA PACKAGE-LOCK.JSON
+       ------------------------------------------------------------------------ */
 
     if (
-        hasPackageLock
+        hasPackageLock &&
+        originalPackageLock
     ) {
 
         const packageLock =
@@ -538,36 +713,51 @@ async function main() {
         `Versão alterada para ${newVersion}.`
     );
 
-    console.log('');
-    console.log(
-        'Gerando instalador...'
-    );
+
+    /* ------------------------------------------------------------------------
+       ESCOLHE BUILD LOCAL OU BUILD + PUBLICAÇÃO
+       ------------------------------------------------------------------------ */
+
+    const command =
+        shouldPublish
+
+            ? 'npm run electron:publish:raw'
+
+            : 'npm run electron:build:raw';
+
+
     console.log('');
 
 
-    /* --------------------------------------------------------------------------
-       EXECUTA BUILD REAL
-       -------------------------------------------------------------------------- */
+    if (
+        shouldPublish
+    ) {
+
+        console.log(
+            'Compilando e publicando no GitHub...'
+        );
+
+    } else {
+
+        console.log(
+            'Gerando instalador local...'
+        );
+
+    }
+
+
+    console.log('');
+
 
     const result =
-        spawnSync(
-            'npm run electron:build:raw',
-            {
-                cwd:
-                    rootDir,
-
-                stdio:
-                    'inherit',
-
-                shell:
-                    true
-            }
+        runCommand(
+            command
         );
 
 
-    /* --------------------------------------------------------------------------
-       BUILD FALHOU
-       -------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------
+       ERRO AO INICIAR
+       ------------------------------------------------------------------------ */
 
     if (
         result.error
@@ -575,7 +765,7 @@ async function main() {
 
         console.error('');
         console.error(
-            'Erro ao iniciar o processo de compilação:'
+            'Erro ao iniciar o processo:'
         );
 
         console.error(
@@ -584,39 +774,32 @@ async function main() {
 
     }
 
+
+    /* ------------------------------------------------------------------------
+       FALHA
+       ------------------------------------------------------------------------ */
+
     if (
         result.status !== 0
     ) {
 
         console.error('');
         console.error(
-            'A compilação falhou.'
+            shouldPublish
+                ? 'A compilação/publicação falhou.'
+                : 'A compilação falhou.'
         );
+
 
         console.error(
             'Restaurando a versão anterior...'
         );
 
 
-        fs.writeFileSync(
-            packagePath,
+        restoreOriginalFiles(
             originalPackage,
-            'utf8'
-        );
-
-
-        if (
-            hasPackageLock &&
             originalPackageLock
-        ) {
-
-            fs.writeFileSync(
-                packageLockPath,
-                originalPackageLock,
-                'utf8'
-            );
-
-        }
+        );
 
 
         console.error('');
@@ -632,9 +815,9 @@ async function main() {
     }
 
 
-    /* --------------------------------------------------------------------------
-       BUILD BEM-SUCEDIDO
-       -------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------
+       SUCESSO
+       ------------------------------------------------------------------------ */
 
     writeJson(
         lastBuildPath,
@@ -644,51 +827,106 @@ async function main() {
 
             builtAt:
                 new Date()
-                    .toISOString()
+                    .toISOString(),
+
+            published:
+                shouldPublish
         }
     );
 
 
     console.log('');
     console.log(
-        '==============================================='
+        '==================================================='
     );
 
-    console.log(
-        ` Build ${newVersion} concluída com sucesso!`
-    );
+
+    if (
+        shouldPublish
+    ) {
+
+        console.log(
+            ` Versão ${newVersion} compilada e publicada!`
+        );
+
+    } else {
+
+        console.log(
+            ` Build ${newVersion} concluída com sucesso!`
+        );
+
+    }
+
 
     console.log(
-        '==============================================='
+        '==================================================='
     );
+
 
     console.log('');
 
-    console.log(
-        'Arquivos disponíveis na pasta:'
-    );
 
-    console.log(
-        path.join(
-            rootDir,
-            'release'
-        )
-    );
+    if (
+        shouldPublish
+    ) {
+
+        console.log(
+            `GitHub Release: v${newVersion}`
+        );
+
+        console.log('');
+        console.log(
+            'O aplicativo instalado poderá detectar essa versão automaticamente.'
+        );
+
+    } else {
+
+        console.log(
+            'Arquivos gerados em:'
+        );
+
+        console.log(
+            path.join(
+                rootDir,
+                'release'
+            )
+        );
+
+    }
+
 
     console.log('');
 
 }
 
 
+/* ==========================================================================
+   ERRO INESPERADO
+   ========================================================================== */
+
 main().catch(
     error => {
 
+        console.error('');
         console.error(
-            'Erro inesperado:',
+            'Erro inesperado:'
+        );
+
+        console.error(
             error
         );
 
-        rl.close();
+
+        try {
+
+            rl.close();
+
+        } catch {
+
+            // Nada a fazer.
+
+        }
+
 
         process.exit(1);
 
