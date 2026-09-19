@@ -1,310 +1,2891 @@
-<div class="page-container">
-  
+<div class="page-container no-print">
+
+  <!-- ======================================================================
+       CABEÇALHO
+       ====================================================================== -->
+
   <header class="page-header">
+
     <div>
-      <h1>Ordens de Serviço</h1>
-      <p class="subtitle">Controle de orçamentos, aprovações e serviços realizados</p>
+
+      <h1>
+        Ordens de Serviço
+      </h1>
+
+      <p class="subtitle">
+        Controle de serviços, estoque e recebimentos
+      </p>
+
     </div>
-    <button class="btn-primary" (click)="openModal()">
-      <span class="icon">+</span> Nova OS
-    </button>
+
+
+    <div class="page-header-actions">
+
+      <button type="button" class="btn-archive-completed" (click)="archiveCompletedOrders()"
+        [disabled]="completedOrdersAvailableCount() <= 0" [title]="
+        completedOrdersAvailableCount() > 0
+          ? 'Arquivar todas as Ordens de Serviço finalizadas'
+          : 'Nenhuma OS finalizada disponível para arquivar'
+      ">
+
+        <span class="archive-button-icon">
+          📦
+        </span>
+
+        <span>
+          Arquivar concluídas
+        </span>
+
+        @if (
+        completedOrdersAvailableCount() > 0
+        ) {
+
+        <span class="archive-ready-count">
+          {{ completedOrdersAvailableCount() }}
+        </span>
+
+        }
+
+      </button>
+
+
+      <button type="button" class="btn-open-archived" (click)="openArchivedOrders()">
+
+        <span class="archive-button-icon">
+          🗄️
+        </span>
+
+        <span>
+          Arquivadas
+        </span>
+
+        <span class="archived-count">
+          {{ archivedCount() }}
+        </span>
+
+      </button>
+
+
+      <button class="btn-primary" type="button" (click)="openModal()">
+
+        <span class="icon">
+          +
+        </span>
+
+        Nova OS
+
+      </button>
+
+    </div>
+
   </header>
 
+
+  <!-- ======================================================================
+       BUSCA
+       ====================================================================== -->
+
   <div class="toolbar">
+
     <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input 
-        type="text" 
-        placeholder="Buscar por cliente, veículo ou Nº da OS..."
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
-      >
+
+      <span class="search-icon">
+        🔍
+      </span>
+
+      <input type="text" placeholder="Buscar por cliente, veículo ou Nº da OS..." [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)">
+
     </div>
+
   </div>
 
-  <div class="page-container no-print"></div>
 
- <div class="table-container card">
+  <!-- ======================================================================
+       LISTAGEM DAS ORDENS
+       ====================================================================== -->
+
+  <div class="table-container card">
+
     <table>
+
       <thead>
+
         <tr>
           <th>Nº OS</th>
-          <th>Cliente / Veículo</th>
-          <th>Data</th>
-          <th>Status do Serviço</th>
-          <th>Pagamento</th> <th>Total</th>
-          <th class="actions-col">Ações</th>
+
+          <th>
+            Cliente / Veículo
+          </th>
+
+          <th>
+            Data
+          </th>
+
+          <th>
+            Serviço
+          </th>
+
+          <th>
+            Situação
+          </th>
+
+          <th>
+            Pago
+          </th>
+
+          <th>
+            Em Aberto
+          </th>
+
+          <th>
+            Total
+          </th>
+
+          <th class="actions-col">
+            Ações
+          </th>
         </tr>
+
       </thead>
+
+
       <tbody>
-        @for (os of filteredOrders(); track os.id) {
-          <tr>
-            <td><span class="os-id">#{{ os.id }}</span></td>
-            <td>
-              <div class="os-info">
-                <strong>{{ os.client }}</strong>
-                <span class="detail-text">{{ os.vehicle }}</span>
-              </div>
-            </td>
-            <td>{{ os.date | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <span class="status-badge" [class]="os.status">
-                {{ getStatusLabel(os.status) }}
-              </span>
-            </td>
-            <td>
-              <select class="payment-select" 
-                      [class]="os.paymentStatus || 'pending'" 
-                      [ngModel]="os.paymentStatus || 'pending'" 
-                      (ngModelChange)="updatePayment(os, $event)">
-                <option value="pending">Pendente</option>
-                <option value="paid">Pago</option>
-              </select>
-            </td>
-            <td class="total-col">{{ os.total | currency:'BRL' }}</td>
-            <td class="actions-cell">
-              <button class="btn-action edit" (click)="editOrder(os)" title="Editar">✏️</button>
-              <button class="btn-action delete" (click)="deleteOrder(os.id)" title="Excluir">🗑️</button>
-              <button class="btn-action print" (click)="printOS(os)" title="Imprimir">🖨️</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
 
-  @if (showModal()) {
-    <div class="modal-overlay" (click)="closeModal()">
-      <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-        
-        <div class="modal-header">
-          <h2>{{ currentOrder().id === 0 ? 'Nova Ordem de Serviço' : 'Editar OS #' + currentOrder().id }}</h2>
-          <div class="header-actions">
-            @if (currentOrder().id !== 0) {
-              <button type="button" class="btn-print" (click)="printOS(currentOrder())">🖨️ Imprimir</button>
-            }
-            <div class="total-display">
-              Total: {{ currentOrder().total | currency:'BRL' }}
-            </div>
-          </div>
-        </div>
-        
-        <form (ngSubmit)="saveOrder()">
-          
-          <div class="form-section">
-            <div class="form-row">
-              <div class="form-group col-4">
-                <label>Cliente</label>
-                <select 
-                  [(ngModel)]="currentOrder().client" 
-                  name="client" 
-                  required
-                  (ngModelChange)="onClientChange(currentOrder().client)"
-                >
-                  <option value="" disabled selected>Selecione...</option>
-                  @for (c of clientsList(); track c) { <option [value]="c">{{ c }}</option> }
-                </select>
-              </div>
-              <div class="form-group col-4">
-                <label>Veículo</label>
-                <select 
-                  [(ngModel)]="currentOrder().vehicle" 
-                  name="vehicle" 
-                  required
-                  [disabled]="!currentOrder().client"
-                >
-                  <option value="" disabled selected>Selecione...</option>
-                  @for (v of vehiclesList(); track v) { <option [value]="v">{{ v }}</option> }
-                </select>
-              </div>
-              <div class="form-group col-2">
-                <label>Data</label>
-                <input type="date" [(ngModel)]="currentOrder().date" name="date">
-              </div>
-              <div class="form-group col-2">
-                <label>Status</label>
-                <select [(ngModel)]="currentOrder().status" name="status">
-                  <option value="in-progress">Em Andamento</option>
-                  <option value="completed">Finalizado</option>
-                  <option value="canceled">Cancelado</option>
-                </select>
-              </div>
-            </div>
-          </div>
+        @for (
+        os of filteredOrders();
+        track os.id
+        ) {
 
-          <div class="items-section">
-            <div class="add-row">
-              <div class="add-group service-group">
-                <label>Adicionar Serviço</label>
-                <div class="input-with-btn">
-                  <select [ngModel]="selectedServiceId()" (ngModelChange)="selectedServiceId.set($event)" name="addSvc">
-                    <option [ngValue]="null">Selecione o serviço...</option>
-                    @for (s of availableServices(); track s.id) {
-                      <option [value]="s.id">{{ s.name }} ({{ s.price | currency:'BRL' }})</option>
-                    }
-                  </select>
-                  <button type="button" class="btn-add" (click)="addService()">Add</button>
-                </div>
-              </div>
-
-              <div class="add-group product-group">
-                <label>Adicionar Peça/Produto</label>
-                <div class="input-with-btn">
-                  <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)" name="addProd">
-                    <option [ngValue]="null">Selecione a peça...</option>
-                    @for (p of availableProducts(); track p.id) {
-                      <option [value]="p.id">{{ p.name }} ({{ p.price | currency:'BRL' }})</option>
-                    }
-                  </select>
-                  <input type="number" [ngModel]="productQty()" (ngModelChange)="productQty.set($event)" name="qty" class="qty-input" min="1" value="1">
-                  <button type="button" class="btn-add" (click)="addProduct()">Add</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="items-list-container">
-              <table class="items-table">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Descrição</th>
-                    <th>Qtd</th>
-                    <th>Unitário</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of currentOrder().items; track $index) {
-                    <tr>
-                      <td>
-                        <span class="type-badge" [class]="item.type">
-                          {{ item.type === 'service' ? 'Serviço' : 'Peça' }}
-                        </span>
-                      </td>
-                      <td>{{ item.name }}</td>
-                      <td>{{ item.qty }}</td>
-                      <td>{{ item.price | currency:'BRL' }}</td>
-                      <td class="subtotal">{{ item.total | currency:'BRL' }}</td>
-                      <td>
-                        <button type="button" class="btn-remove-item" (click)="removeItem($index)">×</button>
-                      </td>
-                    </tr>
-                  }
-                  @if (currentOrder().items.length === 0) {
-                    <tr>
-                      <td colspan="6" class="empty-items">Nenhum item adicionado à OS.</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Observações / Diagnóstico</label>
-            <textarea [(ngModel)]="currentOrder().notes" name="notes" rows="2" placeholder="Descreva o problema ou observações importantes..."></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn-save">Salvar OS</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
-</div>
-<div class="printable-invoice" id="invoice">
-  @if (osItemToView()) {
-    <div class="invoice-accent-bar"></div>
-
-    <header class="invoice-header-flex">
-      <div class="company-details">
-        <h1>{{ companyData()?.name || 'Mecânica Borges' }}</h1>
-        <div class="company-contact">
-          <p>{{ companyData()?.address }}</p>
-          <p>{{ companyData()?.city }}</p>
-          <p>{{ companyData()?.phone ? 'Tel: ' + companyData()?.phone : '' }} {{ companyData()?.email ? '| ' + companyData()?.email : '' }}</p>
-          @if (companyData()?.cnpj) { <p>CNPJ: {{ companyData()?.cnpj }}</p> }
-        </div>
-      </div>
-      <div class="invoice-meta-box">
-        <div class="meta-title">ORDEM DE SERVIÇO</div>
-        <div class="meta-number">#{{ osItemToView()!.id }}</div>
-        <div class="meta-dates">
-          <p><strong>Data:</strong> {{ osItemToView()!.date | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Status:</strong> {{ getStatusLabel(osItemToView()!.status) }}</p>
-        </div>
-      </div>
-    </header>
-
-    <section class="client-section">
-      <h3>Cliente:</h3>
-      <div class="client-info-box">
-        <div class="client-data">
-          <p class="client-name">{{ osItemToView()!.client }}</p>
-        </div>
-        <div class="vehicle-data">
-           <span class="label-vehicle">Veículo:</span>
-           <span class="vehicle-name">{{ osItemToView()!.vehicle }}</span>
-        </div>
-      </div>
-    </section>
-
-    <table class="invoice-table-modern">
-      <thead>
         <tr>
-          <th class="col-desc">Descrição</th>
-          <th class="col-type center">Tipo</th>
-          <th class="col-qty center">Qtd.</th>
-          <th class="col-price right">Valor Unit.</th>
-          <th class="col-total right">Subtotal</th>
+
+          <td>
+
+            <span class="os-id">
+              #{{ os.id }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <div class="os-info">
+
+              <strong>
+                {{ os.client }}
+              </strong>
+
+              <span class="detail-text">
+                {{ os.vehicle }}
+              </span>
+
+            </div>
+
+          </td>
+
+
+          <td>
+            {{
+            os.date
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+
+          <td>
+
+            <span class="status-badge" [ngClass]="os.status">
+              {{
+              getStatusLabel(
+              os.status
+              )
+              }}
+            </span>
+
+
+            @if (
+            os.stockProcessed
+            ) {
+
+            <div class="stock-processed-mini">
+              📦 Estoque processado
+            </div>
+
+            }
+
+          </td>
+
+
+          <td class="payment-status-col">
+
+            <span class="payment-status-badge" [ngClass]="
+                  getPaymentStatusClass(
+                    os.paymentStatus
+                  )
+                ">
+              {{
+              getPaymentStatusLabel(
+              os.paymentStatus
+              )
+              }}
+            </span>
+
+          </td>
+
+
+          <td class="payment-money-col payment-money-paid">
+
+            {{
+            getOrderPaidAmount(os)
+            | currency:'BRL'
+            }}
+
+          </td>
+
+
+          <td class="payment-money-col">
+
+            <span class="payment-money-due" [class.payment-money-zero]="
+                  getOrderRemainingAmount(os) <= 0
+                ">
+              {{
+              getOrderRemainingAmount(os)
+              | currency:'BRL'
+              }}
+            </span>
+
+          </td>
+
+
+          <td class="total-col">
+            {{
+            os.total
+            | currency:'BRL'
+            }}
+          </td>
+
+
+          <td class="actions-cell">
+
+            <!-- ===============================================================
+       PAGAMENTOS
+       =============================================================== -->
+
+            <button type="button" class="btn-action payment" (click)="openPaymentModal(os)" [title]="
+      os.paymentStatus === 'paid'
+        ? 'Ver pagamentos'
+        : 'Receber pagamento'
+    ">
+              💰
+            </button>
+
+
+            <!-- ===============================================================
+       FINALIZAR
+       Só aparece enquanto a OS ainda está aberta
+       =============================================================== -->
+
+            @if (
+            os.status !== 'completed' &&
+            os.status !== 'canceled'
+            ) {
+
+            <button type="button" class="btn-action finalize" (click)="finalizeOrder(os)"
+              title="Finalizar Ordem de Serviço">
+              ✅
+            </button>
+
+            }
+
+
+            <!-- ===============================================================
+       EDITAR
+       OS finalizada NÃO pode mais ser editada
+       =============================================================== -->
+
+            @if (
+            os.status !== 'completed'
+            ) {
+
+            <button type="button" class="btn-action edit" (click)="editOrder(os)" title="Editar">
+              ✏️
+            </button>
+
+            } @else {
+
+            <span class="finalized-lock" title="OS finalizada e bloqueada para edição">
+              🔒
+            </span>
+
+            }
+
+
+            <!-- ===============================================================
+       EXCLUIR
+       O backend já protege OS com estoque processado
+       =============================================================== -->
+
+            <button type="button" class="btn-action delete" (click)="deleteOrder(os.id)" title="Excluir">
+              🗑️
+            </button>
+
+
+            <!-- ===============================================================
+       IMPRIMIR
+       =============================================================== -->
+
+            <button type="button" class="btn-action print" (click)="printOS(os)" title="Imprimir">
+              🖨️
+            </button>
+
+          </td>
+
         </tr>
-      </thead>
-      <tbody>
-        @for (item of osItemToView()!.items; track $index) {
-          <tr>
-            <td class="col-desc">{{ item.name }}</td>
-            <td class="col-type center"><span class="print-badge {{ item.type }}">{{ item.type === 'service' ? 'Serviço' : 'Peça' }}</span></td>
-            <td class="col-qty center">{{ item.qty }}</td>
-            <td class="col-price right">{{ item.price | currency:'BRL' }}</td>
-            <td class="col-total right">{{ item.total | currency:'BRL' }}</td>
-          </tr>
+
         }
+
+
+        @if (
+        filteredOrders().length === 0
+        ) {
+
+        <tr>
+
+          <td colspan="9" class="empty-items">
+
+            @if (
+            archivedCount() > 0 &&
+            !searchTerm().trim()
+            ) {
+
+            <div class="empty-main-list">
+
+              <span class="empty-main-list-icon">
+                🗄️
+              </span>
+
+              <strong>
+                Nenhuma OS ativa na listagem
+              </strong>
+
+              <span>
+                Existem
+                {{ archivedCount() }}
+                {{
+                archivedCount() === 1
+                ? 'OS arquivada'
+                : 'OS arquivadas'
+                }}
+                no histórico.
+              </span>
+
+
+              <button type="button" class="btn-empty-archived" (click)="openArchivedOrders()">
+                Ver arquivadas
+              </button>
+
+            </div>
+
+            } @else {
+
+            Nenhuma Ordem de Serviço encontrada.
+
+            }
+
+          </td>
+
+        </tr>
+
+        }
+
       </tbody>
+
     </table>
 
-    <div class="invoice-totals-section">
-      <div class="totals-box">
-         <div class="grand-total-row">
-           <span class="total-label">TOTAL GERAL</span>
-           <span class="total-amount">{{ osItemToView()!.total | currency:'BRL' }}</span>
-         </div>
+  </div>
+
+
+  <!-- ======================================================================
+       MODAL NOVA / EDITAR OS
+       ====================================================================== -->
+
+  @if (
+  showModal()
+  ) {
+
+  <div class="modal-overlay" (click)="closeModal()">
+
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+
+      <!-- ================================================================
+             CABEÇALHO DO MODAL
+             ================================================================ -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <h2>
+            {{
+            currentOrder().id === 0
+            ? 'Nova Ordem de Serviço'
+            : 'Editar OS #' + currentOrder().id
+            }}
+          </h2>
+
+
+          @if (
+          isStockLocked()
+          ) {
+
+          <div class="stock-lock-badge">
+            🔒 Estoque processado
+          </div>
+
+          }
+
+        </div>
+
+
+        <div class="header-actions">
+
+          @if (
+          currentOrder().id !== 0
+          ) {
+
+          <button type="button" class="btn-payment-header" (click)="openPaymentModal(currentOrder())">
+            💰 Pagamentos
+          </button>
+
+
+          <button type="button" class="btn-print" (click)="printOS(currentOrder())">
+            🖨️ Imprimir
+          </button>
+
+          }
+
+
+          <div class="total-display">
+            Total:
+            {{
+            currentOrder().total
+            | currency:'BRL'
+            }}
+          </div>
+
+        </div>
+
       </div>
+
+
+      <!-- ================================================================
+             AVISO DE ESTOQUE PROCESSADO
+             ================================================================ -->
+
+      @if (
+      isStockLocked()
+      ) {
+
+      <div class="stock-lock-notice">
+
+        <div class="stock-lock-icon">
+          📦
+        </div>
+
+
+        <div>
+
+          <strong>
+            Estoque desta OS já processado
+          </strong>
+
+          <p>
+            As peças e quantidades desta Ordem de Serviço já foram
+            baixadas do estoque. Para alterar produtos ou reabrir a OS,
+            será necessário realizar um estorno.
+          </p>
+
+        </div>
+
+      </div>
+
+      }
+
+
+      <!-- ================================================================
+             RESUMO FINANCEIRO
+             ================================================================ -->
+
+      @if (
+      currentOrder().id !== 0
+      ) {
+
+      <div class="os-financial-summary">
+
+        <div class="financial-summary-item">
+
+          <span class="financial-summary-label">
+            Total
+          </span>
+
+          <strong>
+            {{
+            currentOrder().total
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="financial-summary-item paid">
+
+          <span class="financial-summary-label">
+            Já pago
+          </span>
+
+          <strong>
+            {{
+            getOrderPaidAmount(
+            currentOrder()
+            )
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="financial-summary-item due">
+
+          <span class="financial-summary-label">
+            Em aberto
+          </span>
+
+          <strong>
+            {{
+            getOrderRemainingAmount(
+            currentOrder()
+            )
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="financial-summary-item">
+
+          <span class="financial-summary-label">
+            Situação
+          </span>
+
+          <span class="payment-status-badge" [ngClass]="
+                  getPaymentStatusClass(
+                    currentOrder().paymentStatus
+                  )
+                ">
+            {{
+            getPaymentStatusLabel(
+            currentOrder().paymentStatus
+            )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+      }
+
+
+      <form (ngSubmit)="saveOrder()">
+
+        <!-- ==============================================================
+               DADOS DA OS
+               ============================================================== -->
+
+        <div class="form-section">
+
+          <div class="form-row">
+
+            <div class="form-group col-4">
+
+              <label>
+                Cliente
+              </label>
+
+              <select [(ngModel)]="currentOrder().client" name="client" required [disabled]="
+                    getOrderPaidAmount(
+                      currentOrder()
+                    ) > 0
+                  " (ngModelChange)="
+                    onClientChange(
+                      currentOrder().client
+                    )
+                  ">
+
+                <option value="" disabled>
+                  Selecione...
+                </option>
+
+
+                @for (
+                c of clientsList();
+                track c
+                ) {
+
+                <option [value]="c">
+                  {{ c }}
+                </option>
+
+                }
+
+              </select>
+
+
+              @if (
+              getOrderPaidAmount(
+              currentOrder()
+              ) > 0
+              ) {
+
+              <small class="field-lock-hint">
+                🔒 Cliente protegido porque já existem pagamentos.
+              </small>
+
+              }
+
+            </div>
+
+
+            <div class="form-group col-4">
+
+              <label>
+                Veículo
+              </label>
+
+              <select [(ngModel)]="currentOrder().vehicle" name="vehicle" required [disabled]="!currentOrder().client">
+
+                <option value="" disabled>
+                  Selecione...
+                </option>
+
+
+                @for (
+                v of vehiclesList();
+                track v
+                ) {
+
+                <option [value]="v">
+                  {{ v }}
+                </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group col-2">
+
+              <label>
+                Data
+              </label>
+
+              <input type="date" [(ngModel)]="currentOrder().date" name="date">
+
+            </div>
+
+
+            <div class="form-group col-2">
+
+              <label>
+                Status
+              </label>
+
+              <select [(ngModel)]="currentOrder().status" name="status" [disabled]="isStockLocked()">
+
+                <option value="pending">
+                  Pendente
+                </option>
+
+                <option value="approved">
+                  Aprovado
+                </option>
+
+                <option value="in-progress">
+                  Em Andamento
+                </option>
+
+                <option value="completed">
+                  Finalizado
+                </option>
+
+                <option value="canceled">
+                  Cancelado
+                </option>
+
+              </select>
+
+
+              @if (
+              isStockLocked()
+              ) {
+
+              <small class="field-lock-hint">
+                🔒 OS finalizada com estoque processado.
+              </small>
+
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==============================================================
+               ITENS
+               MESMA ESTRUTURA DO ORÇAMENTO
+               ============================================================== -->
+
+        <div class="items-section">
+
+          <div class="items-section-heading">
+
+            <div>
+
+              <h4>
+                Adicionar Itens
+              </h4>
+
+              <p>
+                Pesquise serviços e produtos sem precisar percorrer listas extensas.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="item-search-grid">
+
+            <!-- =========================================================
+                   BUSCA DE SERVIÇOS
+                   ========================================================= -->
+
+            <div class="item-search-card service-search-card">
+
+              <div class="item-search-header">
+
+                <div class="item-search-title">
+
+                  <span class="item-search-icon service">
+                    🔧
+                  </span>
+
+
+                  <div>
+
+                    <strong>
+                      Adicionar Serviço
+                    </strong>
+
+                    <span>
+                      Pesquise pelo nome, descrição ou categoria
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="smart-search-container">
+
+                <div class="smart-search-input" [class.open]="serviceDropdownOpen()">
+
+                  <span class="smart-search-icon">
+                    🔍
+                  </span>
+
+
+                  <input type="text" name="serviceSearch" autocomplete="off" placeholder="Ex: Troca de óleo..."
+                    [ngModel]="serviceSearchTerm()" (ngModelChange)="onServiceSearchChange($event)"
+                    (focus)="onServiceSearchFocus()" (blur)="onServiceSearchBlur()"
+                    (keydown)="onServiceSearchKeydown($event)">
+
+
+                  @if (
+                  serviceSearchLoading()
+                  ) {
+
+                  <span class="search-loading">
+                    •••
+                  </span>
+
+                  }
+
+                </div>
+
+
+                @if (
+                serviceDropdownOpen() &&
+                serviceSearchTerm().trim()
+                ) {
+
+                <div class="smart-search-dropdown">
+
+                  @if (
+                  serviceSearchLoading()
+                  ) {
+
+                  <div class="search-state">
+
+                    <span class="search-state-icon">
+                      🔎
+                    </span>
+
+                    Pesquisando serviços...
+
+                  </div>
+
+                  } @else if (
+                  serviceSearchResults().length === 0
+                  ) {
+
+                  <div class="search-state empty">
+
+                    <span class="search-state-icon">
+                      🔧
+                    </span>
+
+
+                    <div>
+
+                      <strong>
+                        Nenhum serviço encontrado
+                      </strong>
+
+                      <span>
+                        Tente pesquisar outro termo.
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  } @else {
+
+                  @for (
+                  service of serviceSearchResults();
+                  track service.id;
+                  let i = $index
+                  ) {
+
+                  <button type="button" class="search-result-item" [class.active]="
+                              serviceActiveIndex() === i
+                            " (mousedown)="
+                              $event.preventDefault();
+                              selectService(service)
+                            ">
+
+                    <div class="result-main">
+
+                      <div class="result-name-row">
+
+                        <strong class="result-name">
+                          {{ service.name }}
+                        </strong>
+
+
+                        <strong class="result-price">
+                          {{
+                          service.price
+                          | currency:'BRL'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div class="result-meta">
+
+                        @if (
+                        service.category
+                        ) {
+
+                        <span>
+                          {{ service.category }}
+                        </span>
+
+                        }
+
+
+                        @if (
+                        service.time
+                        ) {
+
+                        <span>
+                          ⏱ {{ service.time }}
+                        </span>
+
+                        }
+
+                      </div>
+
+
+                      @if (
+                      service.description
+                      ) {
+
+                      <span class="result-description">
+                        {{ service.description }}
+                      </span>
+
+                      }
+
+                    </div>
+
+                  </button>
+
+                  }
+
+                  }
+
+                </div>
+
+                }
+
+              </div>
+
+
+              <div class="search-help">
+
+                <span>
+                  ↑ ↓ para navegar
+                </span>
+
+                <span>
+                  Enter para adicionar
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- =========================================================
+                   BUSCA DE PRODUTOS
+                   ========================================================= -->
+
+            <div class="item-search-card product-search-card" [class.stock-locked]="isStockLocked()">
+
+              <div class="item-search-header">
+
+                <div class="item-search-title">
+
+                  <span class="item-search-icon product">
+                    📦
+                  </span>
+
+
+                  <div>
+
+                    <strong>
+                      Adicionar Peça / Produto
+                    </strong>
+
+                    <span>
+                      Nome, código, marca ou código de barras
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="quantity-selector">
+
+                  <label for="os-product-qty">
+                    Qtd.
+                  </label>
+
+                  <input id="os-product-qty" type="number" name="productQty" min="1" [disabled]="isStockLocked()"
+                    [ngModel]="productQty()" (ngModelChange)="productQty.set($event)">
+
+                </div>
+
+              </div>
+
+
+              <div class="smart-search-container">
+
+                <div class="smart-search-input product-input" [class.open]="
+                      productDropdownOpen() &&
+                      !isStockLocked()
+                    ">
+
+                  <span class="smart-search-icon">
+                    🔍
+                  </span>
+
+
+                  <input type="text" name="productSearch" autocomplete="off"
+                    placeholder="Nome, código ou escaneie o código de barras..." [disabled]="isStockLocked()"
+                    [ngModel]="productSearchTerm()" (ngModelChange)="onProductSearchChange($event)"
+                    (focus)="onProductSearchFocus()" (blur)="onProductSearchBlur()"
+                    (keydown)="onProductSearchKeydown($event)">
+
+
+                  @if (
+                  !isStockLocked()
+                  ) {
+
+                  <span class="barcode-search-indicator" title="Este campo aceita leitura por scanner">
+                    ▥
+                  </span>
+
+                  }
+
+
+                  @if (
+                  productSearchLoading() &&
+                  !isStockLocked()
+                  ) {
+
+                  <span class="search-loading product-loading">
+                    •••
+                  </span>
+
+                  }
+
+                </div>
+
+
+                @if (
+                !isStockLocked() &&
+                productDropdownOpen() &&
+                productSearchTerm().trim()
+                ) {
+
+                <div class="smart-search-dropdown">
+
+                  @if (
+                  productSearchLoading()
+                  ) {
+
+                  <div class="search-state">
+
+                    <span class="search-state-icon">
+                      🔎
+                    </span>
+
+                    Pesquisando produtos...
+
+                  </div>
+
+                  } @else if (
+                  productSearchResults().length === 0
+                  ) {
+
+                  <div class="search-state empty">
+
+                    <span class="search-state-icon">
+                      📦
+                    </span>
+
+
+                    <div>
+
+                      <strong>
+                        Nenhum produto encontrado
+                      </strong>
+
+                      <span>
+                        Pesquise por nome, código, marca ou código de barras.
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  } @else {
+
+                  @for (
+                  product of productSearchResults();
+                  track product.id;
+                  let i = $index
+                  ) {
+
+                  <button type="button" class="search-result-item product-result" [class.active]="
+                              productActiveIndex() === i
+                            " (mousedown)="
+                              $event.preventDefault();
+                              selectProduct(product)
+                            ">
+
+                    <div class="result-main">
+
+                      <div class="result-name-row">
+
+                        <strong class="result-name">
+                          {{ product.name }}
+                        </strong>
+
+
+                        <strong class="result-price">
+                          {{
+                          product.sellPrice
+                          | currency:'BRL'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div class="result-meta">
+
+                        @if (
+                        product.code
+                        ) {
+
+                        <span class="result-code">
+                          {{ product.code }}
+                        </span>
+
+                        }
+
+
+                        @if (
+                        product.brand
+                        ) {
+
+                        <span>
+                          {{ product.brand }}
+                        </span>
+
+                        }
+
+
+                        <span class="result-stock" [class.low]="
+                                    product.quantity <= product.minQuantity
+                                  " [class.empty]="
+                                    product.quantity <= 0
+                                  ">
+                          Estoque:
+                          {{ product.quantity }}
+                        </span>
+
+                      </div>
+
+
+                      @if (
+                      product.barcode
+                      ) {
+
+                      <div class="result-barcode">
+
+                        <span>
+                          ▥
+                        </span>
+
+                        {{ product.barcode }}
+
+                      </div>
+
+                      }
+
+                    </div>
+
+                  </button>
+
+                  }
+
+                  }
+
+                </div>
+
+                }
+
+              </div>
+
+
+              <div class="search-help product-help">
+
+                @if (
+                isStockLocked()
+                ) {
+
+                <span class="stock-search-help">
+                  🔒 Estoque processado. As peças desta OS estão protegidas.
+                </span>
+
+                } @else {
+
+                <span>
+                  ↑ ↓ para navegar
+                </span>
+
+                <span>
+                  Enter para adicionar
+                </span>
+
+                <span class="scanner-help">
+                  ▥ Scanner compatível
+                </span>
+
+                }
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ===========================================================
+                 ITENS JÁ ADICIONADOS
+                 =========================================================== -->
+
+          <div class="os-items-header">
+
+            <h4>
+              Itens da Ordem de Serviço
+            </h4>
+
+
+            @if (
+            currentOrder().items.length > 0
+            ) {
+
+            <span class="items-counter">
+              {{
+              currentOrder().items.length
+              }}
+              {{
+              currentOrder().items.length === 1
+              ? 'item'
+              : 'itens'
+              }}
+            </span>
+
+            }
+
+          </div>
+
+
+          <div class="items-list-container">
+
+            <table class="items-table">
+
+              <thead>
+
+                <tr>
+                  <th>Tipo</th>
+
+                  <th>Descrição</th>
+
+                  <th>Qtd</th>
+
+                  <th>Unitário</th>
+
+                  <th>Subtotal</th>
+
+                  <th></th>
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                @for (
+                item of currentOrder().items;
+                track $index
+                ) {
+
+                <tr>
+
+                  <td>
+
+                    <span class="type-badge" [ngClass]="item.type">
+                      {{
+                      item.type === 'service'
+                      ? 'Serviço'
+                      : 'Peça'
+                      }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    {{ item.name }}
+
+
+                    @if (
+                    item.type === 'product' &&
+                    isStockLocked()
+                    ) {
+
+                    <span class="locked-item-icon" title="Estoque já processado">
+                      🔒
+                    </span>
+
+                    }
+
+                  </td>
+
+
+                  <td>
+                    {{ item.qty }}
+                  </td>
+
+
+                  <td>
+                    {{
+                    item.price
+                    | currency:'BRL'
+                    }}
+                  </td>
+
+
+                  <td class="subtotal">
+                    {{
+                    item.total
+                    | currency:'BRL'
+                    }}
+                  </td>
+
+
+                  <td>
+
+                    <button type="button" class="btn-remove-item" (click)="removeItem($index)" [disabled]="
+                            item.type === 'product' &&
+                            isStockLocked()
+                          " [title]="
+                            item.type === 'product' &&
+                            isStockLocked()
+                            ? 'Produto protegido porque o estoque já foi processado'
+                            : 'Remover item'
+                          ">
+                      ×
+                    </button>
+
+                  </td>
+
+                </tr>
+
+                }
+
+
+                @if (
+                currentOrder().items.length === 0
+                ) {
+
+                <tr>
+
+                  <td colspan="6" class="empty-items">
+                    Nenhum item na Ordem de Serviço.
+                  </td>
+
+                </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==============================================================
+               OBSERVAÇÕES
+               ============================================================== -->
+
+        <div class="form-group">
+
+          <label>
+            Observações / Diagnóstico
+          </label>
+
+          <textarea [(ngModel)]="currentOrder().notes" name="notes" rows="3"
+            placeholder="Descreva o problema ou observações importantes..."></textarea>
+
+        </div>
+
+
+        <!-- ==============================================================
+               AÇÕES
+               ============================================================== -->
+
+        <div class="form-actions">
+
+          <button type="button" class="btn-cancel" (click)="closeModal()">
+            Cancelar
+          </button>
+
+
+          <button type="submit" class="btn-save">
+            Salvar OS
+          </button>
+
+        </div>
+
+      </form>
+
     </div>
 
-    <footer class="invoice-footer-container">
-  <div class="invoice-notes-box">
-    @if (osItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
-      <h3>Diagnóstico e Observações</h3>
-      <div class="notes-content">
-          {{ osItemToView()!.notes }}
-          @if(osItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
-          @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
-          {{ companyData()?.bankInfo }}
-      </div>
-    }
   </div>
-  
-  <div class="invoice-signatures-row">
-    <div class="signature-wrapper">
-      <div class="signature-line">Responsável Técnico</div>
-    </div>
-    <div class="signature-wrapper">
-      <div class="signature-line">Assinatura do Cliente</div>
-    </div>
-  </div>
-</footer>
+
   }
+
+  <!-- ======================================================================
+     MODAL DE ORDENS ARQUIVADAS
+     ====================================================================== -->
+
+  @if (
+  showArchivedModal()
+  ) {
+
+  <div class="modal-overlay archived-modal-overlay" (click)="closeArchivedOrders()">
+
+    <div class="modal-content archived-modal" (click)="$event.stopPropagation()">
+
+      <!-- ================================================================
+           CABEÇALHO
+           ================================================================ -->
+
+      <div class="archived-modal-header">
+
+        <div class="archived-modal-title">
+
+          <div class="archived-modal-icon">
+            🗄️
+          </div>
+
+
+          <div>
+
+            <h2>
+              Ordens de Serviço Arquivadas
+            </h2>
+
+            <p>
+              Histórico de Ordens de Serviço finalizadas
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button type="button" class="modal-close-button" (click)="closeArchivedOrders()" title="Fechar">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- ================================================================
+           RESUMO
+           ================================================================ -->
+
+      <div class="archived-summary">
+
+        <div>
+
+          <span class="archived-summary-label">
+            Total arquivado
+          </span>
+
+          <strong>
+            {{ archivedCount() }}
+          </strong>
+
+        </div>
+
+
+        <p>
+          Os registros continuam preservando pagamentos,
+          estoque e histórico original.
+        </p>
+
+      </div>
+
+
+      <!-- ================================================================
+           PESQUISA
+           ================================================================ -->
+
+      <div class="archived-search-section">
+
+        <div class="archived-search-box">
+
+          <span class="archived-search-icon">
+            🔍
+          </span>
+
+
+          <input type="text" autocomplete="off" placeholder="Buscar por cliente, veículo, Nº da OS ou data..."
+            [ngModel]="archivedSearchTerm()" (ngModelChange)="onArchivedSearchChange($event)">
+
+
+          @if (
+          archivedLoading()
+          ) {
+
+          <span class="archived-search-loading">
+            •••
+          </span>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================================
+           CONTEÚDO
+           ================================================================ -->
+
+      <div class="archived-content">
+
+        @if (
+        archivedLoading() &&
+        archivedOrders().length === 0
+        ) {
+
+        <div class="archived-loading-state">
+
+          <div class="archived-loading-icon">
+            🗄️
+          </div>
+
+          <strong>
+            Carregando histórico...
+          </strong>
+
+          <p>
+            Buscando Ordens de Serviço arquivadas.
+          </p>
+
+        </div>
+
+        } @else if (
+        archivedOrders().length === 0
+        ) {
+
+        <div class="archived-empty-state">
+
+          <div class="archived-empty-icon">
+            📭
+          </div>
+
+          <strong>
+            {{
+            archivedSearchTerm().trim()
+            ? 'Nenhuma OS encontrada'
+            : 'Nenhuma OS arquivada'
+            }}
+          </strong>
+
+          <p>
+            {{
+            archivedMessage()
+            }}
+          </p>
+
+        </div>
+
+        } @else {
+
+        <div class="archived-table-container">
+
+          <table class="archived-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Nº OS
+                </th>
+
+                <th>
+                  Cliente / Veículo
+                </th>
+
+                <th>
+                  Data
+                </th>
+
+                <th>
+                  Total
+                </th>
+
+                <th>
+                  Pagamento
+                </th>
+
+                <th>
+                  Arquivada em
+                </th>
+
+                <th class="archived-actions-col">
+                  Ações
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+              os of archivedOrders();
+              track os.id
+              ) {
+
+              <tr>
+
+                <!-- ===================================================
+                         Nº
+                         =================================================== -->
+
+                <td>
+
+                  <span class="os-id">
+                    #{{ os.id }}
+                  </span>
+
+                </td>
+
+
+                <!-- ===================================================
+                         CLIENTE
+                         =================================================== -->
+
+                <td>
+
+                  <div class="os-info">
+
+                    <strong>
+                      {{ os.client }}
+                    </strong>
+
+                    <span class="detail-text">
+                      {{ os.vehicle }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ===================================================
+                         DATA
+                         =================================================== -->
+
+                <td>
+
+                  {{
+                  os.date
+                  | date:'dd/MM/yyyy'
+                  }}
+
+                </td>
+
+
+                <!-- ===================================================
+                         TOTAL
+                         =================================================== -->
+
+                <td class="archived-total">
+
+                  {{
+                  os.total
+                  | currency:'BRL'
+                  }}
+
+                </td>
+
+
+                <!-- ===================================================
+                         PAGAMENTO
+                         =================================================== -->
+
+                <td>
+
+                  <div class="archived-payment-cell">
+
+                    <span class="payment-status-badge" [ngClass]="
+                            getPaymentStatusClass(
+                              os.paymentStatus
+                            )
+                          ">
+                      {{
+                      getPaymentStatusLabel(
+                      os.paymentStatus
+                      )
+                      }}
+                    </span>
+
+
+                    @if (
+                    getOrderRemainingAmount(os) > 0
+                    ) {
+
+                    <small class="archived-payment-due">
+
+                      Falta:
+
+                      {{
+                      getOrderRemainingAmount(os)
+                      | currency:'BRL'
+                      }}
+
+                    </small>
+
+                    }
+
+                  </div>
+
+                </td>
+
+
+                <!-- ===================================================
+                         DATA DO ARQUIVAMENTO
+                         =================================================== -->
+
+                <td>
+
+                  @if (
+                  os.archivedAt
+                  ) {
+
+                  <div class="archived-date">
+
+                    <span>
+                      {{
+                      os.archivedAt
+                      | date:'dd/MM/yyyy'
+                      }}
+                    </span>
+
+                    <small>
+                      {{
+                      os.archivedAt
+                      | date:'HH:mm'
+                      }}
+                    </small>
+
+                  </div>
+
+                  } @else {
+
+                  <span class="archived-date-empty">
+                    -
+                  </span>
+
+                  }
+
+                </td>
+
+
+                <!-- ===================================================
+                         AÇÕES
+                         =================================================== -->
+
+                <td class="archived-actions-cell">
+
+                  <button type="button" class="btn-archived-action payment" (click)="openPaymentModal(os)" [title]="
+                          os.paymentStatus === 'paid'
+                            ? 'Ver pagamentos'
+                            : 'Ver ou receber pagamento'
+                        ">
+                    💰
+                  </button>
+
+
+                  <button type="button" class="btn-archived-action print" (click)="printOS(os)" title="Imprimir OS">
+                    🖨️
+                  </button>
+
+
+                  <button type="button" class="btn-unarchive" (click)="unarchiveOrder(os)" title="Desarquivar esta OS">
+
+                    <span>
+                      ↩
+                    </span>
+
+                    Desarquivar
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        }
+
+      </div>
+
+
+      <!-- ================================================================
+           RODAPÉ
+           ================================================================ -->
+
+      <div class="archived-modal-footer">
+
+        <div class="archived-footer-info">
+
+          @if (
+          archivedOrders().length > 0
+          ) {
+
+          Exibindo
+
+          <strong>
+            {{ archivedOrders().length }}
+          </strong>
+
+          {{
+          archivedOrders().length === 1
+          ? 'registro'
+          : 'registros'
+          }}
+
+          }
+
+        </div>
+
+
+        <button type="button" class="btn-cancel" (click)="closeArchivedOrders()">
+          Fechar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  }
+
+  <!-- ======================================================================
+       MODAL DE PAGAMENTO / CAIXA
+       ====================================================================== -->
+
+  @if (
+  showPaymentModal()
+  ) {
+
+  <div class="modal-overlay payment-modal-overlay" (click)="closePaymentModal()">
+
+    <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
+
+      <div class="payment-modal-header">
+
+        <div class="payment-modal-title-row">
+
+          <span class="payment-modal-icon">
+            💰
+          </span>
+
+
+          <div>
+
+            <h2>
+              Receber pagamento
+            </h2>
+
+
+            @if (
+            paymentOrder()
+            ) {
+
+            <p>
+              OS #{{ paymentOrder()!.id }}
+              ·
+              {{ paymentOrder()!.client }}
+            </p>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <button type="button" class="modal-close-button" (click)="closePaymentModal()" [disabled]="paymentSaving()">
+          ×
+        </button>
+
+      </div>
+
+
+      @if (
+      paymentLoading()
+      ) {
+
+      <div class="payment-loading">
+
+        <div class="payment-loading-icon">
+          💳
+        </div>
+
+        <p>
+          Carregando informações financeiras...
+        </p>
+
+      </div>
+
+      } @else {
+
+      @if (
+      paymentSummary()
+      ) {
+
+      <div class="payment-summary-grid">
+
+        <div class="payment-summary-card">
+
+          <span>
+            Total da OS
+          </span>
+
+          <strong>
+            {{
+            paymentSummary()!.total
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="payment-summary-card paid">
+
+          <span>
+            Já pago
+          </span>
+
+          <strong>
+            {{
+            paymentSummary()!.paidAmount
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="payment-summary-card due">
+
+          <span>
+            Falta pagar
+          </span>
+
+          <strong>
+            {{
+            paymentSummary()!.remainingAmount
+            | currency:'BRL'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="payment-current-status">
+
+        <span>
+          Situação:
+        </span>
+
+        <span class="payment-status-badge" [ngClass]="
+                  getPaymentStatusClass(
+                    paymentSummary()!.paymentStatus
+                  )
+                ">
+          {{
+          getPaymentStatusLabel(
+          paymentSummary()!.paymentStatus
+          )
+          }}
+        </span>
+
+      </div>
+
+
+      @if (
+      paymentSummary()!.paymentStatus === 'paid'
+      ) {
+
+      <div class="payment-complete-box">
+
+        <span class="payment-complete-icon">
+          ✅
+        </span>
+
+
+        <div>
+
+          <strong>
+            Pagamento concluído
+          </strong>
+
+          <p>
+            Esta Ordem de Serviço não possui saldo pendente.
+          </p>
+
+        </div>
+
+      </div>
+
+      } @else {
+
+      <div class="payment-form-section">
+
+        <h3>
+          Novo pagamento
+        </h3>
+
+
+        <div class="payment-form-group">
+
+          <label>
+            Forma de pagamento
+          </label>
+
+
+          <div class="payment-method-grid">
+
+            @for (
+            method of paymentMethods;
+            track method.value
+            ) {
+
+            <button type="button" class="payment-method-option" [class.selected]="
+                          paymentMethod() === method.value
+                        " (click)="
+                          paymentMethod.set(
+                            method.value
+                          )
+                        ">
+
+              <span class="payment-method-icon">
+
+                @switch (
+                method.value
+                ) {
+
+                @case ('cash') {
+                💵
+                }
+
+                @case ('pix') {
+                📱
+                }
+
+                @case ('debit-card') {
+                💳
+                }
+
+                @case ('credit-card') {
+                💳
+                }
+
+                @case ('transfer') {
+                🏦
+                }
+
+                @default {
+                💰
+                }
+
+                }
+
+              </span>
+
+
+              <span>
+                {{ method.label }}
+              </span>
+
+            </button>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="payment-form-group">
+
+          <div class="payment-label-row">
+
+            <label>
+              Valor recebido
+            </label>
+
+
+            <button type="button" class="btn-fill-balance" (click)="
+                        paymentReceivedAmount.set(
+                          paymentSummary()!.remainingAmount
+                        )
+                      ">
+              Usar saldo total
+            </button>
+
+          </div>
+
+
+          <div class="money-input-wrapper">
+
+            <span>
+              R$
+            </span>
+
+            <input type="number" min="0.01" step="0.01" placeholder="0,00" [ngModel]="paymentReceivedAmount()"
+              (ngModelChange)="
+                        paymentReceivedAmount.set(
+                          $event
+                        )
+                      ">
+
+          </div>
+
+
+          @if (
+          paymentMethod() === 'cash'
+          ) {
+
+          <small class="payment-form-hint">
+            Em dinheiro você pode informar um valor maior que
+            o saldo. O sistema calculará o troco automaticamente.
+          </small>
+
+          } @else {
+
+          <small class="payment-form-hint">
+            Para PIX, cartão ou transferência, o valor não pode
+            ultrapassar o saldo pendente.
+          </small>
+
+          }
+
+        </div>
+
+
+        <div class="payment-preview">
+
+          <div class="payment-preview-row">
+
+            <span>
+              Saldo atual
+            </span>
+
+            <strong>
+              {{
+              paymentSummary()!.remainingAmount
+              | currency:'BRL'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="payment-preview-row">
+
+            <span>
+              Valor aplicado
+            </span>
+
+            <strong class="positive-value">
+              {{
+              paymentAppliedAmount()
+              | currency:'BRL'
+              }}
+            </strong>
+
+          </div>
+
+
+          @if (
+          paymentMethod() === 'cash' &&
+          paymentChangeAmount() > 0
+          ) {
+
+          <div class="payment-preview-row change-row">
+
+            <span>
+              Troco a devolver
+            </span>
+
+            <strong>
+              {{
+              paymentChangeAmount()
+              | currency:'BRL'
+              }}
+            </strong>
+
+          </div>
+
+          }
+
+
+          <div class="payment-preview-row remaining-row">
+
+            <span>
+              Saldo após pagamento
+            </span>
+
+            <strong>
+              {{
+              paymentRemainingAfter()
+              | currency:'BRL'
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="payment-form-group">
+
+          <label>
+            Observação
+
+            <span class="optional-text">
+              opcional
+            </span>
+          </label>
+
+
+          <textarea rows="2" placeholder="Ex.: entrada, segunda parcela, pagamento feito por terceiro..."
+            [ngModel]="paymentNotes()" (ngModelChange)="
+                      paymentNotes.set(
+                        $event
+                      )
+                    "></textarea>
+
+        </div>
+
+
+        @if (
+        paymentMessage()
+        ) {
+
+        <div class="payment-message" [class.success]="
+                      paymentMessageType() === 'success'
+                    " [class.error]="
+                      paymentMessageType() === 'error'
+                    ">
+          {{ paymentMessage() }}
+        </div>
+
+        }
+
+
+        <button type="button" class="btn-confirm-payment" (click)="confirmPayment()" [disabled]="
+                    paymentSaving()
+                    ||
+                    !paymentReceivedAmount()
+                    ||
+                    paymentReceivedAmount()! <= 0
+                  ">
+
+          @if (
+          paymentSaving()
+          ) {
+          Registrando...
+          } @else {
+          💰 Confirmar pagamento
+          }
+
+        </button>
+
+      </div>
+
+      }
+
+
+      <div class="payment-history-section">
+
+        <div class="payment-history-header">
+
+          <div>
+
+            <h3>
+              Histórico de pagamentos
+            </h3>
+
+            <p>
+              Todos os recebimentos registrados nesta OS.
+            </p>
+
+          </div>
+
+
+          <button type="button" class="btn-refresh-payment" (click)="loadPaymentData()" [disabled]="paymentLoading()">
+            ↻ Atualizar
+          </button>
+
+        </div>
+
+
+        @if (
+        paymentHistory().length > 0
+        ) {
+
+        <div class="payment-history-list">
+
+          @for (
+          payment of paymentHistory();
+          track payment.id
+          ) {
+
+          <div class="payment-history-item">
+
+            <div class="payment-history-icon">
+
+              @switch (
+              payment.method
+              ) {
+
+              @case ('cash') {
+              💵
+              }
+
+              @case ('pix') {
+              📱
+              }
+
+              @case ('debit-card') {
+              💳
+              }
+
+              @case ('credit-card') {
+              💳
+              }
+
+              @case ('transfer') {
+              🏦
+              }
+
+              @case ('legacy') {
+              🗂️
+              }
+
+              @default {
+              💰
+              }
+
+              }
+
+            </div>
+
+
+            <div class="payment-history-main">
+
+              <div class="payment-history-top">
+
+                <strong>
+                  {{
+                  getPaymentMethodLabel(
+                  payment.method
+                  )
+                  }}
+                </strong>
+
+                <span class="payment-history-date">
+                  {{
+                  payment.createdAt
+                  | date:'dd/MM/yyyy HH:mm'
+                  }}
+                </span>
+
+              </div>
+
+
+              @if (
+              payment.notes
+              ) {
+
+              <p class="payment-history-notes">
+                {{ payment.notes }}
+              </p>
+
+              }
+
+
+              <div class="payment-history-details">
+
+                @if (
+                payment.receivedAmount !==
+                payment.appliedAmount
+                ) {
+
+                <span>
+                  Recebido:
+                  {{
+                  payment.receivedAmount
+                  | currency:'BRL'
+                  }}
+                </span>
+
+                }
+
+
+                <span>
+                  Aplicado:
+                  {{
+                  payment.appliedAmount
+                  | currency:'BRL'
+                  }}
+                </span>
+
+
+                @if (
+                payment.changeAmount > 0
+                ) {
+
+                <span class="payment-history-change">
+                  Troco:
+                  {{
+                  payment.changeAmount
+                  | currency:'BRL'
+                  }}
+                </span>
+
+                }
+
+              </div>
+
+            </div>
+
+
+            <div class="payment-history-value">
+              +
+              {{
+              payment.appliedAmount
+              | currency:'BRL'
+              }}
+            </div>
+
+          </div>
+
+          }
+
+        </div>
+
+        } @else {
+
+        <div class="payment-history-empty">
+
+          <span>
+            🧾
+          </span>
+
+          <strong>
+            Nenhum pagamento registrado
+          </strong>
+
+          <p>
+            O primeiro recebimento aparecerá aqui.
+          </p>
+
+        </div>
+
+        }
+
+      </div>
+
+      }
+
+      }
+
+
+      <div class="payment-modal-footer">
+
+        <button type="button" class="btn-cancel" (click)="closePaymentModal()" [disabled]="paymentSaving()">
+          Fechar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  }
+
+</div>
+
+
+<!-- =========================================================================
+     IMPRESSÃO DA ORDEM DE SERVIÇO
+     ========================================================================= -->
+
+<div class="printable-invoice" id="invoice">
+
+  @if (
+  osItemToView()
+  ) {
+
+  <div class="invoice-accent-bar"></div>
+
+
+  <header class="invoice-header-flex">
+
+    <div class="company-details">
+
+      <h1>
+        {{
+        companyData()?.name
+        ||
+        'Mecânica Borges'
+        }}
+      </h1>
+
+
+      <div class="company-contact">
+
+        <p>
+          {{ companyData()?.address }}
+        </p>
+
+        <p>
+          {{ companyData()?.city }}
+        </p>
+
+        <p>
+          {{
+          companyData()?.phone
+          ? 'Tel: ' + companyData()?.phone
+          : ''
+          }}
+
+          {{
+          companyData()?.email
+          ? '| ' + companyData()?.email
+          : ''
+          }}
+        </p>
+
+
+        @if (
+        companyData()?.cnpj
+        ) {
+
+        <p>
+          CNPJ:
+          {{ companyData()?.cnpj }}
+        </p>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <div class="invoice-meta-box">
+
+      <div class="meta-title">
+        ORDEM DE SERVIÇO
+      </div>
+
+      <div class="meta-number">
+        #{{ osItemToView()!.id }}
+      </div>
+
+      <div class="meta-dates">
+
+        <p>
+          <strong>
+            Data:
+          </strong>
+
+          {{
+          osItemToView()!.date
+          | date:'dd/MM/yyyy'
+          }}
+        </p>
+
+        <p>
+          <strong>
+            Status:
+          </strong>
+
+          {{
+          getStatusLabel(
+          osItemToView()!.status
+          )
+          }}
+        </p>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <section class="client-section">
+
+    <h3>
+      Cliente:
+    </h3>
+
+
+    <div class="client-info-box">
+
+      <div class="client-data">
+
+        <p class="client-name">
+          {{ osItemToView()!.client }}
+        </p>
+
+      </div>
+
+
+      <div class="vehicle-data">
+
+        <span class="label-vehicle">
+          Veículo:
+        </span>
+
+        <span class="vehicle-name">
+          {{ osItemToView()!.vehicle }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <table class="invoice-table-modern">
+
+    <thead>
+
+      <tr>
+        <th class="col-desc">
+          Descrição
+        </th>
+
+        <th class="col-type center">
+          Tipo
+        </th>
+
+        <th class="col-qty center">
+          Qtd.
+        </th>
+
+        <th class="col-price right">
+          Valor Unit.
+        </th>
+
+        <th class="col-total right">
+          Subtotal
+        </th>
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      @for (
+      item of osItemToView()!.items;
+      track $index
+      ) {
+
+      <tr>
+
+        <td class="col-desc">
+          {{ item.name }}
+        </td>
+
+
+        <td class="col-type center">
+
+          <span class="print-badge" [ngClass]="item.type">
+            {{
+            item.type === 'service'
+            ? 'Serviço'
+            : 'Peça'
+            }}
+          </span>
+
+        </td>
+
+
+        <td class="col-qty center">
+          {{ item.qty }}
+        </td>
+
+
+        <td class="col-price right">
+          {{
+          item.price
+          | currency:'BRL'
+          }}
+        </td>
+
+
+        <td class="col-total right">
+          {{
+          item.total
+          | currency:'BRL'
+          }}
+        </td>
+
+      </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+
+  <div class="invoice-totals-section">
+
+    <div class="totals-box">
+
+      <div class="grand-total-row">
+
+        <span class="total-label">
+          TOTAL GERAL
+        </span>
+
+        <span class="total-amount">
+          {{
+          osItemToView()!.total
+          | currency:'BRL'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <footer class="invoice-footer-container">
+
+    <div class="invoice-notes-box">
+
+      @if (
+      osItemToView()!.notes
+      ||
+      companyData()?.pixKey
+      ||
+      companyData()?.bankInfo
+      ) {
+
+      <h3>
+        Diagnóstico e Observações
+      </h3>
+
+
+      <div class="notes-content">
+
+        {{ osItemToView()!.notes }}
+
+
+        @if (
+        osItemToView()!.notes
+        &&
+        (
+        companyData()?.pixKey
+        ||
+        companyData()?.bankInfo
+        )
+        ) {
+
+        <br>
+        <br>
+
+        }
+
+
+        @if (
+        companyData()?.pixKey
+        ) {
+
+        <strong>
+          PIX:
+        </strong>
+
+        {{ companyData()?.pixKey }}
+
+        <br>
+
+        }
+
+
+        {{ companyData()?.bankInfo }}
+
+      </div>
+
+      }
+
+    </div>
+
+
+    <div class="invoice-signatures-row">
+
+      <div class="signature-wrapper">
+
+        <div class="signature-line">
+          Responsável Técnico
+        </div>
+
+      </div>
+
+
+      <div class="signature-wrapper">
+
+        <div class="signature-line">
+          Assinatura do Cliente
+        </div>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+  }
+
 </div>

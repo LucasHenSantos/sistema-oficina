@@ -1,140 +1,1638 @@
 <div class="page-container">
+
+    <!-- =====================================================================
+       CABEÇALHO
+       ===================================================================== -->
+
     <header class="page-header">
+
         <div>
-        <h1>Produtos e Estoque</h1>
-        <p class="subtitle">Gerencie peças, lubrificantes e itens de venda.</p>
+            <h1>Produtos</h1>
+
+            <p class="subtitle">
+                Controle de peças, produtos e estoque
+            </p>
         </div>
-        <button class="btn-primary" (click)="openModal()">
-            <span class="icon">➕</span> Novo Produto
-        </button>
+
+
+        <div class="header-actions">
+
+            <!-- ENTRADA DE ESTOQUE -->
+            <button type="button" class="btn-stock-entry" (click)="openStockEntry()">
+                <span class="button-icon">📥</span>
+
+                Entrada de Produtos
+            </button>
+
+            <!-- HISTÓRICO DE ESTOQUE -->
+            <button type="button" class="btn-stock-history" (click)="openStockHistory()">
+                <span class="button-icon">
+                    📜
+                </span>
+
+                Histórico de Estoque
+            </button>
+
+
+            <!-- CADASTRO DE CÓDIGOS EM LOTE -->
+            <button type="button" class="btn-scanner-mode" (click)="openBulkBarcodeScanner()">
+                <span class="button-icon">▥</span>
+
+                Modo Scanner
+
+                @if (productsWithoutBarcode().length > 0) {
+                <span class="scanner-count">
+                    {{ productsWithoutBarcode().length }}
+                </span>
+                }
+
+            </button>
+
+
+            <!-- NOVO PRODUTO -->
+            <button type="button" class="btn-primary" (click)="openModal()">
+                <span class="icon">+</span>
+
+                Novo Produto
+            </button>
+
+        </div>
+
     </header>
 
+
+    <!-- =====================================================================
+       PESQUISA
+       ===================================================================== -->
+
     <div class="toolbar">
+
         <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input 
-                type="text" 
-                placeholder="Buscar por nome, código ou marca..."
-                [ngModel]="searchTerm()"
-                (ngModelChange)="searchTerm.set($event)"
-            >
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input type="text" placeholder="Buscar por nome, código, código de barras ou marca..."
+                [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+
         </div>
+
     </div>
+
+
+    <!-- =====================================================================
+       TABELA
+       ===================================================================== -->
 
     <div class="table-container card">
+
         <table>
+
             <thead>
+
                 <tr>
-                    <th>CÓDIGO</th> 
-                    <th>PRODUTO / MARCA</th>
-                    <th>CATEGORIA</th>
-                    <th>PREÇO CUSTO</th>
-                    <th>PREÇO VENDA</th>
-                    <th>ESTOQUE</th>
-                    <th class="actions-col">AÇÕES</th>
+                    <th>Código</th>
+                    <th>Código de Barras</th>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Estoque</th>
+                    <th>Custo</th>
+                    <th>Venda</th>
+                    <th>Localização</th>
+                    <th class="actions-col">Ações</th>
                 </tr>
+
             </thead>
+
+
             <tbody>
-                @for (product of filteredProducts(); track product.id) {
-                    <tr>
-                        <td>{{ product.code }}</td> 
-                        <td>
-                            <div class="product-info">
-                                <strong>{{ product.name }}</strong>
-                                <span class="detail-text">{{ product.brand }}</span>
-                            </div>
-                        </td>
-                        <td>{{ product.category }}</td>
-                        <td>{{ product.costPrice | currency:'BRL' }}</td>
-                        <td class="sell-price">{{ product.sellPrice | currency:'BRL' }}</td>
-                        <td>
-                            <span class="stock-badge" [class]="getStockStatusClass(product.quantity, product.minQuantity)">
-                                {{ getStockStatusText(product.quantity, product.minQuantity) }} ({{ product.quantity }})
+
+                @for (
+                product of filteredProducts();
+                track product.id
+                ) {
+
+                <tr>
+
+                    <!-- CÓDIGO -->
+                    <td>
+
+                        <span class="product-code">
+                            {{ product.code || '—' }}
+                        </span>
+
+                    </td>
+
+
+                    <!-- CÓDIGO DE BARRAS -->
+                    <td>
+
+                        @if (product.barcode) {
+
+                        <button type="button" class="barcode-value" (click)="openBarcodeScanner(product)"
+                            title="Alterar código de barras">
+                            <span>▥</span>
+
+                            {{ product.barcode }}
+                        </button>
+
+                        } @else {
+
+                        <button type="button" class="barcode-missing" (click)="openBarcodeScanner(product)"
+                            title="Cadastrar código de barras">
+                            <span>▥</span>
+
+                            Sem código
+                        </button>
+
+                        }
+
+                    </td>
+
+
+                    <!-- PRODUTO -->
+                    <td>
+
+                        <div class="product-info">
+
+                            <strong>
+                                {{ product.name }}
+                            </strong>
+
+                            @if (product.brand) {
+
+                            <span class="detail-text">
+                                {{ product.brand }}
                             </span>
-                        </td>
-                        <td class="actions-cell">
-                            <button class="btn-action edit" (click)="editProduct(product)">✏️</button>
-                            <button class="btn-action delete" (click)="deleteProduct(product.id)">🗑️</button>
-                        </td>
-                    </tr>
+
+                            }
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- CATEGORIA -->
+                    <td>
+                        {{ product.category || '—' }}
+                    </td>
+
+
+                    <!-- ESTOQUE -->
+                    <td>
+
+                        <div class="stock-info">
+
+                            <strong>
+                                {{ product.quantity }}
+                            </strong>
+
+                            <span class="stock-status" [class]="
+                    getStockStatusClass(
+                      product.quantity,
+                      product.minQuantity
+                    )
+                  ">
+                                {{
+                                getStockStatusText(
+                                product.quantity,
+                                product.minQuantity
+                                )
+                                }}
+                            </span>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- CUSTO -->
+                    <td>
+                        {{
+                        product.costPrice
+                        | currency:'BRL'
+                        }}
+                    </td>
+
+
+                    <!-- VENDA -->
+                    <td class="sell-price">
+                        {{
+                        product.sellPrice
+                        | currency:'BRL'
+                        }}
+                    </td>
+
+
+                    <!-- LOCALIZAÇÃO -->
+                    <td>
+                        {{ product.location || '—' }}
+                    </td>
+
+
+                    <!-- AÇÕES -->
+                    <td class="actions-cell">
+
+                        <button type="button" class="btn-action scanner" (click)="openBarcodeScanner(product)"
+                            title="Ler código de barras">
+                            ▥
+                        </button>
+
+
+                        <button type="button" class="btn-action edit" (click)="editProduct(product)"
+                            title="Editar produto">
+                            ✏️
+                        </button>
+
+
+                        <button type="button" class="btn-action delete" (click)="deleteProduct(product.id)"
+                            title="Excluir produto">
+                            🗑️
+                        </button>
+
+                    </td>
+
+                </tr>
+
                 }
+
+
+                @if (filteredProducts().length === 0) {
+
+                <tr>
+
+                    <td colspan="9" class="empty-table">
+                        Nenhum produto encontrado.
+                    </td>
+
+                </tr>
+
+                }
+
             </tbody>
+
         </table>
+
     </div>
 
+
+    <!-- =====================================================================
+       MODAL CADASTRAR / EDITAR PRODUTO
+       ===================================================================== -->
+
     @if (showModal()) {
-        <div class="modal-overlay" (click)="closeModal()">
-            <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-                <h2>{{ currentProduct().id === 0 ? 'Novo Produto' : 'Editar Produto' }}</h2>
-                
-                <form (ngSubmit)="saveProduct()" #productForm="ngForm">
-                    
-                    <div class="form-section">
-                        <h4>Dados Básicos</h4>
-                        <div class="form-row">
-                            <div class="form-group col-1">
-                                <label>Código (Opcional)</label>
-                                <input type="text" [(ngModel)]="currentProduct().code" name="code" placeholder="Ex: FIL-001">
-                            </div>
-                            <div class="form-group col-2">
-                                <label>Nome do Produto *</label>
-                                <input type="text" [(ngModel)]="currentProduct().name" name="name" required placeholder="Ex: Filtro de Óleo 5w-30">
-                            </div>
-                            <div class="form-group col-1">
-                                <label>Marca</label>
-                                <input type="text" [(ngModel)]="currentProduct().brand" name="brand" placeholder="Ex: Shell">
-                            </div>
-                        </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-2">
-                                <label>Localização (Estoque)</label>
-                                <input type="text" [(ngModel)]="currentProduct().location" name="location" placeholder="Ex: Prateleira A1">
-                            </div>
-                            <div class="form-group col-2">
-                                <label>Categoria</label>
-                                <select [(ngModel)]="currentProduct().category" name="category">
-                                    @for (cat of categories(); track cat) {
-                                        <option [value]="cat">{{ cat }}</option>
-                                    }
-                                    @if (categories().length === 0) {
-                                        <option value="" disabled>Cadastre categorias em Configurações</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Estoque e Preços</h4>
-                        <div class="form-row">
-                            <div class="form-group col-1">
-                                <label>Quantidade Atual *</label>
-                                <input type="number" [(ngModel)]="currentProduct().quantity" name="quantity" required min="0">
-                            </div>
-                            <div class="form-group col-1">
-                                <label>Alerta Mínimo</label>
-                                <input type="number" [(ngModel)]="currentProduct().minQuantity" name="minQuantity" min="0">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-1">
-                                <label>Preço de Custo *</label>
-                                <input type="number" [(ngModel)]="currentProduct().costPrice" name="costPrice" required min="0">
-                            </div>
-                            <div class="form-group col-1">
-                                <label>Preço de Venda *</label>
-                                <input type="number" [(ngModel)]="currentProduct().sellPrice" name="sellPrice" required min="0">
-                            </div>
-                        </div>
-                    </div>
+    <div class="modal-overlay" (click)="closeModal()">
 
-                    <div class="form-actions">
-                        <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-                        <button type="submit" class="btn-save" [disabled]="productForm.invalid">Salvar Produto</button>
-                    </div>
-                </form>
+        <div class="modal-content" (click)="$event.stopPropagation()">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        {{
+                        currentProduct().id === 0
+                        ? 'Novo Produto'
+                        : 'Editar Produto'
+                        }}
+                    </h2>
+
+                    <p>
+                        Informe os dados do produto.
+                    </p>
+
+                </div>
+
             </div>
+
+
+            <form (ngSubmit)="saveProduct()">
+
+                <!-- NOME -->
+                <div class="form-group">
+
+                    <label>
+                        Nome do Produto *
+                    </label>
+
+                    <input type="text" name="name" required [(ngModel)]="currentProduct().name"
+                        placeholder="Ex: Óleo Mobil Super 5W30">
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- CÓDIGO -->
+                    <div class="form-group">
+
+                        <label>
+                            Código Interno
+                        </label>
+
+                        <input type="text" name="code" [(ngModel)]="currentProduct().code" placeholder="Ex: OLE-001">
+
+                    </div>
+
+
+                    <!-- CÓDIGO DE BARRAS -->
+                    <div class="form-group">
+
+                        <label>
+                            Código de Barras
+                        </label>
+
+                        <div class="barcode-form-input">
+
+                            <span>▥</span>
+
+                            <input type="text" name="barcode" [(ngModel)]="currentProduct().barcode"
+                                placeholder="Escaneie ou digite...">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- MARCA -->
+                    <div class="form-group">
+
+                        <label>
+                            Marca
+                        </label>
+
+                        <input type="text" name="brand" [(ngModel)]="currentProduct().brand" placeholder="Ex: Mobil">
+
+                    </div>
+
+
+                    <!-- CATEGORIA -->
+                    <div class="form-group">
+
+                        <label>
+                            Categoria
+                        </label>
+
+                        <select name="category" [(ngModel)]="currentProduct().category">
+
+                            <option value="">
+                                Sem categoria
+                            </option>
+
+
+                            @for (
+                            category of categories();
+                            track category
+                            ) {
+
+                            <option [value]="category">
+                                {{ category }}
+                            </option>
+
+                            }
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- ESTOQUE -->
+                    <div class="form-group">
+
+                        <label>
+                            Estoque Atual
+                        </label>
+
+                        <input type="number" name="quantity" min="0" [(ngModel)]="currentProduct().quantity">
+
+                    </div>
+
+
+                    <!-- ESTOQUE MÍNIMO -->
+                    <div class="form-group">
+
+                        <label>
+                            Estoque Mínimo
+                        </label>
+
+                        <input type="number" name="minQuantity" min="0" [(ngModel)]="currentProduct().minQuantity">
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <!-- CUSTO -->
+                    <div class="form-group">
+
+                        <label>
+                            Preço de Custo
+                        </label>
+
+                        <input type="number" name="costPrice" min="0" step="0.01"
+                            [(ngModel)]="currentProduct().costPrice">
+
+                    </div>
+
+
+                    <!-- VENDA -->
+                    <div class="form-group">
+
+                        <label>
+                            Preço de Venda
+                        </label>
+
+                        <input type="number" name="sellPrice" min="0" step="0.01"
+                            [(ngModel)]="currentProduct().sellPrice">
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOCALIZAÇÃO -->
+                <div class="form-group">
+
+                    <label>
+                        Localização
+                    </label>
+
+                    <input type="text" name="location" [(ngModel)]="currentProduct().location"
+                        placeholder="Ex: Prateleira A3">
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button type="button" class="btn-cancel" (click)="closeModal()">
+                        Cancelar
+                    </button>
+
+
+                    <button type="submit" class="btn-save">
+                        Salvar Produto
+                    </button>
+
+                </div>
+
+            </form>
+
         </div>
+
+    </div>
+
     }
+
+
+    <!-- =====================================================================
+       ENTRADA DE PRODUTOS
+       ===================================================================== -->
+
+    @if (showStockEntry()) {
+
+    <div class="modal-overlay stock-entry-overlay" (click)="closeStockEntry()">
+
+        <div class="modal-content stock-entry-modal" (click)="$event.stopPropagation()">
+
+            <!-- CABEÇALHO -->
+            <div class="stock-entry-header">
+
+                <div class="stock-entry-title">
+
+                    <span class="stock-entry-title-icon">
+                        📥
+                    </span>
+
+
+                    <div>
+
+                        <h2>
+                            Entrada de Produtos
+                        </h2>
+
+                        <p>
+                            Escaneie o produto e informe a quantidade recebida.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button type="button" class="modal-close" (click)="closeStockEntry()"
+                    [disabled]="stockEntryState() === 'saving'">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- ===============================================================
+             PASSO 1: CÓDIGO DE BARRAS
+             =============================================================== -->
+
+            <div class="stock-entry-section">
+
+                <div class="stock-entry-step">
+
+                    <span class="step-number">
+                        1
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Leia o código de barras
+                        </strong>
+
+                        <span>
+                            O scanner pode enviar Enter automaticamente.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stock-barcode-input" [class.success]="stockEntryState() === 'found'"
+                    [class.error]="stockEntryState() === 'error'">
+
+                    <span class="stock-barcode-icon">
+                        ▥
+                    </span>
+
+
+                    <input id="stock-entry-barcode-input" type="text" autocomplete="off"
+                        placeholder="Aguardando scanner..." [ngModel]="stockEntryBarcode()"
+                        (ngModelChange)="onStockEntryBarcodeChange($event)"
+                        (keydown)="onStockEntryBarcodeKeydown($event)" [disabled]="
+                stockEntryState() === 'searching' ||
+                stockEntryState() === 'saving'
+              ">
+
+
+                    <button type="button" class="stock-find-button" (click)="findStockEntryProduct()" [disabled]="
+                stockEntryState() === 'searching' ||
+                stockEntryState() === 'saving'
+              ">
+                        @if (stockEntryState() === 'searching') {
+                        ...
+                        } @else {
+                        Buscar
+                        }
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ===============================================================
+             PRODUTO ENCONTRADO
+             =============================================================== -->
+
+            @if (stockEntryProduct()) {
+
+            <div class="stock-product-found">
+
+                <div class="found-status">
+
+                    <span class="found-check">
+                        ✓
+                    </span>
+
+                    Produto identificado
+
+                </div>
+
+
+                <div class="stock-product-main">
+
+                    <div>
+
+                        <h3>
+                            {{ stockEntryProduct()!.name }}
+                        </h3>
+
+
+                        <div class="stock-product-meta">
+
+                            @if (stockEntryProduct()!.code) {
+
+                            <span>
+                                Código:
+                                <strong>
+                                    {{ stockEntryProduct()!.code }}
+                                </strong>
+                            </span>
+
+                            }
+
+
+                            @if (stockEntryProduct()!.brand) {
+
+                            <span>
+                                Marca:
+                                <strong>
+                                    {{ stockEntryProduct()!.brand }}
+                                </strong>
+                            </span>
+
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="current-stock-box">
+
+                        <span>
+                            Estoque atual
+                        </span>
+
+                        <strong>
+                            {{ stockEntryProduct()!.quantity }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================================
+               PASSO 2: QUANTIDADE
+               ============================================================= -->
+
+            <div class="stock-entry-section">
+
+                <div class="stock-entry-step">
+
+                    <span class="step-number">
+                        2
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Informe a quantidade recebida
+                        </strong>
+
+                        <span>
+                            Digite a quantidade e pressione Enter.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stock-quantity-area">
+
+                    <div class="stock-quantity-input">
+
+                        <button type="button" (click)="
+                    stockEntryQuantity.set(
+                      stockEntryQuantity() > 1
+                        ? stockEntryQuantity() - 1
+                        : 1
+                    )
+                  " [disabled]="stockEntryState() === 'saving'">
+                            −
+                        </button>
+
+
+                        <input id="stock-entry-quantity-input" type="number" min="1" step="1"
+                            [ngModel]="stockEntryQuantity()" (ngModelChange)="stockEntryQuantity.set(+$event)"
+                            (keydown)="onStockEntryQuantityKeydown($event)" [disabled]="stockEntryState() === 'saving'">
+
+
+                        <button type="button" (click)="
+                    stockEntryQuantity.set(
+                      stockEntryQuantity() + 1
+                    )
+                  " [disabled]="stockEntryState() === 'saving'">
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <div class="stock-calculation">
+
+                        <div>
+
+                            <span>
+                                Atual
+                            </span>
+
+                            <strong>
+                                {{ stockEntryProduct()!.quantity }}
+                            </strong>
+
+                        </div>
+
+
+                        <span class="stock-operation">
+                            +
+                        </span>
+
+
+                        <div>
+
+                            <span>
+                                Entrada
+                            </span>
+
+                            <strong class="entry-value">
+                                {{ stockEntryQuantity() }}
+                            </strong>
+
+                        </div>
+
+
+                        <span class="stock-operation">
+                            =
+                        </span>
+
+
+                        <div class="new-stock">
+
+                            <span>
+                                Novo estoque
+                            </span>
+
+                            <strong>
+                                {{
+                                stockEntryProduct()!.quantity +
+                                stockEntryQuantity()
+                                }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            }
+
+
+            <!-- ===============================================================
+             MENSAGEM
+             =============================================================== -->
+
+            @if (stockEntryMessage()) {
+
+            <div class="stock-entry-message" [class.success]="stockEntryState() === 'success'"
+                [class.error]="stockEntryState() === 'error'" [class.loading]="
+              stockEntryState() === 'searching' ||
+              stockEntryState() === 'saving'
+            ">
+
+                @if (stockEntryState() === 'success') {
+
+                <span>
+                    ✓
+                </span>
+
+                } @else if (stockEntryState() === 'error') {
+
+                <span>
+                    !
+                </span>
+
+                } @else {
+
+                <span>
+                    •••
+                </span>
+
+                }
+
+
+                {{ stockEntryMessage() }}
+
+            </div>
+
+            }
+
+
+            <!-- ===============================================================
+             ÚLTIMA ENTRADA
+             =============================================================== -->
+
+            @if (lastStockEntry()) {
+
+            <div class="last-stock-entry">
+
+                <div class="last-entry-title">
+
+                    <span>
+                        ✓
+                    </span>
+
+                    Última entrada registrada
+
+                </div>
+
+
+                <div class="last-entry-content">
+
+                    <div>
+
+                        <strong>
+                            {{ lastStockEntry()!.productName }}
+                        </strong>
+
+                        <span>
+                            +{{ lastStockEntry()!.quantity }}
+                            unidade{{
+                            lastStockEntry()!.quantity === 1
+                            ? ''
+                            : 's'
+                            }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="last-entry-stock">
+
+                        <span>
+                            {{ lastStockEntry()!.previousQuantity }}
+                        </span>
+
+                        <span class="arrow">
+                            →
+                        </span>
+
+                        <strong>
+                            {{ lastStockEntry()!.newQuantity }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            }
+
+
+            <!-- ===============================================================
+             AÇÕES
+             =============================================================== -->
+
+            <div class="stock-entry-actions">
+
+                <span class="stock-entry-tip">
+                    ▥ Scanner + Enter → quantidade + Enter
+                </span>
+
+
+                <div>
+
+                    <button type="button" class="btn-cancel" (click)="closeStockEntry()"
+                        [disabled]="stockEntryState() === 'saving'">
+                        Fechar
+                    </button>
+
+
+                    <button type="button" class="btn-stock-confirm" (click)="confirmStockEntry()" [disabled]="
+                !stockEntryProduct() ||
+                stockEntryState() === 'saving'
+              ">
+
+                        @if (stockEntryState() === 'saving') {
+                        Registrando...
+                        } @else {
+                        Confirmar Entrada
+                        }
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    }
+
+    <!-- =====================================================================
+     HISTÓRICO DE ESTOQUE
+     ===================================================================== -->
+
+    @if (showStockHistory()) {
+
+    <div class="modal-overlay stock-history-overlay" (click)="closeStockHistory()">
+
+        <div class="modal-content stock-history-modal" (click)="$event.stopPropagation()">
+
+            <!-- ===============================================================
+           CABEÇALHO
+           =============================================================== -->
+
+            <div class="stock-history-header">
+
+                <div class="stock-history-title">
+
+                    <span class="stock-history-title-icon">
+                        📜
+                    </span>
+
+
+                    <div>
+
+                        <h2>
+                            Histórico de Estoque
+                        </h2>
+
+                        <p>
+                            Consulte as últimas movimentações registradas no estoque.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button type="button" class="modal-close" (click)="closeStockHistory()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- ===============================================================
+           BUSCA
+           =============================================================== -->
+
+            <div class="stock-history-toolbar">
+
+                <div class="stock-history-search">
+
+                    <span>
+                        🔍
+                    </span>
+
+
+                    <input type="text" autocomplete="off"
+                        placeholder="Buscar por produto, código, código de barras ou marca..."
+                        [ngModel]="stockHistorySearchTerm()" (ngModelChange)="stockHistorySearchTerm.set($event)">
+
+                </div>
+
+
+                <button type="button" class="btn-refresh-history" (click)="loadStockMovements()"
+                    [disabled]="stockHistoryLoading()" title="Atualizar histórico">
+
+                    @if (stockHistoryLoading()) {
+                    ...
+                    } @else {
+                    ↻ Atualizar
+                    }
+
+                </button>
+
+            </div>
+
+
+            <!-- ===============================================================
+           CARREGANDO
+           =============================================================== -->
+
+            @if (stockHistoryLoading()) {
+
+            <div class="stock-history-state">
+
+                <div class="history-loading-icon">
+                    📦
+                </div>
+
+                <strong>
+                    Carregando movimentações...
+                </strong>
+
+                <span>
+                    Consultando o histórico do estoque.
+                </span>
+
+            </div>
+
+            } @else {
+
+
+            <!-- =============================================================
+             TABELA
+             ============================================================= -->
+
+            @if (filteredStockMovements().length > 0) {
+
+            <div class="stock-history-table-container">
+
+                <table class="stock-history-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Data
+                            </th>
+
+                            <th>
+                                Produto
+                            </th>
+
+                            <th>
+                                Tipo
+                            </th>
+
+                            <th class="history-center">
+                                Quantidade
+                            </th>
+
+                            <th class="history-center">
+                                Estoque
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @for (
+                        movement of filteredStockMovements();
+                        track movement.id
+                        ) {
+
+                        <tr>
+
+                            <!-- DATA -->
+                            <td class="history-date">
+
+                                <strong>
+
+                                    {{
+                                    movement.createdAt
+                                    | date:'dd/MM/yyyy'
+                                    }}
+
+                                </strong>
+
+
+                                <span>
+
+                                    {{
+                                    movement.createdAt
+                                    | date:'HH:mm'
+                                    }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- PRODUTO -->
+                            <td>
+
+                                <div class="history-product">
+
+                                    <strong>
+
+                                        {{
+                                        movement.productName ||
+                                        'Produto removido'
+                                        }}
+
+                                    </strong>
+
+
+                                    <div class="history-product-meta">
+
+                                        @if (movement.productCode) {
+
+                                        <span>
+                                            {{ movement.productCode }}
+                                        </span>
+
+                                        }
+
+
+                                        @if (movement.productBrand) {
+
+                                        <span>
+                                            {{ movement.productBrand }}
+                                        </span>
+
+                                        }
+
+
+                                        @if (movement.productBarcode) {
+
+                                        <span class="history-barcode">
+                                            ▥
+                                            {{ movement.productBarcode }}
+                                        </span>
+
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- TIPO -->
+                            <td>
+
+                                <span class="movement-type" [class]="
+                          getStockMovementClass(
+                            movement.type
+                          )
+                        ">
+
+                                    {{
+                                    getStockMovementLabel(
+                                    movement.type
+                                    )
+                                    }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- QUANTIDADE -->
+                            <td class="history-center">
+
+                                <strong class="movement-quantity" [class]="
+                          getStockMovementClass(
+                            movement.type
+                          )
+                        ">
+
+                                    {{
+                                    getStockMovementQuantity(
+                                    movement
+                                    )
+                                    }}
+
+                                </strong>
+
+                            </td>
+
+
+                            <!-- ESTOQUE ANTES / DEPOIS -->
+                            <td class="history-center">
+
+                                <div class="history-stock-change">
+
+                                    <span class="previous-stock">
+                                        {{ movement.previousQuantity }}
+                                    </span>
+
+
+                                    <span class="stock-arrow">
+                                        →
+                                    </span>
+
+
+                                    <strong>
+                                        {{ movement.newQuantity }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            } @else {
+
+            <!-- =============================================================
+               SEM RESULTADOS
+               ============================================================= -->
+
+            <div class="stock-history-state empty">
+
+                <div class="history-empty-icon">
+                    📦
+                </div>
+
+
+                @if (
+                stockHistorySearchTerm().trim()
+                ) {
+
+                <strong>
+                    Nenhuma movimentação encontrada
+                </strong>
+
+                <span>
+                    Tente pesquisar outro produto, código ou código de barras.
+                </span>
+
+                } @else {
+
+                <strong>
+                    Nenhuma movimentação registrada
+                </strong>
+
+                <span>
+                    As entradas de produtos aparecerão aqui.
+                </span>
+
+                }
+
+            </div>
+
+            }
+
+            }
+
+
+            <!-- ===============================================================
+           RODAPÉ
+           =============================================================== -->
+
+            <div class="stock-history-footer">
+
+                <div class="history-summary">
+
+                    @if (
+                    !stockHistoryLoading() &&
+                    filteredStockMovements().length > 0
+                    ) {
+
+                    <span>
+
+                        {{
+                        filteredStockMovements().length
+                        }}
+
+                        {{
+                        filteredStockMovements().length === 1
+                        ? 'movimentação'
+                        : 'movimentações'
+                        }}
+
+                    </span>
+
+                    }
+
+                </div>
+
+
+                <button type="button" class="btn-cancel" (click)="closeStockHistory()">
+                    Fechar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    }
+
+
+    <!-- =====================================================================
+       SCANNER RÁPIDO DE CÓDIGO DE BARRAS
+       ===================================================================== -->
+
+    @if (
+    showBarcodeScanner() &&
+    scannerProduct()
+    ) {
+
+    <div class="modal-overlay scanner-overlay" (click)="closeBarcodeScanner()">
+
+        <div class="modal-content scanner-modal" (click)="$event.stopPropagation()">
+
+            <div class="scanner-modal-icon">
+                ▥
+            </div>
+
+
+            <h2>
+                Código de Barras
+            </h2>
+
+
+            <p class="scanner-product-name">
+                {{ scannerProduct()!.name }}
+            </p>
+
+
+            <p class="scanner-instruction">
+                Escaneie o código de barras ou digite manualmente.
+            </p>
+
+
+            <input id="quick-barcode-input" class="scanner-input" type="text" autocomplete="off"
+                placeholder="Aguardando leitura..." [ngModel]="scannerBarcode()"
+                (ngModelChange)="scannerBarcode.set($event)" (keydown)="onQuickScannerKeydown($event)"
+                [disabled]="scannerState() === 'saving'">
+
+
+            @if (scannerMessage()) {
+
+            <div class="scanner-message" [class.success]="scannerState() === 'success'"
+                [class.error]="scannerState() === 'error'">
+                {{ scannerMessage() }}
+            </div>
+
+            }
+
+
+            <div class="scanner-actions">
+
+                <button type="button" class="btn-cancel" (click)="closeBarcodeScanner()"
+                    [disabled]="scannerState() === 'saving'">
+                    Cancelar
+                </button>
+
+
+                <button type="button" class="btn-save" (click)="saveQuickBarcode()"
+                    [disabled]="scannerState() === 'saving'">
+
+                    {{
+                    scannerState() === 'saving'
+                    ? 'Salvando...'
+                    : 'Salvar Código'
+                    }}
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    }
+
+
+    <!-- =====================================================================
+       MODO SCANNER EM LOTE
+       ===================================================================== -->
+
+    @if (showBulkScanner()) {
+
+    <div class="modal-overlay scanner-overlay" (click)="closeBulkBarcodeScanner()">
+
+        <div class="modal-content bulk-scanner-modal" (click)="$event.stopPropagation()">
+
+            <!-- CABEÇALHO -->
+            <div class="bulk-header">
+
+                <div>
+
+                    <h2>
+                        Modo Scanner
+                    </h2>
+
+                    <p>
+                        Cadastre códigos de barras rapidamente nos produtos pendentes.
+                    </p>
+
+                </div>
+
+
+                <button type="button" class="modal-close" (click)="closeBulkBarcodeScanner()"
+                    [disabled]="bulkState() === 'saving'">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- PROGRESSO -->
+            <div class="bulk-progress">
+
+                <div class="bulk-progress-info">
+
+                    <span>
+                        Progresso
+                    </span>
+
+                    <strong>
+                        {{ bulkCompleted() }}
+                        /
+                        {{ bulkTotal() }}
+                    </strong>
+
+                </div>
+
+
+                <div class="bulk-progress-track">
+
+                    <div class="bulk-progress-bar" [style.width.%]="getBulkProgress()"></div>
+
+                </div>
+
+            </div>
+
+
+            @if (
+            bulkState() === 'finished'
+            ) {
+
+            <div class="bulk-finished">
+
+                <div class="finished-icon">
+                    ✓
+                </div>
+
+                <h3>
+                    Cadastro concluído
+                </h3>
+
+                <p>
+                    Todos os produtos da fila possuem código de barras.
+                </p>
+
+
+                <button type="button" class="btn-save" (click)="closeBulkBarcodeScanner()">
+                    Concluir
+                </button>
+
+            </div>
+
+            } @else if (currentBulkProduct()) {
+
+            <!-- PRODUTO ATUAL -->
+            <div class="bulk-product-card">
+
+                <span class="bulk-label">
+                    Produto atual
+                </span>
+
+
+                <h3>
+                    {{ currentBulkProduct()!.name }}
+                </h3>
+
+
+                <div class="bulk-product-meta">
+
+                    @if (currentBulkProduct()!.code) {
+
+                    <span>
+                        Código:
+                        <strong>
+                            {{ currentBulkProduct()!.code }}
+                        </strong>
+                    </span>
+
+                    }
+
+
+                    @if (currentBulkProduct()!.brand) {
+
+                    <span>
+                        Marca:
+                        <strong>
+                            {{ currentBulkProduct()!.brand }}
+                        </strong>
+                    </span>
+
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- INPUT -->
+            <div class="bulk-scanner-input-area">
+
+                <label>
+                    Código de barras
+                </label>
+
+
+                <div class="bulk-input-wrapper">
+
+                    <span>
+                        ▥
+                    </span>
+
+
+                    <input id="bulk-barcode-input" type="text" autocomplete="off" placeholder="Aguardando scanner..."
+                        [ngModel]="bulkBarcode()" (ngModelChange)="bulkBarcode.set($event)"
+                        (keydown)="onBulkScannerKeydown($event)" [disabled]="bulkState() === 'saving'">
+
+                </div>
+
+
+                <span class="bulk-hint">
+                    O leitor pode pressionar Enter automaticamente.
+                </span>
+
+            </div>
+
+
+            <!-- MENSAGEM -->
+            @if (bulkMessage()) {
+
+            <div class="scanner-message bulk-message" [class.success]="bulkState() === 'success'"
+                [class.error]="bulkState() === 'error'">
+                {{ bulkMessage() }}
+            </div>
+
+            }
+
+
+            <!-- NAVEGAÇÃO -->
+            <div class="bulk-navigation">
+
+                <button type="button" class="btn-bulk-nav" (click)="previousBulkProduct()" [disabled]="
+                getBulkRemaining() <= 1 ||
+                bulkState() === 'saving'
+              ">
+                    ← Anterior
+                </button>
+
+
+                <span class="remaining-count">
+                    {{ getBulkRemaining() }}
+                    pendente{{
+                    getBulkRemaining() === 1
+                    ? ''
+                    : 's'
+                    }}
+                </span>
+
+
+                <button type="button" class="btn-bulk-nav" (click)="nextBulkProduct()" [disabled]="
+                getBulkRemaining() <= 1 ||
+                bulkState() === 'saving'
+              ">
+                    Próximo →
+                </button>
+
+            </div>
+
+
+            <div class="bulk-actions">
+
+                <button type="button" class="btn-cancel" (click)="closeBulkBarcodeScanner()"
+                    [disabled]="bulkState() === 'saving'">
+                    Fechar
+                </button>
+
+
+                <button type="button" class="btn-save" (click)="saveBulkBarcode()"
+                    [disabled]="bulkState() === 'saving'">
+                    {{
+                    bulkState() === 'saving'
+                    ? 'Salvando...'
+                    : 'Salvar e Continuar'
+                    }}
+                </button>
+
+            </div>
+
+            }
+
+        </div>
+
+    </div>
+
+    }
+
 </div>

@@ -901,7 +901,7 @@ body {
 
     width: 100% !important;
 
-    margin: 14mm 0 0 0 !important;
+    margin: 20mm 0 0 0 !important;
     padding: 0 !important;
 
     break-inside: avoid !important;
@@ -922,7 +922,7 @@ body {
     width: 100% !important;
 
     margin: 0 !important;
-    padding: 2mm 1mm 0 1mm !important;
+    padding: 3.5mm 1mm 0 1mm !important;
 
     border-top: 1px solid #222222 !important;
     border-right: 0 !important;

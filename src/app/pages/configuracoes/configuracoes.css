@@ -8,20 +8,27 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.page-header h1 { 
-  font-size: 28px; 
+.page-header h1 {
+  font-size: 28px;
   color: var(--text-primary);
-  margin: 0; 
+  margin: 0;
 }
 
-.subtitle { 
+.subtitle {
   color: var(--text-secondary);
-  margin: 4px 0 0 0; 
-  font-size: 14px; 
+  margin: 4px 0 0 0;
+  font-size: 14px;
 }
 
 /* Grid Principal */
@@ -29,7 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 900px; 
+  max-width: 900px;
 }
 
 /* Cards */
@@ -46,26 +53,28 @@
 .card-header {
   padding: 20px;
   border-bottom: 1px solid var(--border-color);
-  background: var(--hover-bg); 
+  background: var(--hover-bg);
 }
 
-.card-header h3 { 
-  margin: 0; 
-  font-size: 18px; 
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.card-header p { 
-  margin: 4px 0 0 0; 
-  font-size: 13px; 
+.card-header p {
+  margin: 4px 0 0 0;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
-.card-body { padding: 24px; }
+.card-body {
+  padding: 24px;
+}
 
 /* --- SELETOR DE TEMA --- */
 .theme-selector {
@@ -90,9 +99,9 @@
   gap: 10px;
 }
 
-.theme-btn:hover { 
-  border-color: #d1d5db; 
-  background: var(--hover-bg); 
+.theme-btn:hover {
+  border-color: #d1d5db;
+  background: var(--hover-bg);
 }
 
 .theme-btn.active {
@@ -108,7 +117,11 @@
 }
 
 /* --- FORMULÁRIO DE DADOS --- */
-.company-form { display: flex; flex-direction: column; gap: 16px; }
+.company-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 .form-row {
   display: flex;
@@ -124,12 +137,19 @@
 }
 
 /* Classes utilitárias de coluna */
-.col-1 { flex: 1; min-width: 200px; }
-.col-2 { flex: 2; min-width: 300px; }
+.col-1 {
+  flex: 1;
+  min-width: 200px;
+}
 
-.form-group label { 
-  font-size: 13px; 
-  font-weight: 600; 
+.col-2 {
+  flex: 2;
+  min-width: 300px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -138,7 +158,8 @@
 .form-group textarea {
   padding: 10px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 8px; /* Padrão de 8px nas bordas */
+  border-radius: 8px;
+  /* Padrão de 8px nas bordas */
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
@@ -147,7 +168,10 @@
 }
 
 .form-group input:focus,
-.form-group textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.form-group textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
 
 .divider {
   border: 0;
@@ -174,54 +198,60 @@
   gap: 8px;
   transition: background 0.2s;
 }
-.btn-save:hover { background: #1d4ed8; }
 
-/* --- CATEGORIAS (Input e Lista) --- */
-.input-group { 
-  display: flex; 
-  gap: 10px; 
-  margin-bottom: 20px; 
-  align-items: center; 
+.btn-save:hover {
+  background: #1d4ed8;
 }
 
-.input-group input { 
-  flex: 1; 
-  height: 40px; 
-  
+/* --- CATEGORIAS (Input e Lista) --- */
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 1;
+  height: 40px;
+
   /* CORREÇÃO: Aplica as bordas arredondadas e o estilo de input */
   padding: 10px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 8px; /* Aplicação da borda arredondada */
+  border-radius: 8px;
+  /* Aplicação da borda arredondada */
   background-color: var(--input-bg);
   color: var(--text-primary);
   font-size: 14px;
   outline: none;
 }
 
-.btn-add { 
-  background: #2563eb; 
-  color: white; 
-  border: none; 
-  padding: 0 20px; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  font-weight: 600; 
+.btn-add {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
   transition: background 0.2s;
-  
-  height: 40px; 
-  display: flex; 
-  align-items: center; 
+
+  height: 40px;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
-.btn-add:hover { 
-  background: #1d4ed8; 
+
+.btn-add:hover {
+  background: #1d4ed8;
 }
 
 [data-theme="dark"] .btn-add {
   background: #2563eb;
 }
-[data-theme="dark"] .btn-add:hover { 
-  background: #1d4ed8; 
+
+[data-theme="dark"] .btn-add:hover {
+  background: #1d4ed8;
 }
 
 /* Lista Horizontal de Categorias (estilo tags) */
@@ -260,23 +290,1134 @@
   font-size: 14px;
   line-height: 1;
 }
-.btn-remove-icon:hover { background: #fee2e2; color: #dc2626; }
 
-.btn-backup {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #16a34a; /* Verde sucesso */
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 15px;
+.btn-remove-icon:hover {
+  background: #fee2e2;
+  color: #dc2626;
 }
 
+/* ==========================================================================
+   BACKUP E RESTAURAÇÃO
+   ========================================================================== */
+
+.backup-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+
+/* ==========================================================================
+   CARD DE AÇÃO
+   ========================================================================== */
+
+.backup-option {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 14px;
+
+  min-width: 0;
+
+  padding: 18px;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: 10px;
+
+  background:
+    var(--bg-card);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+
+.backup-option:hover {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 6px 18px rgba(15,
+      23,
+      42,
+      0.06);
+}
+
+
+/* ==========================================================================
+   EXPORTAR
+   ========================================================================== */
+
+.backup-export {
+  border-top:
+    3px solid #16a34a;
+}
+
+
+.backup-export:hover {
+  border-color:
+    #86efac;
+
+  border-top-color:
+    #16a34a;
+}
+
+
+/* ==========================================================================
+   RESTAURAR
+   ========================================================================== */
+
+.backup-restore {
+  border-top:
+    3px solid #2563eb;
+}
+
+
+.backup-restore:hover {
+  border-color:
+    #93c5fd;
+
+  border-top-color:
+    #2563eb;
+}
+
+
+/* ==========================================================================
+   ÍCONE
+   ========================================================================== */
+
+.backup-option-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex:
+    0 0 46px;
+
+  width: 46px;
+  height: 46px;
+
+  border:
+    1px solid #bbf7d0;
+
+  border-radius:
+    11px;
+
+  background:
+    #f0fdf4;
+
+  font-size:
+    21px;
+}
+
+
+.backup-option-icon.restore {
+  border-color:
+    #bfdbfe;
+
+  background:
+    #eff6ff;
+}
+
+
+/* ==========================================================================
+   TEXTO
+   ========================================================================== */
+
+.backup-option-content {
+  display: flex;
+
+  flex: 1;
+
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+
+.backup-option-content h4 {
+  margin:
+    1px 0 5px;
+
+  color:
+    var(--text-primary);
+
+  font-size:
+    15px;
+
+  font-weight:
+    700;
+}
+
+
+.backup-option-content p {
+  min-height:
+    52px;
+
+  margin:
+    0 0 15px;
+
+  color:
+    var(--text-secondary);
+
+  font-size:
+    11.5px;
+
+  line-height:
+    1.5;
+}
+
+
+/* ==========================================================================
+   BOTÃO EXPORTAR
+   ========================================================================== */
+
+.btn-backup {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  align-self:
+    flex-start;
+
+  gap: 7px;
+
+  min-height:
+    39px;
+
+  padding:
+    0 14px;
+
+  border:
+    1px solid #15803d;
+
+  border-radius:
+    7px;
+
+  background:
+    #16a34a;
+
+  color:
+    #ffffff;
+
+  font-family:
+    inherit;
+
+  font-size:
+    12px;
+
+  font-weight:
+    650;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.1s ease;
+}
+
+
 .btn-backup:hover {
-    background-color: #15803d;
+  border-color:
+    #166534;
+
+  background:
+    #15803d;
+
+  box-shadow:
+    0 4px 12px rgba(22,
+      163,
+      74,
+      0.16);
+}
+
+
+.btn-backup:active {
+  transform:
+    translateY(1px);
+}
+
+
+/* ==========================================================================
+   BOTÃO RESTAURAR
+   ========================================================================== */
+
+.btn-restore-backup {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  align-self:
+    flex-start;
+
+  gap: 7px;
+
+  min-height:
+    39px;
+
+  padding:
+    0 14px;
+
+  border:
+    1px solid #2563eb;
+
+  border-radius:
+    7px;
+
+  background:
+    #2563eb;
+
+  color:
+    #ffffff;
+
+  font-family:
+    inherit;
+
+  font-size:
+    12px;
+
+  font-weight:
+    650;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.1s ease;
+}
+
+
+.btn-restore-backup:hover {
+  border-color:
+    #1d4ed8;
+
+  background:
+    #1d4ed8;
+
+  box-shadow:
+    0 4px 12px rgba(37,
+      99,
+      235,
+      0.16);
+}
+
+
+.btn-restore-backup:active {
+  transform:
+    translateY(1px);
+}
+
+
+/* ==========================================================================
+   AVISO DE RESTAURAÇÃO
+   ========================================================================== */
+
+.backup-warning {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 11px;
+
+  margin-top:
+    16px;
+
+  padding:
+    12px 14px;
+
+  border:
+    1px solid #fde68a;
+
+  border-radius:
+    9px;
+
+  background:
+    #fffbeb;
+}
+
+
+.backup-warning-icon {
+  flex:
+    0 0 auto;
+
+  margin-top:
+    1px;
+
+  font-size:
+    18px;
+}
+
+
+.backup-warning strong {
+  display: block;
+
+  margin-bottom:
+    3px;
+
+  color:
+    #92400e;
+
+  font-size:
+    12px;
+
+  font-weight:
+    700;
+}
+
+
+.backup-warning p {
+  margin:
+    0;
+
+  color:
+    #a16207;
+
+  font-size:
+    10.5px;
+
+  line-height:
+    1.5;
+}
+
+
+/* ==========================================================================
+   DARK MODE
+   ========================================================================== */
+
+[data-theme="dark"] .backup-option {
+  background:
+    var(--bg-card);
+}
+
+
+[data-theme="dark"] .backup-export {
+  border-top-color:
+    #4ade80;
+}
+
+
+[data-theme="dark"] .backup-restore {
+  border-top-color:
+    #60a5fa;
+}
+
+
+[data-theme="dark"] .backup-option-icon {
+  border-color:
+    #166534;
+
+  background:
+    rgba(22,
+      163,
+      74,
+      0.14);
+}
+
+
+[data-theme="dark"] .backup-option-icon.restore {
+  border-color:
+    #1e40af;
+
+  background:
+    rgba(37,
+      99,
+      235,
+      0.14);
+}
+
+
+[data-theme="dark"] .backup-warning {
+  border-color:
+    #92400e;
+
+  background:
+    rgba(217,
+      119,
+      6,
+      0.10);
+}
+
+
+[data-theme="dark"] .backup-warning strong {
+  color:
+    #fbbf24;
+}
+
+
+[data-theme="dark"] .backup-warning p {
+  color:
+    #fcd34d;
+}
+
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 700px) {
+
+  .backup-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .backup-option-content p {
+    min-height:
+      0;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .backup-option {
+    flex-direction:
+      column;
+
+    padding:
+      15px;
+  }
+
+
+  .btn-backup,
+  .btn-restore-backup {
+    width:
+      100%;
+
+    align-self:
+      stretch;
+  }
+
+}
+
+/* ==========================================================================
+   ATUALIZAÇÕES DO SISTEMA
+   ========================================================================== */
+
+.update-card {
+  overflow: hidden;
+}
+
+
+.update-panel {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+}
+
+
+/* ==========================================================================
+   BLOCO PRINCIPAL
+   ========================================================================== */
+
+.update-main {
+  display: flex;
+
+  align-items: flex-start;
+
+  flex: 1;
+
+  min-width: 0;
+
+  gap: 15px;
+}
+
+
+.update-icon-box {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 50px;
+
+  width: 50px;
+  height: 50px;
+
+  border: 1px solid #bfdbfe;
+
+  border-radius: 12px;
+
+  background: #eff6ff;
+
+  font-size: 22px;
+}
+
+
+/* ==========================================================================
+   INFORMAÇÕES
+   ========================================================================== */
+
+.update-info {
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+.update-title-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+
+.update-label {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--text-secondary);
+
+  font-size: 10px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.45px;
+}
+
+
+.update-version {
+  display: block;
+
+  color: var(--text-primary);
+
+  font-size: 19px;
+
+  font-weight: 800;
+
+  line-height: 1.1;
+}
+
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+
+.update-badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 27px;
+
+  padding: 0 9px;
+
+  border: 1px solid;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+.update-badge.success {
+  border-color: #bbf7d0;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+}
+
+
+.update-badge.checking {
+  border-color: #bfdbfe;
+
+  background: #eff6ff;
+
+  color: #1d4ed8;
+}
+
+
+.update-badge.available {
+  border-color: #fde68a;
+
+  background: #fffbeb;
+
+  color: #b45309;
+}
+
+
+.update-badge.downloading {
+  border-color: #bfdbfe;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+
+.update-badge.ready {
+  border-color: #bbf7d0;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+}
+
+
+.update-badge.error {
+  border-color: #fecaca;
+
+  background: #fef2f2;
+
+  color: #dc2626;
+}
+
+
+/* ==========================================================================
+   VERSÃO DISPONÍVEL
+   ========================================================================== */
+
+.update-available-version {
+  margin-top: 9px;
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+}
+
+
+.update-available-version strong {
+  color: #2563eb;
+
+  font-weight: 750;
+}
+
+
+/* ==========================================================================
+   MENSAGEM
+   ========================================================================== */
+
+.update-message {
+  max-width: 650px;
+
+  margin: 8px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 11.5px;
+
+  line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   AÇÕES
+   ========================================================================== */
+
+.update-actions {
+  display: flex;
+
+  align-items: center;
+
+  flex: 0 0 auto;
+}
+
+
+.btn-update-check,
+.btn-update-download,
+.btn-update-install {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 40px;
+
+  padding: 0 15px;
+
+  border-radius: 7px;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 650;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.1s ease;
+}
+
+
+/* ==========================================================================
+   VERIFICAR
+   ========================================================================== */
+
+.btn-update-check {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  color: #334155;
+}
+
+
+.btn-update-check:hover:not(:disabled) {
+  border-color: #94a3b8;
+
+  background: #f8fafc;
+
+  color: #0f172a;
+}
+
+
+/* ==========================================================================
+   DOWNLOAD
+   ========================================================================== */
+
+.btn-update-download {
+  border: 1px solid #2563eb;
+
+  background: #2563eb;
+
+  color: #ffffff;
+}
+
+
+.btn-update-download:hover:not(:disabled) {
+  border-color: #1d4ed8;
+
+  background: #1d4ed8;
+
+  box-shadow:
+    0 4px 12px rgba(37, 99, 235, 0.16);
+}
+
+
+/* ==========================================================================
+   INSTALAR
+   ========================================================================== */
+
+.btn-update-install {
+  border: 1px solid #15803d;
+
+  background: #16a34a;
+
+  color: #ffffff;
+}
+
+
+.btn-update-install:hover:not(:disabled) {
+  border-color: #166534;
+
+  background: #15803d;
+
+  box-shadow:
+    0 4px 12px rgba(22, 163, 74, 0.16);
+}
+
+
+.btn-update-check:active:not(:disabled),
+.btn-update-download:active:not(:disabled),
+.btn-update-install:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+.btn-update-check:disabled,
+.btn-update-download:disabled,
+.btn-update-install:disabled {
+  opacity: 0.65;
+
+  cursor: wait;
+}
+
+
+/* ==========================================================================
+   PROGRESSO
+   ========================================================================== */
+
+.update-progress-area {
+  max-width: 520px;
+
+  margin-top: 13px;
+}
+
+
+.update-progress-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 5px;
+
+  color: var(--text-secondary);
+
+  font-size: 10px;
+}
+
+
+.update-progress-header strong {
+  color: #2563eb;
+
+  font-size: 10px;
+}
+
+
+.update-progress-track {
+  width: 100%;
+  height: 8px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #e2e8f0;
+}
+
+
+.update-progress-bar {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #2563eb;
+
+  transition: width 0.2s ease;
+}
+
+
+/* ==========================================================================
+   MODO DE DESENVOLVIMENTO
+   ========================================================================== */
+
+.update-dev-notice {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 8px;
+
+  max-width: 520px;
+
+  margin-top: 12px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 8px;
+
+  background: #f8fafc;
+}
+
+
+.update-dev-notice>span {
+  font-size: 15px;
+}
+
+
+.update-dev-notice strong {
+  display: block;
+
+  margin-bottom: 2px;
+
+  color: var(--text-primary);
+
+  font-size: 10.5px;
+}
+
+
+.update-dev-notice p {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 9.5px;
+
+  line-height: 1.45;
+}
+
+
+/* ==========================================================================
+   ANIMAÇÃO
+   ========================================================================== */
+
+.update-spinner {
+  display: inline-block;
+
+  animation:
+    updateSpin 0.9s linear infinite;
+}
+
+
+@keyframes updateSpin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* ==========================================================================
+   DARK MODE
+   ========================================================================== */
+
+:host-context([data-theme="dark"]) .update-icon-box {
+  border-color: #1e40af;
+
+  background:
+    rgba(37, 99, 235, 0.14);
+}
+
+
+:host-context([data-theme="dark"]) .update-badge.success,
+:host-context([data-theme="dark"]) .update-badge.ready {
+  border-color: #166534;
+
+  background:
+    rgba(22, 163, 74, 0.12);
+
+  color: #4ade80;
+}
+
+
+:host-context([data-theme="dark"]) .update-badge.checking,
+:host-context([data-theme="dark"]) .update-badge.downloading {
+  border-color: #1e40af;
+
+  background:
+    rgba(37, 99, 235, 0.12);
+
+  color: #93c5fd;
+}
+
+
+:host-context([data-theme="dark"]) .update-badge.available {
+  border-color: #92400e;
+
+  background:
+    rgba(217, 119, 6, 0.12);
+
+  color: #fbbf24;
+}
+
+
+:host-context([data-theme="dark"]) .update-badge.error {
+  border-color: #991b1b;
+
+  background:
+    rgba(220, 38, 38, 0.12);
+
+  color: #f87171;
+}
+
+
+:host-context([data-theme="dark"]) .btn-update-check {
+  border-color: #475569;
+
+  background: var(--bg-card);
+
+  color: #cbd5e1;
+}
+
+
+:host-context([data-theme="dark"]) .btn-update-check:hover:not(:disabled) {
+  background: #273449;
+
+  color: #f8fafc;
+}
+
+
+:host-context([data-theme="dark"]) .update-progress-track {
+  background: #374151;
+}
+
+
+:host-context([data-theme="dark"]) .update-dev-notice {
+  border-color: #374151;
+
+  background: #111827;
+}
+
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 760px) {
+
+  .update-panel {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+
+  .update-actions {
+    width: 100%;
+  }
+
+
+  .btn-update-check,
+  .btn-update-download,
+  .btn-update-install {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .update-main {
+    flex-direction: column;
+  }
+
+
+  .update-title-row {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
 }

@@ -5,7 +5,7 @@
     </header>
 
     <div class="settings-grid">
-        
+
         <div class="card">
             <div class="card-header">
                 <h3><span class="icon">🎨</span> Aparência e Tema</h3>
@@ -40,7 +40,7 @@
                             <input type="text" [(ngModel)]="companyData().cnpj" name="cnpj">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group col-1">
                             <label>Telefone / WhatsApp</label>
@@ -66,7 +66,7 @@
                     </div>
 
                     <div class="divider"></div>
-                    
+
                     <h4>Informações de Pagamento (Orçamento/Recibo)</h4>
                     <div class="form-row">
                         <div class="form-group col-1">
@@ -81,7 +81,8 @@
 
                     <div class="form-group">
                         <label>Rodapé do Orçamento</label>
-                        <textarea [(ngModel)]="companyData().quoteFooterText" name="quoteFooterText" rows="2"></textarea>
+                        <textarea [(ngModel)]="companyData().quoteFooterText" name="quoteFooterText"
+                            rows="2"></textarea>
                     </div>
 
                     <div class="form-actions right">
@@ -92,7 +93,7 @@
                 </form>
             </div>
         </div>
-        
+
         <div class="card">
             <div class="card-header">
                 <h3><span class="icon">🏷️</span> Categorias de Produtos</h3>
@@ -101,22 +102,23 @@
             <div class="card-body">
                 <form (ngSubmit)="addProductCategory()">
                     <div class="input-group">
-                        <input type="text" [(ngModel)]="newProductCategoryName" name="newProductCategoryName" placeholder="Ex: Peças Elétricas" required>
+                        <input type="text" [(ngModel)]="newProductCategoryName" name="newProductCategoryName"
+                            placeholder="Ex: Peças Elétricas" required>
                         <button type="submit" class="btn-add">Adicionar</button>
                     </div>
                 </form>
 
                 <ul class="category-list horizontal-list">
                     @for (cat of productCategories(); track cat) {
-                        <li class="category-item">
-                            <span>{{ cat }}</span>
-                            <button type="button" class="btn-remove-icon" (click)="removeProductCategory(cat)">×</button>
-                        </li>
+                    <li class="category-item">
+                        <span>{{ cat }}</span>
+                        <button type="button" class="btn-remove-icon" (click)="removeProductCategory(cat)">×</button>
+                    </li>
                     }
                 </ul>
             </div>
         </div>
-        
+
         <div class="card">
             <div class="card-header">
                 <h3><span class="icon">🛠️</span> Categorias de Serviços</h3>
@@ -125,34 +127,527 @@
             <div class="card-body">
                 <form (ngSubmit)="addServiceCategory()">
                     <div class="input-group">
-                        <input type="text" [(ngModel)]="newServiceCategoryName" name="newServiceCategoryName" placeholder="Ex: Mecânica Geral" required>
+                        <input type="text" [(ngModel)]="newServiceCategoryName" name="newServiceCategoryName"
+                            placeholder="Ex: Mecânica Geral" required>
                         <button type="submit" class="btn-add">Adicionar</button>
                     </div>
                 </form>
 
                 <ul class="category-list horizontal-list">
                     @for (cat of serviceCategories(); track cat) {
-                        <li class="category-item">
-                            <span>{{ cat }}</span>
-                            <button type="button" class="btn-remove-icon" (click)="removeServiceCategory(cat)">×</button>
-                        </li>
+                    <li class="category-item">
+                        <span>{{ cat }}</span>
+                        <button type="button" class="btn-remove-icon" (click)="removeServiceCategory(cat)">×</button>
+                    </li>
                     }
                 </ul>
             </div>
         </div>
 
-  <div class="card">
+        <!-- ================================================================
+     SEGURANÇA E DADOS
+     ================================================================ -->
+
+        <div class="card">
+
             <div class="card-header">
-                <h3><span class="icon">🛡️</span> Segurança e Dados</h3>
-                <p>Mantenha seus dados seguros exportando uma cópia de segurança.</p>
+
+                <h3>
+                    <span class="icon">🛡️</span>
+                    Segurança e Dados
+                </h3>
+
+                <p>
+                    Exporte cópias de segurança ou restaure os dados do sistema.
+                </p>
+
             </div>
+
+
             <div class="card-body">
-                <div class="form-actions left">
-                    <button type="button" class="btn-backup" (click)="realizarBackup()">
-                        <span class="icon">💾</span> Fazer Backup (Exportar .db)
-                    </button>
+
+                <div class="backup-grid">
+
+
+                    <!-- ======================================================
+                 EXPORTAR BACKUP
+                 ====================================================== -->
+
+                    <div class="backup-option backup-export">
+
+                        <div class="backup-option-icon">
+                            💾
+                        </div>
+
+
+                        <div class="backup-option-content">
+
+                            <h4>
+                                Fazer Backup
+                            </h4>
+
+                            <p>
+                                Salve uma cópia completa dos clientes,
+                                veículos, produtos, serviços, orçamentos
+                                e ordens de serviço.
+                            </p>
+
+
+                            <button type="button" class="btn-backup" (click)="realizarBackup()">
+                                <span class="icon">
+                                    ⬇️
+                                </span>
+
+                                Exportar arquivo .db
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================================
+                 RESTAURAR BACKUP
+                 ====================================================== -->
+
+                    <div class="backup-option backup-restore">
+
+                        <div class="backup-option-icon restore">
+                            ♻️
+                        </div>
+
+
+                        <div class="backup-option-content">
+
+                            <h4>
+                                Restaurar Backup
+                            </h4>
+
+                            <p>
+                                Selecione um arquivo de backup anteriormente
+                                gerado para recuperar os dados do sistema.
+                            </p>
+
+
+                            <button type="button" class="btn-restore-backup" (click)="restaurarBackup()">
+                                <span class="icon">
+                                    📂
+                                </span>
+
+                                Selecionar backup
+                            </button>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
+
+                <!-- ==========================================================
+             AVISO
+             ========================================================== -->
+
+                <div class="backup-warning">
+
+                    <div class="backup-warning-icon">
+                        ⚠️
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Atenção ao restaurar
+                        </strong>
+
+                        <p>
+                            A restauração substitui os dados atuais pelos
+                            dados presentes no arquivo selecionado.
+                            Antes disso, o sistema cria automaticamente uma
+                            cópia de segurança do banco atual.
+                        </p>
+
+                    </div>
+
+                </div>
+
             </div>
+
+        </div>
+
+        <!-- ================================================================
+     ATUALIZAÇÕES DO SISTEMA
+     ================================================================ -->
+
+        <div class="card update-card">
+
+            <div class="card-header">
+
+                <h3>
+                    <span class="icon">🔄</span>
+                    Atualizações do Sistema
+                </h3>
+
+                <p>
+                    Verifique, baixe e instale novas versões do Sistema Oficina.
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="update-panel">
+
+
+                    <!-- ======================================================
+                 INFORMAÇÕES DA VERSÃO
+                 ====================================================== -->
+
+                    <div class="update-main">
+
+                        <div class="update-icon-box">
+
+                            @if (
+                            updateStatus() === 'downloaded'
+                            ) {
+                            ✅
+                            }
+
+                            @else if (
+                            updateStatus() === 'downloading'
+                            ) {
+                            ⬇️
+                            }
+
+                            @else if (
+                            updateStatus() === 'available'
+                            ) {
+                            📦
+                            }
+
+                            @else if (
+                            updateStatus() === 'checking'
+                            ) {
+                            🔎
+                            }
+
+                            @else if (
+                            updateStatus() === 'error'
+                            ) {
+                            ⚠️
+                            }
+
+                            @else {
+                            🔄
+                            }
+
+                        </div>
+
+
+                        <div class="update-info">
+
+                            <div class="update-title-row">
+
+                                <div>
+
+                                    <span class="update-label">
+                                        Versão instalada
+                                    </span>
+
+                                    <strong class="update-version">
+                                        {{ appVersion() || '...' }}
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- ==================================================
+                             BADGES DE STATUS
+                             ================================================== -->
+
+                                @if (
+                                updateStatus() === 'up-to-date'
+                                ) {
+
+                                <span class="update-badge success">
+                                    ✓ Sistema atualizado
+                                </span>
+
+                                }
+
+
+                                @if (
+                                updateStatus() === 'checking'
+                                ) {
+
+                                <span class="update-badge checking">
+                                    Verificando...
+                                </span>
+
+                                }
+
+
+                                @if (
+                                updateStatus() === 'available'
+                                ) {
+
+                                <span class="update-badge available">
+                                    Nova versão
+                                    {{ availableVersion() }}
+                                </span>
+
+                                }
+
+
+                                @if (
+                                updateStatus() === 'downloading'
+                                ) {
+
+                                <span class="update-badge downloading">
+                                    Baixando
+                                    {{ updatePercent() | number:'1.0-0' }}%
+                                </span>
+
+                                }
+
+
+                                @if (
+                                updateStatus() === 'downloaded'
+                                ) {
+
+                                <span class="update-badge ready">
+                                    Pronta para instalar
+                                </span>
+
+                                }
+
+
+                                @if (
+                                updateStatus() === 'error'
+                                ) {
+
+                                <span class="update-badge error">
+                                    Erro
+                                </span>
+
+                                }
+
+                            </div>
+
+
+                            <!-- ==================================================
+                         VERSÃO DISPONÍVEL
+                         ================================================== -->
+
+                            @if (
+                            availableVersion() &&
+                            updateStatus() !== 'up-to-date'
+                            ) {
+
+                            <div class="update-available-version">
+
+                                Nova versão disponível:
+
+                                <strong>
+                                    {{ availableVersion() }}
+                                </strong>
+
+                            </div>
+
+                            }
+
+
+                            <!-- ==================================================
+                         MENSAGEM
+                         ================================================== -->
+
+                            @if (
+                            updateMessage()
+                            ) {
+
+                            <p class="update-message">
+                                {{ updateMessage() }}
+                            </p>
+
+                            }
+
+
+                            @if (
+                            !updateMessage() &&
+                            updateStatus() === 'idle'
+                            ) {
+
+                            <p class="update-message">
+                                Clique em verificar para procurar uma
+                                versão mais recente do sistema.
+                            </p>
+
+                            }
+
+
+                            <!-- ==================================================
+                         PROGRESSO
+                         ================================================== -->
+
+                            @if (
+                            updateStatus() === 'downloading' ||
+                            updateStatus() === 'downloaded'
+                            ) {
+
+                            <div class="update-progress-area">
+
+                                <div class="update-progress-header">
+
+                                    <span>
+                                        Progresso
+                                    </span>
+
+                                    <strong>
+                                        {{ updatePercent() | number:'1.0-0' }}%
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="update-progress-track">
+
+                                    <div class="update-progress-bar" [style.width.%]="updatePercent()">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            }
+
+
+                            <!-- ==================================================
+                         MODO DE DESENVOLVIMENTO
+                         ================================================== -->
+
+                            @if (
+                            isDevelopmentMode()
+                            ) {
+
+                            <div class="update-dev-notice">
+
+                                <span>
+                                    🧪
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Modo de desenvolvimento
+                                    </strong>
+
+                                    <p>
+                                        A atualização automática será testada
+                                        no aplicativo instalado pelo Setup.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================================
+                 AÇÕES
+                 ====================================================== -->
+
+                    <div class="update-actions">
+
+
+                        @if (
+                        updateStatus() === 'idle' ||
+                        updateStatus() === 'up-to-date' ||
+                        updateStatus() === 'error'
+                        ) {
+
+                        <button type="button" class="btn-update-check" (click)="verificarAtualizacoes()">
+                            <span>
+                                🔎
+                            </span>
+
+                            Verificar atualizações
+                        </button>
+
+                        }
+
+
+                        @if (
+                        updateStatus() === 'checking'
+                        ) {
+
+                        <button type="button" class="btn-update-check" disabled>
+                            <span class="update-spinner">
+                                ↻
+                            </span>
+
+                            Verificando...
+                        </button>
+
+                        }
+
+
+                        @if (
+                        updateStatus() === 'available'
+                        ) {
+
+                        <button type="button" class="btn-update-download" (click)="baixarAtualizacao()">
+                            <span>
+                                ⬇️
+                            </span>
+
+                            Baixar atualização
+                        </button>
+
+                        }
+
+
+                        @if (
+                        updateStatus() === 'downloading'
+                        ) {
+
+                        <button type="button" class="btn-update-download" disabled>
+                            <span class="update-spinner">
+                                ↻
+                            </span>
+
+                            Baixando...
+                        </button>
+
+                        }
+
+
+                        @if (
+                        updateStatus() === 'downloaded'
+                        ) {
+
+                        <button type="button" class="btn-update-install" (click)="instalarAtualizacao()">
+                            <span>
+                                🔄
+                            </span>
+
+                            Reiniciar e instalar
+                        </button>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>

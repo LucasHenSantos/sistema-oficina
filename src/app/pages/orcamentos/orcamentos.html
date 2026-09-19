@@ -1,398 +1,2095 @@
 <div class="page-container no-print">
-  
+
+  <!-- =====================================================================
+       CABEÇALHO
+       ===================================================================== -->
+
   <header class="page-header">
+
     <div>
       <h1>Orçamentos</h1>
-      <p class="subtitle">Propostas comerciais e estimativas para clientes</p>
+
+      <p class="subtitle">
+        Propostas comerciais e estimativas para clientes
+      </p>
     </div>
-    <button class="btn-primary" (click)="openModal()">
-      <span class="icon">+</span> Novo Orçamento
-    </button>
+
+
+    <div class="page-header-actions">
+
+      <!-- Arquivar concluídos -->
+      <button type="button" class="btn-archive-completed" (click)="archiveCompletedBudgets()"
+        [disabled]="archivableBudgetsCount() <= 0" title="Arquivar orçamentos aprovados e rejeitados">
+        📦 Arquivar concluídos
+
+        @if (
+        archivableBudgetsCount() > 0
+        ) {
+
+        <span class="archive-action-count">
+          {{ archivableBudgetsCount() }}
+        </span>
+
+        }
+      </button>
+
+
+      <!-- Abrir histórico -->
+      <button type="button" class="btn-open-archived" (click)="openArchivedBudgets()" title="Ver orçamentos arquivados">
+        🗄️ Arquivados
+
+        @if (
+        archivedCount() > 0
+        ) {
+
+        <span class="archive-count-badge">
+          {{ archivedCount() }}
+        </span>
+
+        }
+      </button>
+
+
+      <!-- Novo orçamento -->
+      <button class="btn-primary" type="button" (click)="openModal()">
+        <span class="icon">+</span>
+
+        Novo Orçamento
+      </button>
+
+    </div>
+
   </header>
 
+
+  <!-- =====================================================================
+       BUSCA DE ORÇAMENTOS
+       ===================================================================== -->
+
   <div class="toolbar">
+
     <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input 
-        type="text" 
-        placeholder="Buscar por cliente, veículo ou Nº..."
-        [ngModel]="searchTerm()"
-        (ngModelChange)="searchTerm.set($event)"
-      >
+
+      <span class="search-icon">
+        🔍
+      </span>
+
+      <input type="text" placeholder="Buscar por cliente, veículo ou Nº..." [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)">
+
     </div>
+
   </div>
+
+
+  <!-- =====================================================================
+       LISTAGEM
+       ===================================================================== -->
 
   <div class="table-container card">
+
     <table>
+
       <thead>
+
         <tr>
           <th>Nº</th>
-          <th>Cliente / Veículo</th>
-          <th>Validade</th>
-          <th>Status</th>
-          <th>Total</th>
-          <th class="actions-col">Ações</th>
+
+          <th>
+            Cliente / Veículo
+          </th>
+
+          <th>
+            Validade
+          </th>
+
+          <th>
+            Status
+          </th>
+
+          <th>
+            Total
+          </th>
+
+          <th class="actions-col">
+            Ações
+          </th>
         </tr>
+
       </thead>
+
+
       <tbody>
-        @for (budget of filteredBudgets(); track budget.id) {
-          <tr>
-            <td><span class="budget-id">#{{ budget.id }}</span></td>
-            <td>
-              <div class="budget-info">
-                <strong>{{ budget.client }}</strong>
-                <span class="detail-text">{{ budget.vehicle }}</span>
-              </div>
-            </td>
-            <td>{{ budget.validUntil | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <span class="status-badge" [class]="budget.status">
-                {{ getStatusLabel(budget.status) }}
+
+        @for (
+        budget of filteredBudgets();
+        track budget.id
+        ) {
+
+        <tr>
+
+          <td>
+
+            <span class="budget-id">
+              #{{ budget.id }}
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <div class="budget-info">
+
+              <strong>
+                {{ budget.client }}
+              </strong>
+
+              <span class="detail-text">
+                {{ budget.vehicle }}
               </span>
-            </td>
-            <td class="total-col">{{ budget.total | currency:'BRL' }}</td>
-            <td class="actions-cell">
-              <button class="btn-action view" (click)="viewBudget(budget)" title="Visualizar Detalhes">👁️</button>
-              
-              @if (budget.status === 'approved') {
-                  <button class="btn-action convert-to-os" (click)="convertToOS(budget)" title="Converter para Ordem de Serviço">⚙️</button>
-              }
-              
-              <button class="btn-action edit" (click)="editBudget(budget)">✏️</button>
-              <button class="btn-action delete" (click)="deleteBudget(budget.id)">🗑️</button>
-              <button class="btn-action print" (click)="printBudget(budget)" title="Imprimir">🖨️</button>
-            </td>
-          </tr>
+
+            </div>
+
+          </td>
+
+
+          <td>
+            {{
+            budget.validUntil
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+
+          <td>
+
+            <span class="status-badge" [class]="budget.status">
+              {{
+              getStatusLabel(
+              budget.status
+              )
+              }}
+            </span>
+
+          </td>
+
+
+          <td class="total-col">
+            {{
+            budget.total
+            | currency:'BRL'
+            }}
+          </td>
+
+
+          <td class="actions-cell">
+
+            <button type="button" class="btn-action view" (click)="viewBudget(budget)" title="Visualizar Detalhes">
+              👁️
+            </button>
+
+
+            @if (
+            budget.status ===
+            'approved'
+            ) {
+
+            <button type="button" class="btn-action convert-to-os" (click)="convertToOS(budget)"
+              title="Converter para Ordem de Serviço">
+              ⚙️
+            </button>
+
+            }
+
+
+            <button type="button" class="btn-action edit" (click)="editBudget(budget)" title="Editar">
+              ✏️
+            </button>
+
+
+            <button type="button" class="btn-action delete" (click)="deleteBudget(budget.id)" title="Excluir">
+              🗑️
+            </button>
+
+
+            <button type="button" class="btn-action print" (click)="printBudget(budget)" title="Imprimir">
+              🖨️
+            </button>
+
+          </td>
+
+        </tr>
+
         }
+
       </tbody>
+
     </table>
+
   </div>
+
+
+  <!-- =====================================================================
+       MODAL NOVO / EDITAR ORÇAMENTO
+       ===================================================================== -->
 
   @if (showModal()) {
-    <div class="modal-overlay" (click)="closeModal()">
-      <div class="modal-content large-modal" (click)="$event.stopPropagation()">
-        
-        <div class="modal-header">
-          <h2>{{ currentBudget().id === 0 ? 'Novo Orçamento' : 'Editar Orçamento #' + currentBudget().id }}</h2>
-          <div class="header-actions">
-            @if (currentBudget().id !== 0) {
-              <button type="button" class="btn-print" (click)="printBudget(currentBudget())">🖨️ Imprimir</button>
+
+  <div class="modal-overlay" (click)="closeModal()">
+
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+
+      <!-- Cabeçalho do modal -->
+      <div class="modal-header">
+
+        <h2>
+          {{
+          currentBudget().id === 0
+          ? 'Novo Orçamento'
+          : 'Editar Orçamento #' + currentBudget().id
+          }}
+        </h2>
+
+
+        <div class="header-actions">
+
+          @if (
+          currentBudget().id !== 0
+          ) {
+
+          <button type="button" class="btn-print" (click)="printBudget(currentBudget())">
+            🖨️ Imprimir
+          </button>
+
+          }
+
+
+          <div class="total-display">
+            Total:
+            {{
+            currentBudget().total
+            | currency:'BRL'
+            }}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <form (ngSubmit)="saveBudget()">
+
+
+        <!-- =============================================================
+               CLIENTE / VEÍCULO / VALIDADE / STATUS
+               ============================================================= -->
+
+        <div class="form-section">
+
+          <div class="form-row">
+
+            <div class="form-group col-4">
+
+              <label>
+                Cliente
+              </label>
+
+              <select [(ngModel)]="currentBudget().client" name="client" required
+                (ngModelChange)="onClientChange(currentBudget().client)">
+
+                <option value="" disabled>
+                  Selecione...
+                </option>
+
+
+                @for (
+                c of clientsList();
+                track c
+                ) {
+
+                <option [value]="c">
+                  {{ c }}
+                </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group col-4">
+
+              <label>
+                Veículo
+              </label>
+
+              <select [(ngModel)]="currentBudget().vehicle" name="vehicle" required
+                [disabled]="!currentBudget().client">
+
+                <option value="" disabled>
+                  Selecione...
+                </option>
+
+
+                @for (
+                v of availableVehicles();
+                track v
+                ) {
+
+                <option [value]="v">
+                  {{ v }}
+                </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group col-2">
+
+              <label>
+                Validade
+              </label>
+
+              <input type="date" [(ngModel)]="currentBudget().validUntil" name="validUntil">
+
+            </div>
+
+
+            <div class="form-group col-2">
+
+              <label>
+                Status
+              </label>
+
+              <select [(ngModel)]="currentBudget().status" name="status">
+
+                <option value="pending">
+                  Pendente
+                </option>
+
+                <option value="approved">
+                  Aprovado
+                </option>
+
+                <option value="rejected">
+                  Rejeitado
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================================================
+               ITENS
+               ============================================================= -->
+
+        <div class="items-section">
+
+          <div class="items-section-heading">
+
+            <div>
+
+              <h4>
+                Adicionar Itens
+              </h4>
+
+              <p>
+                Pesquise serviços e produtos sem precisar percorrer listas extensas.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="item-search-grid">
+
+
+            <!-- =========================================================
+                   BUSCA DE SERVIÇOS
+                   ========================================================= -->
+
+            <div class="item-search-card service-search-card">
+
+              <div class="item-search-header">
+
+                <div class="item-search-title">
+
+                  <span class="item-search-icon service">
+                    🔧
+                  </span>
+
+
+                  <div>
+
+                    <strong>
+                      Adicionar Serviço
+                    </strong>
+
+                    <span>
+                      Pesquise pelo nome, descrição ou categoria
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="smart-search-container">
+
+
+                <div class="smart-search-input" [class.open]="serviceDropdownOpen()">
+
+                  <span class="smart-search-icon">
+                    🔍
+                  </span>
+
+
+                  <input type="text" name="serviceSearch" autocomplete="off" placeholder="Ex: Troca de óleo..."
+                    [ngModel]="serviceSearchTerm()" (ngModelChange)="onServiceSearchChange($event)"
+                    (focus)="onServiceSearchFocus()" (blur)="onServiceSearchBlur()"
+                    (keydown)="onServiceSearchKeydown($event)">
+
+
+                  @if (
+                  serviceSearchLoading()
+                  ) {
+
+                  <span class="search-loading">
+                    •••
+                  </span>
+
+                  }
+
+                </div>
+
+
+                <!-- Dropdown de resultados -->
+                @if (
+                serviceDropdownOpen() &&
+                serviceSearchTerm().trim()
+                ) {
+
+                <div class="smart-search-dropdown">
+
+
+                  @if (
+                  serviceSearchLoading()
+                  ) {
+
+                  <div class="search-state">
+
+                    <span class="search-state-icon">
+                      🔎
+                    </span>
+
+                    Pesquisando serviços...
+
+                  </div>
+
+                  } @else if (
+                  serviceSearchResults().length === 0
+                  ) {
+
+                  <div class="search-state empty">
+
+                    <span class="search-state-icon">
+                      🔧
+                    </span>
+
+                    <div>
+
+                      <strong>
+                        Nenhum serviço encontrado
+                      </strong>
+
+                      <span>
+                        Tente pesquisar outro termo.
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  } @else {
+
+                  @for (
+                  service of serviceSearchResults();
+                  track service.id;
+                  let i = $index
+                  ) {
+
+                  <button type="button" class="search-result-item" [class.active]="serviceActiveIndex() === i"
+                    (mousedown)="
+                              $event.preventDefault();
+                              selectService(service)
+                            ">
+
+                    <div class="result-main">
+
+                      <div class="result-name-row">
+
+                        <strong class="result-name">
+                          {{ service.name }}
+                        </strong>
+
+
+                        <strong class="result-price">
+                          {{
+                          service.price
+                          | currency:'BRL'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div class="result-meta">
+
+                        @if (
+                        service.category
+                        ) {
+
+                        <span>
+                          {{ service.category }}
+                        </span>
+
+                        }
+
+
+                        @if (
+                        service.time
+                        ) {
+
+                        <span>
+                          ⏱ {{ service.time }}
+                        </span>
+
+                        }
+
+                      </div>
+
+
+                      @if (
+                      service.description
+                      ) {
+
+                      <span class="result-description">
+                        {{ service.description }}
+                      </span>
+
+                      }
+
+                    </div>
+
+                  </button>
+
+                  }
+
+                  }
+
+                </div>
+
+                }
+
+              </div>
+
+
+              <div class="search-help">
+
+                <span>
+                  ↑ ↓ para navegar
+                </span>
+
+                <span>
+                  Enter para adicionar
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- =========================================================
+                   BUSCA DE PRODUTOS
+                   ========================================================= -->
+
+            <div class="item-search-card product-search-card">
+
+              <div class="item-search-header">
+
+                <div class="item-search-title">
+
+                  <span class="item-search-icon product">
+                    📦
+                  </span>
+
+
+                  <div>
+
+                    <strong>
+                      Adicionar Peça / Produto
+                    </strong>
+
+                    <span>
+                      Nome, código, marca ou código de barras
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <div class="quantity-selector">
+
+                  <label for="budget-product-qty">
+                    Qtd.
+                  </label>
+
+                  <input id="budget-product-qty" type="number" name="productQty" min="1" [ngModel]="productQty()"
+                    (ngModelChange)="productQty.set($event)">
+
+                </div>
+
+              </div>
+
+
+              <div class="smart-search-container">
+
+
+                <div class="smart-search-input product-input" [class.open]="productDropdownOpen()">
+
+                  <span class="smart-search-icon">
+                    🔍
+                  </span>
+
+
+                  <input type="text" name="productSearch" autocomplete="off"
+                    placeholder="Nome, código ou escaneie o código de barras..." [ngModel]="productSearchTerm()"
+                    (ngModelChange)="onProductSearchChange($event)" (focus)="onProductSearchFocus()"
+                    (blur)="onProductSearchBlur()" (keydown)="onProductSearchKeydown($event)">
+
+
+                  <span class="barcode-search-indicator" title="Este campo aceita leitura por scanner">
+                    ▥
+                  </span>
+
+
+                  @if (
+                  productSearchLoading()
+                  ) {
+
+                  <span class="search-loading product-loading">
+                    •••
+                  </span>
+
+                  }
+
+                </div>
+
+
+                <!-- Dropdown de produtos -->
+                @if (
+                productDropdownOpen() &&
+                productSearchTerm().trim()
+                ) {
+
+                <div class="smart-search-dropdown">
+
+
+                  @if (
+                  productSearchLoading()
+                  ) {
+
+                  <div class="search-state">
+
+                    <span class="search-state-icon">
+                      🔎
+                    </span>
+
+                    Pesquisando produtos...
+
+                  </div>
+
+                  } @else if (
+                  productSearchResults().length === 0
+                  ) {
+
+                  <div class="search-state empty">
+
+                    <span class="search-state-icon">
+                      📦
+                    </span>
+
+                    <div>
+
+                      <strong>
+                        Nenhum produto encontrado
+                      </strong>
+
+                      <span>
+                        Pesquise por nome, código, marca ou código de barras.
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  } @else {
+
+                  @for (
+                  product of productSearchResults();
+                  track product.id;
+                  let i = $index
+                  ) {
+
+                  <button type="button" class="search-result-item product-result"
+                    [class.active]="productActiveIndex() === i" (mousedown)="
+                              $event.preventDefault();
+                              selectProduct(product)
+                            ">
+
+                    <div class="result-main">
+
+                      <div class="result-name-row">
+
+                        <strong class="result-name">
+                          {{ product.name }}
+                        </strong>
+
+
+                        <strong class="result-price">
+                          {{
+                          product.sellPrice
+                          | currency:'BRL'
+                          }}
+                        </strong>
+
+                      </div>
+
+
+                      <div class="result-meta">
+
+                        @if (
+                        product.code
+                        ) {
+
+                        <span class="result-code">
+                          {{ product.code }}
+                        </span>
+
+                        }
+
+
+                        @if (
+                        product.brand
+                        ) {
+
+                        <span>
+                          {{ product.brand }}
+                        </span>
+
+                        }
+
+
+                        <span class="result-stock" [class.low]="
+                                    product.quantity <= product.minQuantity
+                                  " [class.empty]="
+                                    product.quantity <= 0
+                                  ">
+                          Estoque:
+                          {{ product.quantity }}
+                        </span>
+
+                      </div>
+
+
+                      @if (
+                      product.barcode
+                      ) {
+
+                      <div class="result-barcode">
+
+                        <span>
+                          ▥
+                        </span>
+
+                        {{ product.barcode }}
+
+                      </div>
+
+                      }
+
+                    </div>
+
+                  </button>
+
+                  }
+
+                  }
+
+                </div>
+
+                }
+
+              </div>
+
+
+              <div class="search-help product-help">
+
+                <span>
+                  ↑ ↓ para navegar
+                </span>
+
+                <span>
+                  Enter para adicionar
+                </span>
+
+                <span class="scanner-help">
+                  ▥ Scanner compatível
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ===========================================================
+                 ITENS JÁ ADICIONADOS
+                 =========================================================== -->
+
+          <div class="budget-items-header">
+
+            <h4>
+              Itens do Orçamento
+            </h4>
+
+
+            @if (
+            currentBudget().items.length > 0
+            ) {
+
+            <span class="items-counter">
+              {{
+              currentBudget().items.length
+              }}
+              {{
+              currentBudget().items.length === 1
+              ? 'item'
+              : 'itens'
+              }}
+            </span>
+
             }
-            <div class="total-display">
-              Total: {{ currentBudget().total | currency:'BRL' }}
-            </div>
+
           </div>
+
+
+          <div class="items-list-container">
+
+            <table class="items-table">
+
+              <thead>
+
+                <tr>
+                  <th>Tipo</th>
+
+                  <th>Descrição</th>
+
+                  <th>Qtd</th>
+
+                  <th>Unitário</th>
+
+                  <th>Subtotal</th>
+
+                  <th></th>
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                @for (
+                item of currentBudget().items;
+                track $index
+                ) {
+
+                <tr>
+
+                  <td>
+
+                    <span class="type-badge" [class]="item.type">
+                      {{
+                      item.type === 'service'
+                      ? 'Serviço'
+                      : 'Peça'
+                      }}
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    {{ item.name }}
+                  </td>
+
+
+                  <td>
+                    {{ item.qty }}
+                  </td>
+
+
+                  <td>
+                    {{
+                    item.price
+                    | currency:'BRL'
+                    }}
+                  </td>
+
+
+                  <td class="subtotal">
+                    {{
+                    item.total
+                    | currency:'BRL'
+                    }}
+                  </td>
+
+
+                  <td>
+
+                    <button type="button" class="btn-remove-item" (click)="removeItem($index)" title="Remover item">
+                      ×
+                    </button>
+
+                  </td>
+
+                </tr>
+
+                }
+
+
+                @if (
+                currentBudget().items.length === 0
+                ) {
+
+                <tr>
+
+                  <td colspan="6" class="empty-items">
+                    Nenhum item no orçamento.
+                  </td>
+
+                </tr>
+
+                }
+
+              </tbody>
+
+
+              <tfoot>
+
+                <tr>
+
+                  <td colspan="4" class="right">
+                    <strong>
+                      TOTAL GERAL:
+                    </strong>
+                  </td>
+
+
+                  <td class="subtotal right">
+
+                    <strong>
+                      {{
+                      currentBudget().total
+                      | currency:'BRL'
+                      }}
+                    </strong>
+
+                  </td>
+
+
+                  <td></td>
+
+                </tr>
+
+              </tfoot>
+
+            </table>
+
+          </div>
+
         </div>
-        
-        <form (ngSubmit)="saveBudget()">
-          
-          <div class="form-section">
-            <div class="form-row">
-              <div class="form-group col-4">
-                <label>Cliente</label>
-                <select [(ngModel)]="currentBudget().client" name="client" required (ngModelChange)="onClientChange(currentBudget().client)">
-                  <option value="" disabled selected>Selecione...</option>
-                  @for (c of clientsList(); track c) { <option [value]="c">{{ c }}</option> }
-                </select>
-              </div>
-              <div class="form-group col-4">
-                <label>Veículo</label>
-                <select [(ngModel)]="currentBudget().vehicle" name="vehicle" required [disabled]="!currentBudget().client">
-                  <option value="" disabled selected>Selecione...</option>
-                  @for (v of availableVehicles(); track v) { <option [value]="v">{{ v }}</option> }
-                </select>
-              </div>
-              <div class="form-group col-2">
-                <label>Validade</label>
-                <input type="date" [(ngModel)]="currentBudget().validUntil" name="validUntil">
-              </div>
-              <div class="form-group col-2">
-                <label>Status</label>
-                <select [(ngModel)]="currentBudget().status" name="status">
-                  <option value="pending">Pendente</option>
-                  <option value="approved">Aprovado</option>
-                  <option value="rejected">Rejeitado</option>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          <div class="items-section">
-            <h4>Adicionar Itens</h4>
-            <div class="add-row">
-              <div class="add-group service-group">
-                <label>Adicionar Serviço</label>
-                <div class="input-with-btn">
-                  <select [ngModel]="selectedServiceId()" (ngModelChange)="selectedServiceId.set($event)" name="addSvc">
-                    <option [ngValue]="null">Selecione...</option>
-                    @for (s of availableServices(); track s.id) {
-                      <option [value]="s.id">{{ s.name }} ({{ s.price | currency:'BRL' }})</option>
-                    }
-                  </select>
-                  <button type="button" class="btn-add" (click)="addService()">Add</button>
-                </div>
-              </div>
 
-              <div class="add-group product-group">
-                <label>Adicionar Peça</label>
-                <div class="input-with-btn">
-                  <select [ngModel]="selectedProductId()" (ngModelChange)="selectedProductId.set($event)" name="addProd">
-                    <option [ngValue]="null">Selecione...</option>
-                    @for (p of availableProducts(); track p.id) {
-                      <option [value]="p.id">{{ p.name }} ({{ p.sellPrice | currency:'BRL' }})</option>
-                    }
-                  </select>
-                  <input type="number" [ngModel]="productQty()" (ngModelChange)="productQty.set($event)" name="qty" class="qty-input" min="1" value="1">
-                  <button type="button" class="btn-add" (click)="addProduct()">Add</button>
-                </div>
-              </div>
-            </div>
+        <!-- =============================================================
+               OBSERVAÇÕES
+               ============================================================= -->
 
-            <h4>Itens do Orçamento</h4>
-            <div class="items-list-container">
-              <table class="items-table">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Descrição</th>
-                    <th>Qtd</th>
-                    <th>Unitário</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of currentBudget().items; track $index) {
-                    <tr>
-                      <td>
-                        <span class="type-badge" [class]="item.type">
-                          {{ item.type === 'service' ? 'Serviço' : 'Peça' }}
-                        </span>
-                      </td>
-                      <td>{{ item.name }}</td>
-                      <td>{{ item.qty }}</td>
-                      <td>{{ item.price | currency:'BRL' }}</td>
-                      <td class="subtotal">{{ item.total | currency:'BRL' }}</td>
-                      <td>
-                        <button type="button" class="btn-remove-item" (click)="removeItem($index)">×</button>
-                      </td>
-                    </tr>
-                  }
-                  @if (currentBudget().items.length === 0) {
-                    <tr><td colspan="6" class="empty-items">Nenhum item no orçamento.</td></tr>
-                  }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" class="right"><strong>TOTAL GERAL:</strong></td>
-                        <td class="subtotal right"><strong>{{ currentBudget().total | currency:'BRL' }}</strong></td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
+        <div class="form-group">
 
-          <div class="form-group">
-            <label>Observações</label>
-            <textarea [(ngModel)]="currentBudget().notes" name="notes" rows="2" placeholder="Condições de pagamento ou detalhes..."></textarea>
-          </div>
+          <label>
+            Observações
+          </label>
 
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="btn-save">Salvar Orçamento</button>
-          </div>
-        </form>
-      </div>
+          <textarea [(ngModel)]="currentBudget().notes" name="notes" rows="2"
+            placeholder="Condições de pagamento ou detalhes..."></textarea>
+
+        </div>
+
+
+        <!-- =============================================================
+               AÇÕES
+               ============================================================= -->
+
+        <div class="form-actions">
+
+          <button type="button" class="btn-cancel" (click)="closeModal()">
+            Cancelar
+          </button>
+
+
+          <button type="submit" class="btn-save">
+            Salvar Orçamento
+          </button>
+
+        </div>
+
+      </form>
+
     </div>
+
+  </div>
+
   }
-  
+
+  <!-- =====================================================================
+     MODAL DE ORÇAMENTOS ARQUIVADOS
+     ===================================================================== -->
+
+  @if (showArchivedModal()) {
+
+  <div class="modal-overlay archived-overlay" (click)="closeArchivedBudgets()">
+
+    <div class="modal-content archived-modal" (click)="$event.stopPropagation()">
+
+      <!-- ===============================================================
+           CABEÇALHO
+           =============================================================== -->
+
+      <div class="archived-modal-header">
+
+        <div>
+
+          <h2>
+            🗄️ Orçamentos Arquivados
+          </h2>
+
+          <p>
+            Histórico de orçamentos concluídos
+          </p>
+
+        </div>
+
+
+        <button type="button" class="archived-close" (click)="closeArchivedBudgets()" title="Fechar">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- ===============================================================
+           RESUMO
+           =============================================================== -->
+
+      <div class="archived-summary">
+
+        <div class="archived-summary-info">
+
+          <span class="archived-summary-icon">
+            📦
+          </span>
+
+
+          <div>
+
+            <strong>
+              {{ archivedCount() }}
+            </strong>
+
+            <span>
+              {{
+              archivedCount() === 1
+              ? 'orçamento arquivado'
+              : 'orçamentos arquivados'
+              }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <span class="archived-summary-hint">
+          Desarquive um orçamento para devolvê-lo à tela principal.
+        </span>
+
+      </div>
+
+
+      <!-- ===============================================================
+           PESQUISA
+           =============================================================== -->
+
+      <div class="archived-search">
+
+        <span class="archived-search-icon">
+          🔍
+        </span>
+
+
+        <input type="text" autocomplete="off" placeholder="Buscar por Nº, cliente, veículo, data ou status..."
+          [ngModel]="archivedSearchTerm()" (ngModelChange)="onArchivedSearchChange($event)">
+
+
+        @if (
+        archivedLoading()
+        ) {
+
+        <span class="archived-search-loading">
+          Pesquisando...
+        </span>
+
+        }
+
+      </div>
+
+
+      <!-- ===============================================================
+           CONTEÚDO COM SCROLL
+           =============================================================== -->
+
+      <div class="archived-content">
+
+
+        @if (
+        archivedLoading() &&
+        archivedBudgets().length === 0
+        ) {
+
+        <div class="archived-state">
+
+          <span>
+            🔎
+          </span>
+
+          <strong>
+            Carregando histórico...
+          </strong>
+
+        </div>
+
+        } @else if (
+        archivedBudgets().length === 0
+        ) {
+
+        <div class="archived-state empty">
+
+          <span>
+            🗂️
+          </span>
+
+          <strong>
+            {{
+            archivedMessage() ||
+            'Nenhum orçamento arquivado.'
+            }}
+          </strong>
+
+
+          @if (
+          archivedSearchTerm().trim()
+          ) {
+
+          <small>
+            Tente pesquisar outro cliente, veículo ou número.
+          </small>
+
+          }
+
+        </div>
+
+        } @else {
+
+        <div class="archived-table-wrapper">
+
+          <table class="archived-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Nº
+                </th>
+
+                <th>
+                  Cliente / Veículo
+                </th>
+
+                <th>
+                  Validade
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Total
+                </th>
+
+                <th>
+                  Arquivado em
+                </th>
+
+                <th class="archived-actions-col">
+                  Ações
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+              budget of archivedBudgets();
+              track budget.id
+              ) {
+
+              <tr>
+
+
+                <!-- Nº -->
+                <td>
+
+                  <span class="budget-id">
+                    #{{ budget.id }}
+                  </span>
+
+                </td>
+
+
+                <!-- Cliente -->
+                <td>
+
+                  <div class="budget-info">
+
+                    <strong>
+                      {{ budget.client }}
+                    </strong>
+
+
+                    <span class="detail-text">
+                      {{ budget.vehicle }}
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- Validade -->
+                <td>
+
+                  @if (
+                  budget.validUntil
+                  ) {
+
+                  {{
+                  budget.validUntil
+                  | date:'dd/MM/yyyy'
+                  }}
+
+                  } @else {
+
+                  <span class="archived-muted">
+                    Sem validade
+                  </span>
+
+                  }
+
+                </td>
+
+
+                <!-- Status -->
+                <td>
+
+                  <span class="status-badge" [class]="budget.status">
+                    {{
+                    getStatusLabel(
+                    budget.status
+                    )
+                    }}
+                  </span>
+
+                </td>
+
+
+                <!-- Total -->
+                <td class="archived-total">
+
+                  {{
+                  budget.total
+                  | currency:'BRL'
+                  }}
+
+                </td>
+
+
+                <!-- Arquivado -->
+                <td>
+
+                  <div class="archived-date">
+
+                    @if (
+                    budget.archivedAt
+                    ) {
+
+                    <strong>
+                      {{
+                      budget.archivedAt
+                      | date:'dd/MM/yyyy'
+                      }}
+                    </strong>
+
+                    <span>
+                      {{
+                      budget.archivedAt
+                      | date:'HH:mm'
+                      }}
+                    </span>
+
+                    } @else {
+
+                    <span>
+                      -
+                    </span>
+
+                    }
+
+                  </div>
+
+                </td>
+
+
+                <!-- Ações -->
+                <td class="archived-actions">
+
+
+                  <!-- Visualizar -->
+                  <button type="button" class="btn-action view" (click)="viewBudget(budget)"
+                    title="Visualizar orçamento">
+                    👁️
+                  </button>
+
+
+                  <!-- Imprimir -->
+                  <button type="button" class="btn-action print" (click)="printBudget(budget)"
+                    title="Imprimir orçamento">
+                    🖨️
+                  </button>
+
+
+                  <!-- Desarquivar -->
+                  <button type="button" class="btn-unarchive" (click)="unarchiveBudget(budget)"
+                    title="Desarquivar orçamento">
+                    ↩
+                  </button>
+
+                </td>
+
+              </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        }
+
+      </div>
+
+
+      <!-- ===============================================================
+           RODAPÉ
+           =============================================================== -->
+
+      <div class="archived-footer">
+
+        <span>
+          Os registros arquivados continuam salvos no sistema.
+        </span>
+
+
+        <button type="button" class="btn-cancel" (click)="closeArchivedBudgets()">
+          Fechar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  }
+
+  <!-- =====================================================================
+       MODAL DE VISUALIZAÇÃO
+       ===================================================================== -->
+
   @if (showViewModal()) {
-    <div class="modal-overlay" (click)="closeViewModal()">
-      <div class="modal-content large-modal view-modal" (click)="$event.stopPropagation()">
-        
-        @if (budgetItemToView()) {
-          <div class="modal-header">
-            <h2>Orçamento #{{ budgetItemToView()!.id }} (Visualização)</h2>
-            <div class="header-actions">
-              <div class="total-display">
-                Total: {{ budgetItemToView()!.total | currency:'BRL' }}
-              </div>
-              <button type="button" class="btn-primary" (click)="printBudget(budgetItemToView()!)">🖨️ Imprimir</button>
-            </div>
-          </div>
-          
-          <div class="read-only-details">
-            <div class="form-row">
-                <div class="form-group col-4">
-                    <label>Cliente</label>
-                    <p class="read-only-value"><strong>{{ budgetItemToView()!.client }}</strong></p>
-                </div>
-                <div class="form-group col-4">
-                    <label>Veículo</label>
-                    <p class="read-only-value"><strong>{{ budgetItemToView()!.vehicle }}</strong></p>
-                </div>
-                <div class="form-group col-2">
-                    <label>Validade</label>
-                    <p class="read-only-value">{{ budgetItemToView()!.validUntil | date:'dd/MM/yyyy' }}</p>
-                </div>
-                <div class="form-group col-2">
-                    <label>Status</label>
-                    <p class="read-only-value">
-                        <span class="status-badge" [class]="budgetItemToView()!.status">
-                            {{ getStatusLabel(budgetItemToView()!.status) }}
-                        </span>
-                    </p>
-                </div>
-            </div>
+
+  <div class="modal-overlay" (click)="closeViewModal()">
+
+    <div class="modal-content large-modal view-modal" (click)="$event.stopPropagation()">
+
+      @if (
+      budgetItemToView()
+      ) {
+
+      <div class="modal-header">
+
+        <h2>
+          Orçamento
+          #{{ budgetItemToView()!.id }}
+          (Visualização)
+        </h2>
+
+
+        <div class="header-actions">
+
+          <div class="total-display">
+
+            Total:
+            {{
+            budgetItemToView()!.total
+            | currency:'BRL'
+            }}
+
           </div>
 
-          <div class="items-section read-only-items">
-              <h4>Itens Incluídos</h4>
-              <div class="items-list-container">
-                <table class="items-table">
-                  <thead>
-                    <tr>
-                      <th>Tipo</th>
-                      <th>Descrição</th>
-                      <th>Qtd</th>
-                      <th>Unitário</th>
-                      <th>Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (item of budgetItemToView()!.items; track $index) {
-                      <tr>
-                        <td>
-                          <span class="type-badge" [class]="item.type">
-                            {{ item.type === 'service' ? 'Serviço' : 'Peça' }}
-                          </span>
-                        </td>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.qty }}</td>
-                        <td>{{ item.price | currency:'BRL' }}</td>
-                        <td class="subtotal">{{ item.total | currency:'BRL' }}</td>
-                      </tr>
-                    }
-                    @if (budgetItemToView()!.items.length === 0) {
-                      <tr><td colspan="5" class="empty-items">Nenhum item no orçamento.</td></tr>
-                    }
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                        <td colspan="4" class="right"><strong>TOTAL GERAL:</strong></td>
-                        <td class="subtotal right"><strong>{{ budgetItemToView()!.total | currency:'BRL' }}</strong></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-          </div>
-          
-          <div class="form-section read-only-notes">
-              <label>Observações</label>
-              <p class="read-only-value notes-text">{{ budgetItemToView()!.notes || 'Nenhuma observação registrada.' }}</p>
-          </div>
 
-          <div class="form-actions">
-              <button type="button" class="btn-cancel" (click)="closeViewModal()">Fechar Visualização</button>
-          </div>
-        }
+          <button type="button" class="btn-primary" (click)="printBudget(budgetItemToView()!)">
+            🖨️ Imprimir
+          </button>
+
+        </div>
+
       </div>
+
+
+      <div class="read-only-details">
+
+        <div class="form-row">
+
+          <div class="form-group col-4">
+
+            <label>
+              Cliente
+            </label>
+
+            <p class="read-only-value">
+              <strong>
+                {{ budgetItemToView()!.client }}
+              </strong>
+            </p>
+
+          </div>
+
+
+          <div class="form-group col-4">
+
+            <label>
+              Veículo
+            </label>
+
+            <p class="read-only-value">
+              <strong>
+                {{ budgetItemToView()!.vehicle }}
+              </strong>
+            </p>
+
+          </div>
+
+
+          <div class="form-group col-2">
+
+            <label>
+              Validade
+            </label>
+
+            <p class="read-only-value">
+              {{
+              budgetItemToView()!.validUntil
+              | date:'dd/MM/yyyy'
+              }}
+            </p>
+
+          </div>
+
+
+          <div class="form-group col-2">
+
+            <label>
+              Status
+            </label>
+
+            <p class="read-only-value">
+
+              <span class="status-badge" [class]="budgetItemToView()!.status">
+                {{
+                getStatusLabel(
+                budgetItemToView()!.status
+                )
+                }}
+              </span>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="items-section read-only-items">
+
+        <h4>
+          Itens Incluídos
+        </h4>
+
+
+        <div class="items-list-container">
+
+          <table class="items-table">
+
+            <thead>
+
+              <tr>
+                <th>Tipo</th>
+
+                <th>Descrição</th>
+
+                <th>Qtd</th>
+
+                <th>Unitário</th>
+
+                <th>Subtotal</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+              item of budgetItemToView()!.items;
+              track $index
+              ) {
+
+              <tr>
+
+                <td>
+
+                  <span class="type-badge" [class]="item.type">
+                    {{
+                    item.type === 'service'
+                    ? 'Serviço'
+                    : 'Peça'
+                    }}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{ item.name }}
+                </td>
+
+
+                <td>
+                  {{ item.qty }}
+                </td>
+
+
+                <td>
+                  {{
+                  item.price
+                  | currency:'BRL'
+                  }}
+                </td>
+
+
+                <td class="subtotal">
+                  {{
+                  item.total
+                  | currency:'BRL'
+                  }}
+                </td>
+
+              </tr>
+
+              }
+
+
+              @if (
+              budgetItemToView()!.items.length === 0
+              ) {
+
+              <tr>
+
+                <td colspan="5" class="empty-items">
+                  Nenhum item no orçamento.
+                </td>
+
+              </tr>
+
+              }
+
+            </tbody>
+
+
+            <tfoot>
+
+              <tr>
+
+                <td colspan="4" class="right">
+                  <strong>
+                    TOTAL GERAL:
+                  </strong>
+                </td>
+
+
+                <td class="subtotal right">
+
+                  <strong>
+                    {{
+                    budgetItemToView()!.total
+                    | currency:'BRL'
+                    }}
+                  </strong>
+
+                </td>
+
+              </tr>
+
+            </tfoot>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-section read-only-notes">
+
+        <label>
+          Observações
+        </label>
+
+        <p class="read-only-value notes-text">
+          {{
+          budgetItemToView()!.notes ||
+          'Nenhuma observação registrada.'
+          }}
+        </p>
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button type="button" class="btn-cancel" (click)="closeViewModal()">
+          Fechar Visualização
+        </button>
+
+      </div>
+
+      }
+
     </div>
+
+  </div>
+
   }
 
-</div> <div class="printable-invoice" id="invoice">
-  @if (budgetItemToView()) {
-    <div class="invoice-accent-bar"></div>
+</div>
 
-    <header class="invoice-header-flex">
-      <div class="company-details">
-        <h1>{{ companyData()?.name || 'Mecânica Borges' }}</h1>
-        <div class="company-contact">
-          <p>{{ companyData()?.address }}</p>
-          <p>{{ companyData()?.city }}</p>
-          <p>{{ companyData()?.phone ? 'Tel: ' + companyData()?.phone : '' }} {{ companyData()?.email ? '| ' + companyData()?.email : '' }}</p>
-          @if (companyData()?.cnpj) { <p>CNPJ: {{ companyData()?.cnpj }}</p> }
-        </div>
-      </div>
-      <div class="invoice-meta-box">
-        <div class="meta-title">ORÇAMENTO</div>
-        <div class="meta-number">#{{ budgetItemToView()!.id }}</div>
-        <div class="meta-dates">
-          <p><strong>Data de Emissão:</strong> {{ budgetItemToView()!.date | date:'dd/MM/yyyy' }}</p>
-          <p><strong>Válido até:</strong> {{ budgetItemToView()!.validUntil | date:'dd/MM/yyyy' }}</p>
-        </div>
-      </div>
-    </header>
 
-    <section class="client-section">
-      <h3>Preparado para:</h3>
-      <div class="client-info-box">
-        <div class="client-data">
-          <p class="client-name">{{ budgetItemToView()!.client }}</p>
-        </div>
-        <div class="vehicle-data">
-           <span class="label-vehicle">Veículo:</span>
-           <span class="vehicle-name">{{ budgetItemToView()!.vehicle }}</span>
-        </div>
-      </div>
-    </section>
+<!-- =========================================================================
+     DOCUMENTO DE IMPRESSÃO
+     ========================================================================= -->
 
-    <table class="invoice-table-modern">
-      <thead>
-        <tr>
-          <th class="col-desc">Descrição</th>
-          <th class="col-type center">Tipo</th>
-          <th class="col-qty center">Qtd.</th>
-          <th class="col-price right">Valor Unit.</th>
-          <th class="col-total right">Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of budgetItemToView()!.items; track $index) {
-          <tr>
-            <td class="col-desc">{{ item.name }}</td>
-            <td class="col-type center"><span class="print-badge {{ item.type }}">{{ item.type === 'service' ? 'Serviço' : 'Peça' }}</span></td>
-            <td class="col-qty center">{{ item.qty }}</td>
-            <td class="col-price right">{{ item.price | currency:'BRL' }}</td>
-            <td class="col-total right">{{ item.total | currency:'BRL' }}</td>
-          </tr>
+<div class="printable-invoice" id="invoice">
+
+  @if (
+  budgetItemToView()
+  ) {
+
+  <div class="invoice-accent-bar"></div>
+
+
+  <header class="invoice-header-flex">
+
+    <div class="company-details">
+
+      <h1>
+        {{
+        companyData()?.name ||
+        'Mecânica Borges'
+        }}
+      </h1>
+
+
+      <div class="company-contact">
+
+        <p>
+          {{ companyData()?.address }}
+        </p>
+
+        <p>
+          {{ companyData()?.city }}
+        </p>
+
+        <p>
+          {{
+          companyData()?.phone
+          ? 'Tel: ' + companyData()?.phone
+          : ''
+          }}
+
+          {{
+          companyData()?.email
+          ? '| ' + companyData()?.email
+          : ''
+          }}
+        </p>
+
+
+        @if (
+        companyData()?.cnpj
+        ) {
+
+        <p>
+          CNPJ:
+          {{ companyData()?.cnpj }}
+        </p>
+
         }
-      </tbody>
-    </table>
 
-    <div class="invoice-totals-section">
-      <div class="totals-box">
-         <div class="grand-total-row">
-           <span class="total-label">TOTAL GERAL</span>
-           <span class="total-amount">{{ budgetItemToView()!.total | currency:'BRL' }}</span>
-         </div>
       </div>
+
     </div>
 
-    <footer class="invoice-footer-container">
-  <div class="invoice-notes-box">
-    @if (budgetItemToView()!.notes || companyData()?.pixKey || companyData()?.bankInfo) {
-      <h3>Observações e Pagamento</h3>
+
+    <div class="invoice-meta-box">
+
+      <div class="meta-title">
+        ORÇAMENTO
+      </div>
+
+
+      <div class="meta-number">
+        #{{ budgetItemToView()!.id }}
+      </div>
+
+
+      <div class="meta-dates">
+
+        <p>
+
+          <strong>
+            Data de Emissão:
+          </strong>
+
+          {{
+          budgetItemToView()!.date
+          | date:'dd/MM/yyyy'
+          }}
+
+        </p>
+
+
+        <p>
+
+          <strong>
+            Válido até:
+          </strong>
+
+          {{
+          budgetItemToView()!.validUntil
+          | date:'dd/MM/yyyy'
+          }}
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <section class="client-section">
+
+    <h3>
+      Preparado para:
+    </h3>
+
+
+    <div class="client-info-box">
+
+      <div class="client-data">
+
+        <p class="client-name">
+          {{ budgetItemToView()!.client }}
+        </p>
+
+      </div>
+
+
+      <div class="vehicle-data">
+
+        <span class="label-vehicle">
+          Veículo:
+        </span>
+
+        <span class="vehicle-name">
+          {{ budgetItemToView()!.vehicle }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <table class="invoice-table-modern">
+
+    <thead>
+
+      <tr>
+
+        <th class="col-desc">
+          Descrição
+        </th>
+
+        <th class="col-type center">
+          Tipo
+        </th>
+
+        <th class="col-qty center">
+          Qtd.
+        </th>
+
+        <th class="col-price right">
+          Valor Unit.
+        </th>
+
+        <th class="col-total right">
+          Subtotal
+        </th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      @for (
+      item of budgetItemToView()!.items;
+      track $index
+      ) {
+
+      <tr>
+
+        <td class="col-desc">
+          {{ item.name }}
+        </td>
+
+
+        <td class="col-type center">
+
+          <span class="print-badge {{ item.type }}">
+            {{
+            item.type === 'service'
+            ? 'Serviço'
+            : 'Peça'
+            }}
+          </span>
+
+        </td>
+
+
+        <td class="col-qty center">
+          {{ item.qty }}
+        </td>
+
+
+        <td class="col-price right">
+          {{
+          item.price
+          | currency:'BRL'
+          }}
+        </td>
+
+
+        <td class="col-total right">
+          {{
+          item.total
+          | currency:'BRL'
+          }}
+        </td>
+
+      </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+
+  <div class="invoice-totals-section">
+
+    <div class="totals-box">
+
+      <div class="grand-total-row">
+
+        <span class="total-label">
+          TOTAL GERAL
+        </span>
+
+        <span class="total-amount">
+          {{
+          budgetItemToView()!.total
+          | currency:'BRL'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <footer class="invoice-footer-container">
+
+    <div class="invoice-notes-box">
+
+      @if (
+      budgetItemToView()!.notes ||
+      companyData()?.pixKey ||
+      companyData()?.bankInfo
+      ) {
+
+      <h3>
+        Observações e Pagamento
+      </h3>
+
+
       <div class="notes-content">
-          {{ budgetItemToView()!.notes }}
-          @if(budgetItemToView()!.notes && (companyData()?.pixKey || companyData()?.bankInfo)) { <br><br> }
-          @if(companyData()?.pixKey) { <strong>PIX:</strong> {{ companyData()?.pixKey }} <br> }
-          {{ companyData()?.bankInfo }}
+
+        {{ budgetItemToView()!.notes }}
+
+
+        @if (
+        budgetItemToView()!.notes &&
+        (
+        companyData()?.pixKey ||
+        companyData()?.bankInfo
+        )
+        ) {
+
+        <br>
+        <br>
+
+        }
+
+
+        @if (
+        companyData()?.pixKey
+        ) {
+
+        <strong>
+          PIX:
+        </strong>
+
+        {{ companyData()?.pixKey }}
+
+        <br>
+
+        }
+
+
+        {{ companyData()?.bankInfo }}
+
       </div>
-    }
-  </div>
-  
-  <div class="invoice-signatures-row">
-    <div class="signature-wrapper">
-      <div class="signature-line">Responsável Técnico</div>
+
+      }
+
     </div>
-    <div class="signature-wrapper">
-      <div class="signature-line">Assinatura do Cliente</div>
-    </div>
-  </div>
 
 
-</footer>
+    <div class="invoice-signatures-row">
+
+      <div class="signature-wrapper">
+
+        <div class="signature-line">
+          Responsável Técnico
+        </div>
+
+      </div>
+
+
+      <div class="signature-wrapper">
+
+        <div class="signature-line">
+          Assinatura do Cliente
+        </div>
+
+      </div>
+
+    </div>
+
+  </footer>
+
   }
+
 </div>
